@@ -2,18 +2,27 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    
     <title>Laporan Inventaris</title>
     <style>
         body { font-family: Arial, sans-serif; font-size: 12px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #333; padding: 5px; text-align: center; }
         th { background-color: #eee; }
+        .logo { text-align: center; margin-bottom: 10px;}
+        .logo img { width: 300px; height: auto;}
     </style>
 </head>
 <body>
-    <h3 style="text-align:center;">Laporan Data Inventaris</h3>
+     <!-- Logo di Tengah -->
+    <div class="logo">
+        <img src="{{ public_path('images/ppa-logo.png') }}" alt="Logo PPA">
+    </div>
     <table>
         <thead>
+             <tr>
+                <th class="judul" colspan="8">LAPORAN DATA INVENTARIS</th>
+            </tr>
             <tr>
                 <th>No</th>
                 <th>Nama</th>

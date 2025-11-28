@@ -50,12 +50,55 @@ class RegistrasiController extends Controller
         return redirect()->route('registrasi.index')->with('success', 'Data berhasil disimpan.');
     }
 
+    public function update(Request $request, $id)
+    {
+        // Validasi input
+        $request->validate([
+            'perusahaan'      => 'required|string|max:255',
+            'nomor_lambung'   => 'required|string|max:255',
+            'jenis_kendaraan' => 'required|string|max:255',
+            'nomor_polisi'    => 'nullable|string|max:255',
+            'merek_radio'     => 'nullable|string|max:255',
+            'serial_number'   => 'nullable|string|max:255',
+            'channels'        => 'nullable|array',
+        ]);
+
+        // Cari data yang akan di-update
+        $registrasi = Registrasi::findOrFail($id);
+
+        // Simpan data update
+        $registrasi->perusahaan      = $request->perusahaan;
+        $registrasi->nomor_lambung   = $request->nomor_lambung;
+        $registrasi->jenis_kendaraan = $request->jenis_kendaraan;
+        $registrasi->nomor_polisi    = $request->nomor_polisi;
+        $registrasi->merek_radio     = $request->merek_radio;
+        $registrasi->serial_number   = $request->serial_number;
+
+        // Simpan channels sebagai JSON
+        $registrasi->channels = json_encode($request->channels ?? []);
+
+        $registrasi->save();
+
+        return redirect()
+            ->route('registrasi.index')
+            ->with('success', 'Data registrasi berhasil diperbarui!');
+    }
+
+
     // ✅ Tambahan: DETAIL (Show)
     public function show($id)
     {
         $registrasi = Registrasi::findOrFail($id);
         return view('registrasi.show', compact('registrasi'));
     }
+
+    public function edit($id)
+    {
+        $registrasi = Registrasi::findOrFail($id);
+        return view('registrasi.edit', compact('registrasi'));
+    }
+
+
 
     // ✅ Tambahan: HAPUS (Destroy)
     public function destroy($id)
@@ -66,28 +109,35 @@ class RegistrasiController extends Controller
         return redirect()->route('registrasi.index')->with('success', 'Data berhasil dihapus.');
     }
 
-    // ========== Export & Report Tetap Sama ==========
+    // ========== Export & Report Tetap Sama ==========$logoPath = public_path('images/logo_mining.png');
 
     public function report($id)
     {
         $registrasi = Registrasi::findOrFail($id);
+
+        // Pastikan field channel adalah JSON atau string yang bisa didecode
+        $selectedChannels = [];
+
+        if (!empty($registrasi->channels)) {
+            if (is_string($registrasi->channels)) {
+                // kalau isinya JSON
+                $selectedChannels = json_decode($registrasi->channels, true);
+            } elseif (is_array($registrasi->channels)) {
+                // kalau sudah array
+                $selectedChannels = $registrasi->channels;
+            }
+        }
+
+        // path logo
         $logoPath = public_path('images/logo_mining.png');
-        $channels = $registrasi->channel ?? [];
 
-        $pdf = Pdf::loadView('registrasi.report', compact('registrasi', 'logoPath', 'channels'))
-            ->setPaper('A4', 'portrait');
-
-        $pdf->getDomPDF()->getCanvas()->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) {
-            $text = sprintf('Rev.%02d', $pageNumber);
-            $font = $fontMetrics->get_font('Helvetica', 'normal');
-            $size = 9;
-            $x = $canvas->get_width() - 60;
-            $y = $canvas->get_height() - 25;
-            $canvas->text($x, $y, $text, $font, $size);
-        });
-
-        return $pdf->stream('report.pdf');
+        return Pdf::loadView('registrasi.report', [
+            'registrasi' => $registrasi,
+            'selectedChannels' => $selectedChannels,
+            'logoPath' => $logoPath
+        ])->stream();
     }
+
 
 
     public function exportExcel($id)

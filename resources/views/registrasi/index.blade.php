@@ -463,30 +463,37 @@
                                     @endif
                                 </td>
 
-                                <td>
-                                    <div class="d-flex justify-content-center gap-1">
-                                    {{-- Tombol PDF --}}
-                                    <button class="btn btn-pdf btn-modern btn-sm px-2 py-1"
-                                        onclick="generatePDF(event, '{{ $d->id }}')">
-                                        <i class="fas fa-file-pdf me-1"></i>PDF
-                                    </button>
+                               <td>
+    <div class="d-flex justify-content-center gap-1">
 
-                                    {{-- Tombol Excel --}}
-                                    <button class="btn btn-modern btn-sm px-2 py-1"
-                                        style="background: linear-gradient(135deg,#74b9ff,#0984e3); color:white"
-                                        onclick="exportExcel('{{ $d->id }}')">
-                                        <i class="fas fa-file-excel me-1"></i>Excel
-                                    </button>
+        {{-- Tombol PDF --}}
+        <button class="btn btn-pdf btn-modern btn-sm px-2 py-1"
+            onclick="generatePDF(event, '{{ $d->id }}')">
+            <i class="fas fa-file-pdf me-1"></i>PDF
+        </button>
 
-                                    {{-- Tombol CSV --}}
-                                    <button class="btn btn-modern btn-sm px-2 py-1"
-                                        style="background: linear-gradient(135deg,#00b894,#00cec9); color:white"
-                                        onclick="exportCSV('{{ $d->id }}')">
-                                        <i class="fas fa-file-csv me-1"></i>CSV
-                                    </button>
-                                </div>
+        {{-- Tombol Edit --}}
+        <a href="{{ route('registrasi.edit', $d->id) }}"
+            class="btn btn-modern btn-sm px-2 py-1"
+            style="background: linear-gradient(135deg,#51cf66,#2ecc71); color:white">
+            <i class="fas fa-edit me-1"></i>Edit
+        </a>
 
-                                </td>
+        {{-- Tombol Hapus --}}
+        <form action="{{ route('registrasi.destroy', $d->id) }}" method="POST"
+            onsubmit="return confirm('Yakin ingin menghapus data ini?');">
+            @csrf
+            @method('DELETE')
+            <button type="submit"
+                class="btn btn-modern btn-sm px-2 py-1"
+                style="background: linear-gradient(135deg,#ffa94d,#ff922b); color:white">
+                <i class="fas fa-trash me-1"></i>Hapus
+            </button>
+        </form>
+
+    </div>
+</td>
+
                         @empty
                             <tr>
                                 <td colspan="6" class="empty-state">

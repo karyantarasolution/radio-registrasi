@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\InspeksiProyektorExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\Karyawan;
 
 class InspeksiProyektorController extends Controller
 {
@@ -18,7 +19,9 @@ class InspeksiProyektorController extends Controller
 
     public function create()
     {
-        return view('inspeksiproyektor.create');
+        $karyawans = Karyawan::where('jabatan', 'ICT', 'H.ICT')->get();
+        $leaders = Karyawan::where('jabatan', 'Group Leader ICT')->get();
+        return view('inspeksiproyektor.create', compact('karyawans', 'leaders'));
     }
 
     public function store(Request $request)
@@ -61,9 +64,12 @@ class InspeksiProyektorController extends Controller
         return redirect()->route('inspeksiproyektor.index')->with('success', 'Data inspeksi proyektor berhasil disimpan.');
     }
 
-    public function edit(InspeksiProyektor $inspeksiproyektor)
+    public function edit($id)
     {
-        return view('inspeksiproyektor.edit', compact('inspeksiproyektor'));
+        $inspeksimonitor = InspeksiProyektor::findOrFail($id);
+        $karyawans = Karyawan::where('jabatan', 'ICT')->get();
+        $leaders = Karyawan::where('jabatan', 'Group Leader ICT')->get();
+        return view('inspeksiproyektor.edit', compact('inspeksistavolt', 'karyawans', 'leaders'));
     }
 
     public function update(Request $request, InspeksiProyektor $inspeksiproyektor)

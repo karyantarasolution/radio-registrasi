@@ -21,6 +21,12 @@ class KaryawanController extends Controller
         return view('karyawan.create');
     }
 
+    public function edit(Karyawan $karyawan)
+    {
+        return view('karyawan.edit', compact('karyawan'));
+    }
+
+
     public function store(Request $request)
     {
         $request->validate([
@@ -50,11 +56,13 @@ class KaryawanController extends Controller
         return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil ditambahkan!');
     }
 
-    public function update(Request $request, Karyawan $karyawan)
+    public function update(Request $request, $id)
     {
+        $karyawan = Karyawan::findOrFail($id);
+
         $request->validate([
             'nama' => 'required|string|max:100',
-            'nrp' => 'required|string|max:50|unique:karyawans,nrp,',
+            'nrp' => 'required|string|max:50|unique:karyawans,nrp,' . $karyawan->id,
             'jabatan' => 'required|string|max:100',
             'departemen' => 'required|string|max:100',
             'qr_code' => 'nullable|image|mimes:png,jpg,jpeg|max:2048'
@@ -62,23 +70,24 @@ class KaryawanController extends Controller
 
         $data = $request->only(['nama', 'nrp', 'jabatan', 'departemen']);
 
-        // Upload baru jika ada file baru
+        //  Jika user upload file baru
         if ($request->hasFile('qr_code')) {
-            // Hapus file lama jika ada
-            if ($karyawan->qr_code && file_exists(public_path($karyawan->qr_code))) {
-                unlink(public_path($karyawan->qr_code));
+            // Hapus file lama (kalau ada)
+            if ($karyawan->qr_code && Storage::disk('public')->exists('qr_codes/' . $karyawan->qr_code)) {
+                Storage::disk('public')->delete('qr_codes/' . $karyawan->qr_code);
             }
 
+            // Simpan file baru
             $file = $request->file('qr_code');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('public/qr_codes', $filename);
-            $data['qr_code'] = 'qr_codes/' . $filename;
+            $file->storeAs('qr_codes', $filename, 'public');
 
+            $data['qr_code'] = $filename;
         }
 
         $karyawan->update($data);
 
-        return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil diperbarui.');
+        return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil diperbarui!');
     }
 
     public function destroy(Karyawan $karyawan)

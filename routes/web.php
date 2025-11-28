@@ -60,7 +60,10 @@ Route::get('bukutamu-export-excel', [BukuTamuController::class, 'exportExcel'])-
 Route::get('bukutamu-export-pdf', [BukuTamuController::class, 'exportPDF'])->name('bukutamu.export.pdf');
 
 
-
+//registrasi
+Route::get('/registrasi/{id}/edit', [RegistrasiController::class, 'edit'])->name('registrasi.edit');
+Route::put('/registrasi/{id}', [RegistrasiController::class, 'update'])->name('registrasi.update');
+Route::delete('/registrasi/{id}', [RegistrasiController::class, 'destroy'])->name('registrasi.destroy');
 
 /*
 |--------------------------------------------------------------------------

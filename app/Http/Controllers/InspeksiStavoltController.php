@@ -6,7 +6,8 @@ use App\Models\InspeksiStavolt;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\InspeksiStavoltExport; // nanti bikin
+use App\Exports\InspeksiStavoltExport;
+use App\Models\Karyawan;
 
 class InspeksiStavoltController extends Controller
 {
@@ -18,7 +19,9 @@ class InspeksiStavoltController extends Controller
 
     public function create()
     {
-        return view('inspeksistavolt.create');
+        $karyawans = Karyawan::where('jabatan', 'ICT', 'H.ICT')->get();
+        $leaders = Karyawan::where('jabatan', 'Group Leader ICT')->get();
+        return view('inspeksistavolt.create', compact('karyawans', 'leaders'));
     }
 
     public function store(Request $request)
@@ -62,9 +65,12 @@ class InspeksiStavoltController extends Controller
         return view('inspeksistavolt.show', compact('inspeksistavolt'));
     }
 
-    public function edit(InspeksiStavolt $inspeksistavolt)
+    public function edit($id)
     {
-        return view('inspeksistavolt.edit', compact('inspeksistavolt'));
+        $inspeksistavolt = InspeksiStavolt::findOrFail($id);
+        $karyawans = Karyawan::where('jabatan', 'ICT')->get();
+        $leaders = Karyawan::where('jabatan', 'Group Leader ICT')->get();
+        return view('inspeksistavolt.edit', compact('inspeksistavolt', 'karyawans', 'leaders'));
     }
 
     public function update(Request $request, InspeksiStavolt $inspeksistavolt)

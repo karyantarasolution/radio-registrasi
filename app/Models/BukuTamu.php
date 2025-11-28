@@ -17,6 +17,7 @@ class BukuTamu extends Model
     protected $fillable = [
         'nama',
         'nrp',
+        'no_telp',
         'instansi',
         'keperluan',
     ];

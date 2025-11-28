@@ -1,49 +1,50 @@
 {{-- resources/views/inspeksiups/form.blade.php --}}
+
 <div class="mb-3">
     <label class="form-label">Nomor Aset UPS</label>
     <input type="text" name="nomor_aset" class="form-control" 
-        value="{{ old('nomor_aset', $inspeksi_up->nomor_aset ?? '') }}">
+        value="{{ old('nomor_aset', $inspeksiup->nomor_aset ?? '') }}">
 </div>
 
 <div class="mb-3">
     <label class="form-label">Merek</label>
     <input type="text" name="merek" class="form-control" 
-        value="{{ old('merek', $inspeksi_up->merek ?? '') }}">
+        value="{{ old('merek', $inspeksiup->merek ?? '') }}">
 </div>
 
 <div class="mb-3">
     <label class="form-label">Type</label>
     <input type="text" name="type" class="form-control" 
-        value="{{ old('type', $inspeksi_up->type ?? '') }}">
+        value="{{ old('type', $inspeksiup->type ?? '') }}">
 </div>
 
 <div class="mb-3">
     <label class="form-label">S/N</label>
     <input type="text" name="sn" class="form-control" 
-        value="{{ old('sn', $inspeksi_up->sn ?? '') }}">
+        value="{{ old('sn', $inspeksiup->sn ?? '') }}">
 </div>
 
 <div class="mb-3">
     <label class="form-label">Departemen</label>
     <input type="text" name="departemen" class="form-control" 
-        value="{{ old('departemen', $inspeksi_up->departemen ?? '') }}">
+        value="{{ old('departemen', $inspeksiup->departemen ?? '') }}">
 </div>
 
 <div class="mb-3">
     <label class="form-label">Lokasi</label>
     <input type="text" name="lokasi" class="form-control" 
-        value="{{ old('lokasi', $inspeksi_up->lokasi ?? '') }}">
+        value="{{ old('lokasi', $inspeksiup->lokasi ?? '') }}">
 </div>
 
 <div class="mb-3">
     <label class="form-label">Tanggal Inspeksi</label>
     <input type="date" name="tanggal_inspeksi" class="form-control" 
-        value="{{ old('tanggal_inspeksi', isset($inspeksi_up->tanggal_inspeksi) ? $inspeksi_up->tanggal_inspeksi->format('Y-m-d') : '') }}">
+        value="{{ old('tanggal_inspeksi', isset($inspeksiup->tanggal_inspeksi) ? $inspeksiup->tanggal_inspeksi->format('Y-m-d') : '') }}">
 </div>
 
 <div class="mb-3">
     <label class="form-label">Keterangan Umum</label>
-    <textarea name="keterangan" class="form-control" rows="3">{{ old('keterangan', $inspeksi_up->keterangan ?? '') }}</textarea>
+    <textarea name="keterangan" class="form-control" rows="3">{{ old('keterangan', $inspeksiup->keterangan ?? '') }}</textarea>
 </div>
 
 @php
@@ -69,59 +70,40 @@
         </tr>
     </thead>
     <tbody>
-{{-- di bagian bawah form.blade.php (sebelum </body>) --}}
-<div id="data-container" data-items='@json(array_column($items, "key"))'></div>
 
-            @foreach($items as $it)
-            <tr>
-                <td>{{ $it['label'] }}</td>
-                <td style="text-align:center;">
-                    <input type="radio" name="{{ $it['key'] }}" value="Baik"
-                        {{ old($it['key'], $inspeksi_up->{$it['key']} ?? '') == 'Baik' ? 'checked' : '' }}>
-                </td>
-                <td style="text-align:center;">
-                    <input type="radio" name="{{ $it['key'] }}" value="Tidak"
-                        {{ old($it['key'], $inspeksi_up->{$it['key']} ?? '') == 'Tidak' ? 'checked' : '' }}>
-                </td>
-                <td>
-                    <textarea name="tindakan_{{ $it['key'] }}" class="form-control tindakan-field"
-                        rows="2">{{ old('tindakan_'.$it['key'], $inspeksi_up->{'tindakan_'.$it['key']} ?? '') }}</textarea>
-                </td>
-            </tr>
-            @endforeach
+        @foreach($items as $it)
+        <tr>
+            <td>{{ $it['label'] }}</td>
+            <td style="text-align:center;">
+                <input type="radio" name="{{ $it['key'] }}" value="Baik"
+                    {{ old($it['key'], $inspeksiup->{$it['key']} ?? '') == 'Baik' ? 'checked' : '' }}>
+            </td>
+            <td style="text-align:center;">
+                <input type="radio" name="{{ $it['key'] }}" value="Tidak"
+                    {{ old($it['key'], $inspeksiup->{$it['key']} ?? '') == 'Tidak' ? 'checked' : '' }}>
+            </td>
+            <td>
+                <textarea name="tindakan_{{ $it['key'] }}" class="form-control tindakan-field"
+                    rows="2">{{ old('tindakan_'.$it['key'], $inspeksiup->{'tindakan_'.$it['key']} ?? '') }}</textarea>
+            </td>
+        </tr>
+        @endforeach
+
     </tbody>
 </table>
 
 <div class="mb-3">
     <label class="form-label">Inspektor (ICT)</label>
     <input type="text" name="inspektor" class="form-control" 
-        value="{{ old('inspektor', $inspeksi_up->inspektor ?? '') }}">
+        value="{{ old('inspektor', $inspeksiup->inspektor ?? '') }}">
 </div>
 
 <div class="mb-3">
     <label class="form-label">Diketahui Oleh</label>
     <input type="text" name="diketahui_oleh" class="form-control" 
-        value="{{ old('diketahui_oleh', $inspeksi_up->diketahui_oleh ?? '') }}">
+        value="{{ old('diketahui_oleh', $inspeksiup->diketahui_oleh ?? '') }}">
 </div>
 
-<div id="data-container" data-items='@json(array_column($items, "key"))'></div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const items = JSON.parse(document.getElementById('data-items').textContent);
-
-        items.forEach(function (key) {
-            const radios = Array.from(document.getElementsByName(key));
-            const textarea = document.querySelector('textarea[name="tindakan_' + key + '"]');
-            if (!radios.length || !textarea) return;
-        });
-    });
-</script>
-
-<!-- Simpan data di bawah -->
 <script type="application/json" id="data-items">
     {!! json_encode(array_column($items, 'key')) !!}
 </script>
-
-
-
-

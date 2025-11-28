@@ -117,9 +117,9 @@
             transition: width 1s ease-in-out;
         }
 
-        /* Weather Widget */
+  
         .weather-widget {
-            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            background: linear-gradient(135deg, #74e3ffff 0%, #0984e3 100%);
             border-radius: 15px;
             color: white;
             padding: 1.5rem;
@@ -183,161 +183,71 @@
     </div>
 
 
-    {{-- Statistics Cards Row --}}
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3" data-aos="zoom-in" data-aos-duration="800" data-aos-delay="100">
-            <div class="card enhanced-card stat-card-1 text-center">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title opacity-75">Total Registrasi</h6>
-                            <h2 class="fw-bold mb-0">{{ $jumlahRegistrasi }}</h2>
-                        </div>
-                        <div class="fs-1 opacity-75">📊</div>
-                    </div>
-                    <div class="progress-custom mt-3">
-                        <div class="progress-bar-custom" style="width: 75%"></div>
-                    </div>
-                    <small class="opacity-75">Jumlah Seluruh Registrasi</small> 
-                </div>
-            </div>
-        </div>
+   {{-- Quick Actions & Weather Row --}}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="weather-widget p-4"
+            data-aos="fade-up"
+            data-aos-duration="1000"
+            style="border-radius: 14px; background: #4da4f1; color:white; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
 
-    {{-- Total Inventaris --}}
-    <div class="col-lg-3 col-md-6 mb-3" data-aos="zoom-in" data-aos-duration="800" data-aos-delay="150">
-        <div class="card enhanced-card stat-card-3 text-center">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="card-title opacity-75">Total Inventaris</h6>
-                        
-                    </div>
-                    <div class="fs-1 opacity-75">📻</div>
-                </div>
-                <div class="progress-custom mt-3">
-                    <div class="progress-bar-custom" style="width: 60%"></div>
-                </div>
-                <small class="opacity-75">Jumlah seluruh perangkat</small>
-            </div>
-        </div>
-    </div>
+            <h6 class="fw-bold mb-3">🌤️ Cuaca Hari Ini</h6>
 
+            @if(!empty($weatherData) && isset($weatherData['main']))
 
-        <div class="col-lg-3 col-md-6 mb-3" data-aos="zoom-in" data-aos-duration="800" data-aos-delay="200">
-            <div class="card enhanced-card stat-card-2 text-center">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title opacity-75">Hari Tanpa Kecelakaan</h6>
-                            <h2 class="fw-bold mb-0">{{ rand(45, 120) }}</h2>
-                        </div>
-                        <div class="fs-1 opacity-75">🏆</div>
-                    </div>
-                    <div class="progress-custom mt-3">
-                        <div class="progress-bar-custom" style="width: 90%"></div>
-                    </div>
-                    <small class="opacity-75">Target: 365 hari</small>
-                </div>
-            </div>
-        </div>
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
 
-
-        <div class="col-lg-3 col-md-6 mb-3" data-aos="zoom-in" data-aos-duration="800" data-aos-delay="400">
-            <div class="card enhanced-card stat-card-4 text-center">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title opacity-75">Compliance Rate</h6>
-                            <h2 class="fw-bold mb-0">{{ rand(85, 98) }}%</h2>
-                        </div>
-                        <div class="fs-1 opacity-75">✅</div>
+                    {{-- Temperatur + Lokasi --}}
+                    <div class="mb-3">
+                        <h2 class="fw-bold mb-0">{{ round($weatherData['main']['temp']) }}°C</h2>
+                        <small>{{ $weatherData['name'] }}</small>
                     </div>
-                    <div class="progress-custom mt-3">
-                        <div class="progress-bar-custom" style="width: 92%"></div>
-                    </div>
-                    <small class="opacity-75">Sangat Baik</small>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    {{-- Quick Actions & Weather Row --}}
-    <div class="row mb-4">
-        <div class="col-lg-8 mb-3">
-            <div class="card enhanced-card" data-aos="fade-right" data-aos-duration="1000">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-4">⚡ Quick Actions</h5>
-                    <div class="row">
-                        <div class="col-md-3 col-6 mb-3">
-                            <a href="#" class="quick-action-btn bg-light text-center text-decoration-none">
-                                <div class="fs-2 mb-2">🚨</div>
-                                <small class="fw-bold text-dark">Laporkan Insiden</small>
-                                <div class="notification-badge">3</div>
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <a href="#" class="quick-action-btn bg-light text-center text-decoration-none">
-                                <div class="fs-2 mb-2">📋</div>
-                                <small class="fw-bold text-dark">Safety Checklist</small>
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <a href="#" class="quick-action-btn bg-light text-center text-decoration-none">
-                                <div class="fs-2 mb-2">🎓</div>
-                                <small class="fw-bold text-dark">Pelatihan K3</small>
-                                <div class="notification-badge">2</div>
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <a href="#" class="quick-action-btn bg-light text-center text-decoration-none">
-                                <div class="fs-2 mb-2">📞</div>
-                                <small class="fw-bold text-dark">Emergency</small>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4 mb-3"> 
-    <div class="weather-widget" data-aos="fade-left" data-aos-duration="1000">
-        <h6 class="fw-bold mb-3">🌤️ Cuaca Hari Ini</h6>
-        @if(!empty($weatherData) && isset($weatherData['main']))
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h3 class="fw-bold mb-0">{{ round($weatherData['main']['temp']) }}°C</h3>
-                    <small>{{ $weatherData['name'] }}</small>
-                </div>
-                <div class="text-end">
-                    <div class="fs-1">
+                    {{-- Icon + Deskripsi --}}
+                    <div class="text-end mb-3">
                         @php
                             $icon = $weatherData['weather'][0]['icon'];
                         @endphp
-                        <img src="http://openweathermap.org/img/wn/{{ $icon }}@2x.png" alt="icon">
+
+                        <img src="http://openweathermap.org/img/wn/{{ $icon }}@2x.png"
+                             alt="Cuaca Icon"
+                             class="img-fluid mb-1"
+                             style="width: 80px;">
+                        <div>
+                            <small>{{ ucfirst($weatherData['weather'][0]['description']) }}</small>
+                        </div>
                     </div>
-                    <small>{{ ucfirst($weatherData['weather'][0]['description']) }}</small>
+
                 </div>
-            </div>
-            <hr class="my-3 opacity-50">
-            <div class="row text-center">
-                <div class="col-4">
-                    <small>Kelembaban</small><br>
-                    <strong>{{ $weatherData['main']['humidity'] }}%</strong>
+
+                <hr class="my-3 opacity-50">
+
+                {{-- Detail Cuaca --}}
+                <div class="row text-center">
+                    <div class="col-md-4 col-4">
+                        <small>Kelembaban</small><br>
+                        <strong>{{ $weatherData['main']['humidity'] }}%</strong>
+                    </div>
+
+                    <div class="col-md-4 col-4">
+                        <small>Angin</small><br>
+                        <strong>{{ $weatherData['wind']['speed'] }} km/h</strong>
+                    </div>
+
+                    <div class="col-md-4 col-4">
+                        <small>Tekanan</small><br>
+                        <strong>{{ $weatherData['main']['pressure'] }} hPa</strong>
+                    </div>
                 </div>
-                <div class="col-4">
-                    <small>Angin</small><br>
-                    <strong>{{ $weatherData['wind']['speed'] }} km/h</strong>
-                </div>
-                <div class="col-4">
-                    <small>Tekanan</small><br>
-                    <strong>{{ $weatherData['main']['pressure'] }} hPa</strong>
-                </div>
-            </div>
-        @else
-            <p>Data cuaca tidak tersedia.</p> 
-        @endif
+
+            @else
+                <p class="text-white">Data cuaca tidak tersedia.</p>
+            @endif
+
+        </div>
     </div>
 </div>
+
 
 
 

@@ -129,6 +129,12 @@
                         value="{{ old('nama', $bukutamu->nama) }}" required>
                 </div>
 
+                <div class="mb-3">
+                    <label for="no_telp" class="form-label">No. Telepon</label>
+                    <input type="text" name="no_telp" id="no_telp" class="form-control"
+                        value="{{ old('no_telp', $bukutamu->no_telp ?? '') }}">
+                </div>
+
                 <div class="form-group">
                     <label for="nrp" class="form-label">NRP / NIK</label>
                     <input type="text" name="nrp" id="nrp"

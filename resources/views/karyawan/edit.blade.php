@@ -30,8 +30,9 @@
         <div class="mb-3">
             <label>QR Code (Upload Baru Jika Ingin Ganti)</label><br>
             @if($karyawan->qr_code)
-                <img src="{{ asset($karyawan->qr_code) }}" width="100" class="mb-2"><br>
+                <img src="{{ asset('storage/qr_codes/' . $karyawan->qr_code) }}" width="50" class="mb-2"><br>
             @endif
+
             <input type="file" name="qr_code" class="form-control" accept="image/*">
         </div>
 

@@ -7,7 +7,7 @@
     body { font-family: DejaVu Sans, sans-serif; font-size:12px; }
     table { width:100%; border-collapse: collapse; }
     .bordered td, .bordered th { border:1px solid #000; padding:6px; }
-    .section-title { background:#bfbfbf; font-weight:bold; padding:4px; }
+    .section-title { background:#bfbfbf; font-weight:bold; padding:4px; text-align:left;}
     .sign-box { height:60px; border:1px solid #000; margin-bottom:4px; }
     h3 { margin:0; padding:0; }
 </style>
@@ -61,13 +61,19 @@
     </tr>
 
     @php
-      $checks = [
+    use App\Models\Karyawan;
+
+    $checks = [
         ['key'=>'tampilan_layer','label'=>'Tampilan layer monitor'],
         ['key'=>'kabel_power','label'=>'Kondisi Kabel power'],
         ['key'=>'bracket_dudukan','label'=>'Kondisi bracket dudukan'],
         ['key'=>'kebersihan','label'=>'Kebersihan monitor'],
         ['key'=>'stop_kontak','label'=>'Kondisi stop kontak'],
-      ];
+    ];
+
+    // Ambil data karyawan untuk inspektor dan diketahui
+    $inspektorData = Karyawan::where('nama', $inspeksimonitor->inspektor)->first();
+    $diketahuiData = Karyawan::where('nama', $inspeksimonitor->diketahui_oleh)->first();
     @endphp
 
     @foreach($checks as $c)
@@ -85,21 +91,36 @@
     <div style="min-height:70px; border:1px solid #000; padding:6px;">{{ $inspeksimonitor->keterangan }}</div>
 </div>
 
-<table style="width:100%; margin-top:20px;">
-    <tr>
-        <td style="width:50%; text-align:center;">
-            <div class="sign-box"></div>
-            <strong>Inspektor (ICT)</strong><br>
-            Nama : {{ $inspeksimonitor->inspektor }}<br>
-            Jabatan : {{ $inspeksimonitor->jabatan_inspektor }}
-        </td>
-        <td style="width:50%; text-align:center;">
-            <div class="sign-box"></div>
-            <strong>Diketahui Oleh</strong><br>
-            Nama : {{ $inspeksimonitor->diketahui_oleh }}
-        </td>
-    </tr>
-</table>
+    <table style="width:100%; margin-top:20px;">
+        <tr>
+            <td style="width:50%; text-align:center;">
+                <strong>Inspektor (ICT)</strong><br><br>
+                <div class="sign-box" style="border:none;">
+                    @if($inspektorData && $inspektorData->qr_code)
+                        <img src="{{ public_path('storage/qr_codes/'.$inspektorData->qr_code) }}" alt="TTD Inspektor" style="width:70px; height:auto;">
+                    @else
+                        <div style="height:40px;"></div>
+                    @endif
+                </div>
+               <br>
+                Nama : {{ $inspeksimonitor->inspektor }}<br>
+                Jabatan : {{ $inspeksimonitor->jabatan_inspektor }}
+            </td>
 
+            <td style="width:50%; text-align:center;">
+                <strong>Diketahui Oleh</strong><br>
+                <div class="sign-box" style="border:none;">
+                    @if($diketahuiData && $diketahuiData->qr_code)
+                        <img src="{{ public_path('storage/qr_codes/'.$diketahuiData->qr_code) }}" alt="TTD Diketahui" style="width:80px; height:auto;">
+                    @else
+                        <div style="height:40px;"></div>
+                    @endif
+                </div>
+                <br><br>
+                Nama : {{ $inspeksimonitor->diketahui_oleh }} <br>
+                Jabatan : {{ $inspeksimonitor->karyawans }} Group Leader
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

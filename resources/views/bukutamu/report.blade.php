@@ -52,11 +52,12 @@
     <table>
         <thead>
             <tr>
-                <th class="judul" colspan="6">LAPORAN BUKU TAMU</th>
+                <th class="judul" colspan="7">LAPORAN BUKU TAMU</th>
             </tr>
             <tr>
                 <th>No</th>
                 <th>Nama</th>
+                <th>No Telepon</th>
                 <th>NRP</th>
                 <th>Instansi</th>
                 <th>Keperluan</th>
@@ -68,6 +69,7 @@
             <tr>
                 <td style="text-align:center;">{{ $loop->iteration }}</td>
                 <td>{{ $tamu->nama }}</td>
+                <td>{{$tamu->no_telp}}</td>
                 <td>{{ $tamu->nrp }}</td>
                 <td>{{ $tamu->instansi }}</td>
                 <td>{{ $tamu->keperluan }}</td>
@@ -79,3 +81,4 @@
 
 </body>
 </html>
+

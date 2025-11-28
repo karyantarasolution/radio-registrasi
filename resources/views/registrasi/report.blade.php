@@ -37,6 +37,12 @@
             margin-right: 4px; /* jarak kotak dengan teks */
         }
 
+        .checkmark {
+            font-family: DejaVu Sans, sans-serif !important;
+            font-size:9px;
+        }
+
+
         .miring {
             font-style: italic;
         }
@@ -126,18 +132,36 @@
         </thead>
         <tbody>
             <tr>
-                <td style="width: 5px;"></td><td>ADARO 2</td>
+                <td style="text-align:center;">
+                    @if(in_array('ADARO 2', $selectedChannels))
+                        <span class="checkmark">&#10004;</span>
+                    @endif
+                </td>
+                <td>ADARO 2</td>
                 <td></td><td>LW</td>
                 <td></td><td>SIS 3</td>
-                <td></td><td>PPA SECURITY</td>
+                 <td style="text-align:center;">
+                    @if(in_array('PPA SECURITY', $selectedChannels))
+                        <span class="checkmark">&#10004;</span>
+                    @endif
+                </td><td>PPA SECURITY</td>
                 <td></td><td>PSV</td>
                 <td></td><td>REP OPCC</td>
             </tr>
             <tr>
-                <td></td><td>ADARO 4</td>
+                <td style="text-align:center;">
+                    @if(in_array('ADARO 4', $selectedChannels))
+                        <span class="checkmark">&#10004;</span>
+                    @endif
+                </td>
+                <td>ADARO 4</td>
                 <td></td><td>HW1</td>
                 <td></td><td>SIS 4</td>
-                <td></td><td>PPA FRONT</td>
+                 <td style="text-align:center;">
+                    @if(in_array('PPA FRONT', $selectedChannels))
+                        <span class="checkmark">&#10004;</span>
+                    @endif
+                </td><td>PPA FRONT</td>
                 <td></td><td>MCC</td>
                 <td></td><td>OPCC</td>
             </tr>
@@ -145,7 +169,11 @@
                 <td></td><td>MWM</td>
                 <td></td><td>HW2</td>
                 <td></td><td>SIS 5</td>
-                <td></td><td>PPA DISPOSAL</td>
+                 <td style="text-align:center;">
+                    @if(in_array('PPA DISPOSAL', $selectedChannels))
+                        <span class="checkmark">&#10004;</span>
+                    @endif
+                </td><td>PPA DISPOSAL</td>
                 <td></td><td>PRO 1</td>
                 <td></td><td>RMI</td>
             </tr>
@@ -153,7 +181,11 @@
                 <td></td><td>WARA CRUSHER</td>
                 <td></td><td>HILL 11</td>
                 <td></td><td>SIS 7</td>
-                <td></td><td>PPA CCR</td>
+                 <td style="text-align:center;">
+                    @if(in_array('PPA CCR', $selectedChannels))
+                        <span class="checkmark">&#10004;</span>
+                    @endif
+                </td><td>PPA CCR</td>
                 <td></td><td>PRO 2</td>
                 <td></td><td>CBML</td>
             </tr>
@@ -161,7 +193,11 @@
                 <td></td><td>SURVEY 1</td>
                 <td></td><td>ROM</td>
                 <td></td><td>SIS 8</td>
-                <td></td><td>PPA PLANT</td>
+                 <td style="text-align:center;">
+                    @if(in_array('PPA PLANT', $selectedChannels))
+                        <span class="checkmark">&#10004;</span>
+                    @endif
+                </td><td>PPA PLANT</td>
                 <td></td><td>BLASTING</td>
                 <td></td><td>BC 1</td>
             </tr>
@@ -169,7 +205,11 @@
                 <td></td><td>SURVEY 2</td>
                 <td></td><td>HAULING</td>
                 <td></td><td>SIS 9</td>
-                <td></td><td>PPA BASECONTROL</td>
+                 <td style="text-align:center;">
+                    @if(in_array('PPA BASECONTROL', $selectedChannels))
+                        <span class="checkmark">&#10004;</span>
+                    @endif
+                </td><td>PPA BASECONTROL</td>
                 <td></td><td>SURVEY</td>
                 <td></td><td>BC 2</td>
             </tr>
@@ -177,7 +217,11 @@
                 <td></td><td>SURVEY 3</td>
                 <td></td><td>ADS 1</td>
                 <td></td><td>SIS 10</td>
-                <td></td><td>PPA 1</td>
+                 <td style="text-align:center;">
+                    @if(in_array('PPA 1', $selectedChannels))
+                        <span class="checkmark">&#10004;</span>
+                    @endif
+                </td><td>PPA 1</td>
                 <td></td><td>LW</td>
                 <td></td><td>BC 3</td>
             </tr>
@@ -185,7 +229,11 @@
                 <td></td><td>GEOTECH</td>
                 <td></td><td>ADS 3</td>
                 <td></td><td>SIS 11</td>
-                <td></td><td>PPA 2</td>
+                 <td style="text-align:center;">
+                    @if(in_array('PPA 2', $selectedChannels))
+                        <span class="checkmark">&#10004;</span>
+                    @endif
+                </td><td>PPA 2</td>
                 <td></td><td>HW</td>
                 <td></td><td>SERA</td>
             </tr>

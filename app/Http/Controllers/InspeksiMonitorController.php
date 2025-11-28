@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf; // pastikan package dompdf terpasang
 use App\Exports\InspeksiMonitorExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\Karyawan;
 
 class InspeksiMonitorController extends Controller
 {
@@ -16,10 +17,13 @@ class InspeksiMonitorController extends Controller
         return view('inspeksimonitor.index', compact('data'));
     }
 
-    public function create()
-    {
-        return view('inspeksimonitor.create');
-    }
+        public function create()
+        {
+            $karyawans = Karyawan::where('jabatan', 'ICT', 'H.ICT')->get();
+            $leaders = Karyawan::where('jabatan', 'Group Leader ICT')->get();
+
+            return view('inspeksimonitor.create', compact('karyawans', 'leaders'));
+        }
 
     public function store(Request $request)
     {
@@ -61,9 +65,13 @@ class InspeksiMonitorController extends Controller
         return view('inspeksimonitor.show', compact('inspeksimonitor'));
     }
 
-    public function edit(InspeksiMonitor $inspeksimonitor)
+   public function edit($id)
     {
-        return view('inspeksimonitor.edit', compact('inspeksimonitor'));
+        $inspeksimonitor = InspeksiMonitor::findOrFail($id);
+        $karyawans = Karyawan::where('jabatan', 'ICT')->get();
+        $leaders = Karyawan::where('jabatan', 'Group Leader ICT')->get();
+
+        return view('inspeksimonitor.edit', compact('inspeksimonitor', 'karyawans', 'leaders'));
     }
 
     public function update(Request $request, InspeksiMonitor $inspeksimonitor)

@@ -169,6 +169,7 @@
                         <tr>
                             <th>No</th>
                             <th>Nama</th>
+                            <th>No. Telepon</th>
                             <th>NRP / NIK</th>
                             <th>Instansi</th>
                             <th>Keperluan</th>
@@ -180,6 +181,7 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $tamu->nama }}</td>
+                            <td>{{ $tamu->no_telp ?? '-' }}</td>
                             <td>{{ $tamu->nrp }}</td>
                             <td>{{ $tamu->instansi }}</td>
                             <td>{{ $tamu->keperluan }}</td>

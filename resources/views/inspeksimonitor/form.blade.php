@@ -79,17 +79,26 @@
 
             <div class="mb-3">
                 <label class="form-label">Inspektor (ICT)</label>
-                <input type="text" name="inspektor" class="form-control" value="{{ old('inspektor', $inspeksimonitor->inspektor ?? '') }}">
+                <select name="inspektor" class="form-control" required>
+                    <option value=""> Pilih Inspektor </option>
+                    @foreach($karyawans as $k)
+                        <option value="{{ $k->nama }}" {{ old('inspektor', $inspeksimonitor->inspektor ?? '') == $k->nama ? 'selected' : '' }}>
+                            {{ $k->nama }} ({{ $k->jabatan }})
+                        </option>
+                    @endforeach
+                </select>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Jabatan Inspektor</label>
-                <input type="text" name="jabatan_inspektor" class="form-control" value="{{ old('jabatan_inspektor', $inspeksimonitor->jabatan_inspektor ?? '') }}">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Diketahui Oleh</label>
-                <input type="text" name="diketahui_oleh" class="form-control" value="{{ old('diketahui_oleh', $inspeksimonitor->diketahui_oleh ?? '') }}">
+                <label class="form-label">Diketahui oleh (Group Leader ICT)</label>
+                <select name="diketahui_oleh" class="form-control" required>
+                    <option value=""> Pilih Group Leader ICT </option>
+                    @foreach($leaders as $leader)
+                        <option value="{{ $leader->nama }}" {{ old('diketahui_oleh', $inspeksimonitor->diketahui_oleh ?? '') == $leader->nama ? 'selected' : '' }}>
+                            {{ $leader->nama }} ({{ $leader->jabatan }})
+                        </option>
+                    @endforeach
+                </select>
             </div>
         </div>
     </div>

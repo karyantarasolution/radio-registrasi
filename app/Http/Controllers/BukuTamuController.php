@@ -25,14 +25,16 @@ class BukuTamuController extends Controller
     {
         $request->validate([
             'nama'      => 'required|string|max:255',
+            'no_telp'   => 'nullable|string|max:20',
             'nrp'       => 'required|string|max:50',
             'instansi'  => 'required|string|max:255',
             'keperluan' => 'required|string|max:255',
         ]);
 
-        BukuTamu::create($request->all());
+        BukuTamu::create($request->only(['nama', 'no_telp', 'nrp', 'instansi', 'keperluan']));
         return redirect()->route('bukutamu.index')->with('success', 'Data berhasil ditambahkan.');
     }
+
 
     public function show(BukuTamu $bukutamu)
     {
@@ -48,14 +50,16 @@ class BukuTamuController extends Controller
     {
         $request->validate([
             'nama'      => 'required|string|max:255',
+            'no_telp'   => 'nullable|string|max:20',
             'nrp'       => 'required|string|max:50',
             'instansi'  => 'required|string|max:255',
             'keperluan' => 'required|string|max:255',
         ]);
 
-        $bukutamu->update($request->all());
+        $bukutamu->update($request->only(['nama', 'no_telp', 'nrp', 'instansi', 'keperluan']));
         return redirect()->route('bukutamu.index')->with('success', 'Data berhasil diupdate.');
     }
+
 
     public function destroy(BukuTamu $bukutamu)
     {
