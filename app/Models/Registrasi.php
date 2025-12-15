@@ -23,11 +23,15 @@ class Registrasi extends Model
         'serial_number',
         'tanggal_permintaan',
         'channels',
+        'range_power',
+        'range_frekuensi',
+        'jenis_radio',
     ];
 
     protected $casts = [
         'tanggal_permintaan' => 'date',
         'channels' => 'array',
+        'range_frekuensi' => 'array',
     ];
 
 }

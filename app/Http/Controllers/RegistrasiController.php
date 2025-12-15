@@ -15,7 +15,6 @@ class RegistrasiController extends Controller
 {
     public function index()
     {
-        // ambil semua data dari tabel registrasi
         $data = Registrasi::all();
         return view('registrasi.index', compact('data'));
     }
@@ -34,7 +33,12 @@ class RegistrasiController extends Controller
             'nomor_polisi' => 'nullable|string|max:50',
             'merek_radio' => 'required|string|max:100',
             'serial_number' => 'required|string|max:100|unique:registrasis,serial_number',
-            'channels' => 'nullable|array', // ✅ validasi array
+            'channels' => 'nullable|array',
+
+            // ➕ validasi tambahan
+            'range_power' => 'required|string',
+            'range_frekuensi' => 'required|array',
+            'jenis_radio' => 'required|string',
         ]);
 
         $lastPtt = Registrasi::max('id_ptt'); 
@@ -44,7 +48,13 @@ class RegistrasiController extends Controller
         $registrasi = new Registrasi($request->all());
         $registrasi->id_ptt = $idPtt;
         $registrasi->tanggal_permintaan = now();
-        $registrasi->channels = $request->channels ?? []; // ✅ simpan channel dalam bentuk array
+        $registrasi->channels = $request->channels ?? [];
+
+        // ➕ field baru
+        $registrasi->range_power = $request->range_power;
+        $registrasi->range_frekuensi = $request->range_frekuensi;
+        $registrasi->jenis_radio = $request->jenis_radio;
+
         $registrasi->save();
 
         return redirect()->route('registrasi.index')->with('success', 'Data berhasil disimpan.');
@@ -52,7 +62,6 @@ class RegistrasiController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Validasi input
         $request->validate([
             'perusahaan'      => 'required|string|max:255',
             'nomor_lambung'   => 'required|string|max:255',
@@ -61,12 +70,14 @@ class RegistrasiController extends Controller
             'merek_radio'     => 'nullable|string|max:255',
             'serial_number'   => 'nullable|string|max:255',
             'channels'        => 'nullable|array',
+
+            // ➕ validasi tambahan
+            'range_power' => 'required|string',
+            'range_frekuensi' => 'required|array',
+            'jenis_radio' => 'required|string',
         ]);
 
-        // Cari data yang akan di-update
         $registrasi = Registrasi::findOrFail($id);
-
-        // Simpan data update
         $registrasi->perusahaan      = $request->perusahaan;
         $registrasi->nomor_lambung   = $request->nomor_lambung;
         $registrasi->jenis_kendaraan = $request->jenis_kendaraan;
@@ -74,18 +85,22 @@ class RegistrasiController extends Controller
         $registrasi->merek_radio     = $request->merek_radio;
         $registrasi->serial_number   = $request->serial_number;
 
-        // Simpan channels sebagai JSON
+        // simpan channel JSON
         $registrasi->channels = json_encode($request->channels ?? []);
+
+        // ➕ update field baru
+        $registrasi->range_power = $request->range_power;
+        $registrasi->range_frekuensi = $request->range_frekuensi;
+        $registrasi->jenis_radio = $request->jenis_radio;
+
+        // 🔥 update otomatis tanggal
+        $registrasi->tanggal_permintaan = now();
 
         $registrasi->save();
 
-        return redirect()
-            ->route('registrasi.index')
-            ->with('success', 'Data registrasi berhasil diperbarui!');
+        return redirect()->route('registrasi.index')->with('success', 'Data registrasi berhasil diperbarui!');
     }
 
-
-    // ✅ Tambahan: DETAIL (Show)
     public function show($id)
     {
         $registrasi = Registrasi::findOrFail($id);
@@ -98,9 +113,6 @@ class RegistrasiController extends Controller
         return view('registrasi.edit', compact('registrasi'));
     }
 
-
-
-    // ✅ Tambahan: HAPUS (Destroy)
     public function destroy($id)
     {
         $registrasi = Registrasi::findOrFail($id);
@@ -109,26 +121,20 @@ class RegistrasiController extends Controller
         return redirect()->route('registrasi.index')->with('success', 'Data berhasil dihapus.');
     }
 
-    // ========== Export & Report Tetap Sama ==========$logoPath = public_path('images/logo_mining.png');
-
     public function report($id)
     {
         $registrasi = Registrasi::findOrFail($id);
 
-        // Pastikan field channel adalah JSON atau string yang bisa didecode
         $selectedChannels = [];
 
         if (!empty($registrasi->channels)) {
             if (is_string($registrasi->channels)) {
-                // kalau isinya JSON
                 $selectedChannels = json_decode($registrasi->channels, true);
             } elseif (is_array($registrasi->channels)) {
-                // kalau sudah array
                 $selectedChannels = $registrasi->channels;
             }
         }
 
-        // path logo
         $logoPath = public_path('images/logo_mining.png');
 
         return Pdf::loadView('registrasi.report', [
@@ -137,8 +143,6 @@ class RegistrasiController extends Controller
             'logoPath' => $logoPath
         ])->stream();
     }
-
-
 
     public function exportExcel($id)
     {
@@ -180,16 +184,13 @@ class RegistrasiController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Judul
         $sheet->mergeCells('A1:F1');
         $sheet->setCellValue('A1', 'LAPORAN SEMUA REGISTRASI RADIO');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
 
-        // Header tabel
         $sheet->fromArray(['ID', 'Perusahaan', 'No Lambung', 'ID PTT', 'Tanggal', 'Serial Number'], NULL, 'A3');
 
-        // Data
         $row = 4;
         foreach ($registrasis as $r) {
             $sheet->fromArray([
@@ -203,7 +204,6 @@ class RegistrasiController extends Controller
             $row++;
         }
 
-        // Download file
         $writer = new Xlsx($spreadsheet);
         $fileName = 'registrasi_all.xlsx';
 

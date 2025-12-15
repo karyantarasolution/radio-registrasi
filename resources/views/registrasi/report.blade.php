@@ -42,6 +42,16 @@
             font-size:9px;
         }
 
+        .check-box {
+            width: 12px;
+            height: 12px;
+            border: 1px solid #000;
+            display: inline-block;
+            text-align: center;
+            line-height: 12px;
+            font-size: 10px;
+            font-family: DejaVu Sans, sans-serif;
+        }
 
         .miring {
             font-style: italic;
@@ -90,18 +100,42 @@
             <td class="header-label">NOMOR LAMBUNG</td>
             <td class="header-value">{{ $registrasi->nomor_lambung }}</td>
             <td class="header-label">RANGE POWER</td>
-            <td>
-                <span class="check"></span> 25w
-                <span class="check" style="margin-left:15px;"></span> 45w
+           <td>
+                {{-- 25W --}}
+                <span class="check-box" style="font-family: DejaVu Sans, sans-serif;">
+                    @if($registrasi->range_power == '25 W' || $registrasi->range_power == '25w')
+                        ✔
+                    @endif
+                </span> 25W
+
+                {{-- 45W --}}      
+                <span class="check-box" style="margin-left:15px; font-family: DejaVu Sans, sans-serif;">
+                    @if($registrasi->range_power == '45 W' || $registrasi->range_power == '45w')
+                        ✔
+                    @endif
+                </span> 45W
             </td>
+
+
         </tr>
         <tr>
             <td class="header-label">JENIS KENDARAAN</td>
             <td class="header-value">{{ $registrasi->jenis_kendaraan }}</td>
             <td class="header-label">RANGE FREKUENSI</td>
             <td>
-                <span class="check"></span>136-162
-                <span class="check" style="margin-left:15px;"></span> 146-174
+                @php
+                    $freqs = is_array($registrasi->range_frekuensi)
+                        ? $registrasi->range_frekuensi
+                        : json_decode($registrasi->range_frekuensi, true);
+                @endphp
+
+                <span class="check-box" style="font-family: DejaVu Sans, sans-serif;">
+                    @if(in_array('136 - 162', $freqs)) ✔ @endif
+                </span> 136 - 162
+
+                <span class="check-box" style="margin-left:15px; font-family: DejaVu Sans, sans-serif;">
+                    @if(in_array('146 - 174', $freqs)) ✔ @endif
+                </span> 146 - 174
             </td>
         </tr>
         <tr>
@@ -109,10 +143,28 @@
             <td class="header-value">{{ $registrasi->nomor_polisi }}</td>
             <td class="header-label">JENIS RADIO</td>
             <td>
-                <span class="check"></span> Mobile
-                <span class="check" style="margin-left:15px;"></span> HT
-                <span class="check" style="margin-left:15px;"></span> Base
+                {{-- Mobile --}}
+                <span class="check-box" style="font-family: DejaVu Sans, sans-serif;">
+                    @if(trim($registrasi->jenis_radio) == 'Mobile')
+                        ✔
+                    @endif
+                </span> Mobile
+
+                {{-- HT --}}
+                <span class="check-box" style="margin-left:15px; font-family: DejaVu Sans, sans-serif;">
+                    @if(trim($registrasi->jenis_radio) == 'HT')
+                        ✔
+                    @endif
+                </span> HT
+
+                {{-- Base --}}
+                <span class="check-box" style="margin-left:15px; font-family: DejaVu Sans, sans-serif;">
+                    @if(trim($registrasi->jenis_radio) == 'Base')
+                        ✔
+                    @endif
+                </span> Base
             </td>
+
         </tr>
     </table>
 
@@ -182,10 +234,10 @@
                 <td></td><td>HILL 11</td>
                 <td></td><td>SIS 7</td>
                  <td style="text-align:center;">
-                    @if(in_array('PPA CCR', $selectedChannels))
+                    @if(in_array('PPA PLANT', $selectedChannels))
                         <span class="checkmark">&#10004;</span>
                     @endif
-                </td><td>PPA CCR</td>
+                </td><td>PPA PLANT</td>
                 <td></td><td>PRO 2</td>
                 <td></td><td>CBML</td>
             </tr>
@@ -194,10 +246,10 @@
                 <td></td><td>ROM</td>
                 <td></td><td>SIS 8</td>
                  <td style="text-align:center;">
-                    @if(in_array('PPA PLANT', $selectedChannels))
+                    @if(in_array('PPA CCR', $selectedChannels))
                         <span class="checkmark">&#10004;</span>
                     @endif
-                </td><td>PPA PLANT</td>
+                </td><td>PPA CCR</td>
                 <td></td><td>BLASTING</td>
                 <td></td><td>BC 1</td>
             </tr>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\DashboardController;
@@ -95,7 +96,6 @@ Route::post('/logout', function () {
 | Dashboard
 |--------------------------------------------------------------------------
 */
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/dashboard/perusahaan', [DashboardController::class, 'perusahaan'])->name('dashboard.perusahaan');
 Route::get('/dashboard/k3', [DashboardController::class, 'k3'])->name('dashboard.k3');
 
@@ -110,3 +110,30 @@ Route::prefix('registrasi')->name('registrasi.')->group(function () {
     Route::post('/', [RegistrasiController::class, 'store'])->name('store');
     Route::get('/{id}/report', [RegistrasiController::class, 'report'])->name('report');
 });
+
+
+Route::get('/', function () {
+    return view('auth.login');
+});
+
+// Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', function () {
+
+    $role = Auth::user()->name;
+
+    if ($role === 'USER') {
+        return redirect()->route('bukutamu.index'); // USER diarahkan ke Buku Tamu
+    }
+
+    // Jika role ICT, tetap gunakan Controller
+    return app(DashboardController::class)->index();
+
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';

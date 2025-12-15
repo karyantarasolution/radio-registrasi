@@ -66,11 +66,12 @@ class InspeksiProyektorController extends Controller
 
     public function edit($id)
     {
-        $inspeksimonitor = InspeksiProyektor::findOrFail($id);
+        $inspeksiproyektor = InspeksiProyektor::findOrFail($id);
         $karyawans = Karyawan::where('jabatan', 'ICT')->get();
         $leaders = Karyawan::where('jabatan', 'Group Leader ICT')->get();
-        return view('inspeksiproyektor.edit', compact('inspeksistavolt', 'karyawans', 'leaders'));
+        return view('inspeksiproyektor.edit', compact('inspeksiproyektor', 'karyawans', 'leaders'));
     }
+
 
     public function update(Request $request, InspeksiProyektor $inspeksiproyektor)
     {

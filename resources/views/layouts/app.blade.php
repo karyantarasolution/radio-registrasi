@@ -247,7 +247,14 @@
 
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
-        <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}" >
+        @if(Auth::user()->name=='USER')
+            <a href="{{ route('bukutamu.index') }}"
+            class="{{ request()->routeIs('bukutamu.*') ? 'active' : '' }}">
+            <i class="fas fa-book"></i>
+            <span class="link-text">Buku Tamu</span>
+            </a>
+        @elseif(Auth::user()->name=='ICT')
+            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}" >
             <i class="fas fa-home"></i>
             <span class="link-text">Beranda</span>
         </a>
@@ -265,55 +272,55 @@
 
         <a href="{{ route('bukutamu.index') }}"
             class="{{ request()->routeIs('bukutamu.*') ? 'active' : '' }}">
-                <i class="fas fa-book"></i>
-                <span class="link-text">Buku Tamu</span>
+            <i class="fas fa-book"></i>
+            <span class="link-text">Buku Tamu</span>
         </a>
 
-      <!-- Inspeksi (dropdown) -->
-<div class="nav-item dropdown">
-  <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#submenu-inspeksi">
-      <i class="fas fa-tools"></i>
-      <span class="link-text">Inspeksi</span>
-  </a>
-  
-  <div id="submenu-inspeksi" 
-       class="collapse {{ request()->is('inspeksiups*') || request()->is('inspeksistavolt*') || request()->is('inspeksimonitor*') || request()->is('inspeksiproyektor*') ? 'show' : '' }}">
-      <ul class="submenu list-unstyled ps-3">
-          <li>
-              <a href="{{ route('inspeksiups.index') }}" 
-                 class="{{ request()->routeIs('inspeksiups.*') ? 'active' : '' }}">
-                 <i class="fas fa-battery-full"></i> UPS
-              </a>
-          </li>
-          <li>
-              <a href="{{ route('inspeksistavolt.index') }}" 
-                 class="{{ request()->routeIs('inspeksistavolt.*') ? 'active' : '' }}">
-                 <i class="fas fa-bolt"></i> Stavolt
-              </a>
-          </li>
-          <li>
-              <a href="{{ route('inspeksimonitor.index') }}" 
-                 class="{{ request()->routeIs('inspeksimonitor.*') ? 'active' : '' }}">
-                 <i class="fas fa-tv"></i> Monitor / TV
-              </a>
-          </li>
-          <li>
-              <a href="{{ route('inspeksiproyektor.index') }}" 
-                 class="{{ request()->routeIs('inspeksiproyektor.*') ? 'active' : '' }}">
-                 <i class="fas fa-video"></i> Proyektor
-              </a>
-          </li>
-          
-      </ul>
-  </div>
-</div>
-
-        
+        <!-- Inspeksi (Static parent + static children) -->
+        <a 
+            class="">
+            <i class="fas fa-tools"></i>
+            <span class="link-text">Inspeksi</span>
+        </a>
+        <div class="link-text">
+            <!-- Permanent child menu (always visible) -->
+            <ul class="ps-10 mt-1 space-y-1">
+                <li>
+                    <a href="{{ route('inspeksiups.index') }}"
+                    class="flex items-center gap-2 py-1 px-2 rounded 
+                    {{ request()->routeIs('inspeksiups.*') ? 'bg-blue-500 text-white' : 'hover:bg-gray-200' }}">
+                        <i class="fas fa-battery-full text-sm"></i> UPS
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('inspeksistavolt.index') }}"
+                    class="flex items-center gap-2 py-1 px-2 rounded 
+                    {{ request()->routeIs('inspeksistavolt.*') ? 'bg-blue-500 text-white' : 'hover:bg-gray-200' }}">
+                        <i class="fas fa-bolt text-sm"></i> Stavolt
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('inspeksimonitor.index') }}"
+                    class="flex items-center gap-2 py-1 px-2 rounded 
+                    {{ request()->routeIs('inspeksimonitor.*') ? 'bg-blue-500 text-white' : 'hover:bg-gray-200' }}">
+                        <i class="fas fa-tv text-sm"></i> Monitor / TV
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('inspeksiproyektor.index') }}"
+                    class="flex items-center gap-2 py-1 px-2 rounded 
+                    {{ request()->routeIs('inspeksiproyektor.*') ? 'bg-blue-500 text-white' : 'hover:bg-gray-200' }}">
+                        <i class="fas fa-video text-sm"></i> Proyektor
+                    </a>
+                </li>
+            </ul>
+        </div>
         <a href="{{ route('karyawan.index') }}" 
             class="{{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
                 <i class="fas fa-users"></i>
                 <span class="link-text">Data Karyawan</span>
         </a>
+        @endif
     </div>
 
 

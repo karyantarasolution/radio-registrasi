@@ -468,6 +468,71 @@
                     @endforeach
                 </div>
 
+                <hr class="my-4">
+
+                    {{-- Jenis Radio --}}
+                    <div class="form-group">
+                        <label class="form-label">Jenis Radio</label><br>
+                        @php
+                            $jenisRadios = ['Mobile', 'HT', 'Base'];
+                        @endphp
+
+                        @foreach($jenisRadios as $jenis)
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input"
+                                    type="radio"
+                                    name="jenis_radio"
+                                    value="{{ $jenis }}"
+                                    id="jenis_{{ Str::slug($jenis) }}"
+                                    @checked(old('jenis_radio') == $jenis)>
+                                <label class="form-check-label" for="jenis_{{ Str::slug($jenis) }}">{{ $jenis }}</label>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    {{-- Range Frekuensi --}}
+                    <div class="form-group">
+                        <label class="form-label">Range Frekuensi (MHz)</label><br>
+                        @php
+                            $frekuensi = [
+                                '136 - 162',
+                                '146 - 174',
+                            ];
+                        @endphp
+
+                        @foreach($frekuensi as $freq)
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input"
+                                    type="checkbox"
+                                    name="range_frekuensi[]"
+                                    value="{{ $freq }}"
+                                    id="freq_{{ Str::slug($freq) }}"
+                                    @if( old('range_frekuensi') && in_array($freq, old('range_frekuensi')) ) checked @endif>
+                                <label class="form-check-label" for="freq_{{ Str::slug($freq) }}">{{ $freq }}</label>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    {{-- Power Radio --}}
+                    <div class="form-group">
+                        <label class="form-label">Range Power  (Watt)</label><br>
+
+                        @php
+                            $powers = [ '25 W', '45 W'];
+                        @endphp
+
+                        @foreach($powers as $p)
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input"
+                                    type="radio"
+                                    name="range_power"
+                                    value="{{ $p }}"
+                                    id="power_{{ Str::slug($p) }}"
+                                    @checked(old('range_power') == $p)>
+                                <label class="form-check-label" for="power_{{ Str::slug($p) }}">{{ $p }}</label>
+                            </div>
+                        @endforeach
+                    </div>
 
                 <div class="button-group">
                     <a href="{{ route('registrasi.index') }}" class="btn btn-secondary">
