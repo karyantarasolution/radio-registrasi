@@ -7,7 +7,6 @@
     body { font-family: DejaVu Sans, sans-serif; font-size:12px; }
     table { width:100%; border-collapse: collapse; }
     .bordered td, .bordered th { border:1px solid #000; padding:6px; }
-    .header-table td { vertical-align:top; }
     .section-title {
         background:#bfbfbf;
         font-weight:bold;
@@ -16,13 +15,9 @@
     }
     .sign-box {
         height:60px;
-        border:1px solid #000;
         margin-bottom:4px;
     }
-    h3 {
-        margin:0;
-        padding:0;
-    }
+    h3 { margin:0; padding:0; }
 </style>
 </head>
 <body>
@@ -31,14 +26,14 @@
 <table style="width:100%; margin-bottom:8px;">
     <tr>
         <td style="width:15%; text-align:center;">
-            <img src="{{ public_path('images/LogoPPA.png') }}" alt="logo" style="max-width:80px;">
+            <img src="{{ public_path('images/LogoPPA.png') }}" style="max-width:80px;">
         </td>
         <td style="width:55%; text-align:center;">
             <h3>INSPEKSI BATERAI UPS</h3>
             <div>ICT (Information Communication & Technology)</div>
         </td>
         <td style="width:35%;">
-            <table style="width:100%; border-collapse:collapse;">
+            <table style="width:100%;">
                 <tr><td>No. Dokumen</td><td>: PPA-ADRO-F-COE-49</td></tr>
                 <tr><td>Revisi</td><td>: 0</td></tr>
                 <tr><td>Tgl Efektif</td><td>: {{ now()->format('d-M-Y') }}</td></tr>
@@ -52,7 +47,7 @@
 <table class="bordered" style="margin-bottom:10px;">
     <tr><th colspan="4" class="section-title">IDENTITAS PERANGKAT</th></tr>
     <tr>
-        <td>Nomor Aset UPS</td><td>{{ $inspeksiup->nomor_aset }}</td>
+        <td>Nomor Aset</td><td>{{ $inspeksiup->nomor_aset }}</td>
         <td>Departemen</td><td>{{ $inspeksiup->departemen }}</td>
     </tr>
     <tr>
@@ -61,11 +56,12 @@
     </tr>
     <tr>
         <td>Type</td><td>{{ $inspeksiup->type }}</td>
-        <td>Tanggal Inspeksi</td><td>{{ optional($inspeksiup->tanggal_inspeksi)->format('d-M-Y') }}</td>
+        <td>Tanggal Inspeksi</td>
+        <td>{{ optional($inspeksiup->tanggal_inspeksi)->format('d-M-Y') }}</td>
     </tr>
     <tr>
-        <td>S/N</td><td> {{ $inspeksiup->sn }}</td>
-         <td></td><td></td>
+        <td>Serial Number</td><td>{{ $inspeksiup->sn }}</td>
+        <td></td><td></td>
     </tr>
 </table>
 
@@ -80,8 +76,10 @@
     </tr>
 
     @php
+        use App\Models\Karyawan;
+
         $checks = [
-            ['label'=>'Kondisi Casing UPS','key'=>'casing'],
+            ['label'=>'Kondisi casing UPS','key'=>'casing'],
             ['label'=>'Kebersihan UPS','key'=>'kebersihan'],
             ['label'=>'Kondisi kabel adaptor','key'=>'kabel_adaptor'],
             ['label'=>'Kondisi tombol dan switch','key'=>'tombol_switch'],
@@ -90,6 +88,9 @@
             ['label'=>'Respon terhadap kehilangan daya','key'=>'respon_kehilangan_daya'],
             ['label'=>'Fuse (sekering)','key'=>'fuse'],
         ];
+
+        $inspektorData = Karyawan::where('nama', $inspeksiup->inspektor)->first();
+        $diketahuiData = Karyawan::where('nama', $inspeksiup->diketahui_oleh)->first();
     @endphp
 
     @foreach($checks as $c)
@@ -104,21 +105,37 @@
 
 <div style="margin-top:10px;">
     <strong>KETERANGAN:</strong>
-    <div style="min-height:70px; border:1px solid #000; padding:6px;">{{ $inspeksiup->keterangan }}</div>
+    <div style="min-height:70px; border:1px solid #000; padding:6px;">
+        {{ $inspeksiup->keterangan }}
+    </div>
 </div>
 
 {{-- TANDA TANGAN --}}
-<table style="width:100%; margin-top:20px; text-align:center;">
+<table style="width:100%; margin-top:20px;">
     <tr>
-        <td style="width:50%;">
-            <div class="sign-box"></div>
-            <strong>Inspektor (ICT)</strong><br>
+        <td style="width:50%; text-align:center;">
+            <strong>Inspektor (ICT)</strong><br><br>
+            <div class="sign-box">
+                @if($inspektorData && $inspektorData->qr_code)
+                    <img src="{{ public_path('storage/qr_codes/'.$inspektorData->qr_code) }}"
+                         style="width:70px;">
+                @endif
+            </div>
+            <br>
             Nama : {{ $inspeksiup->inspektor }}<br>
             Jabatan : {{ $inspeksiup->jabatan_inspektor }}
+            </br>
         </td>
-        <td style="width:50%;">
-            <div class="sign-box"></div>
-            <strong>Diketahui Oleh</strong><br>
+
+        <td style="width:50%; text-align:center;">
+            <strong>Diketahui Oleh</strong><br><br>
+            <div class="sign-box">
+                @if($diketahuiData && $diketahuiData->qr_code)
+                    <img src="{{ public_path('storage/qr_codes/'.$diketahuiData->qr_code) }}"
+                         style="width:80px;">
+                @endif
+            </div>
+             <br><br>
             Nama : {{ $inspeksiup->diketahui_oleh }}<br>
             Jabatan : Group Leader ICT
         </td>
@@ -127,4 +144,3 @@
 
 </body>
 </html>
-        

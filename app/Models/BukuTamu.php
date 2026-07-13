@@ -20,7 +20,13 @@ class BukuTamu extends Model
         'no_telp',
         'instansi',
         'keperluan',
+        'pic_id',
     ];
+
+    public function pic()
+    {
+        return $this->belongsTo(Pic::class);
+    }
 
     /**
      * Override supaya route model binding pakai kolom "no"

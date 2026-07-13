@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    
+
     <title>Laporan Inventaris</title>
     <style>
         body { font-family: Arial, sans-serif; font-size: 12px; }
@@ -21,7 +21,7 @@
     <table>
         <thead>
              <tr>
-                <th class="judul" colspan="8">LAPORAN DATA INVENTARIS</th>
+                <th class="judul" colspan="9">LAPORAN DATA INVENTARIS</th>
             </tr>
             <tr>
                 <th>No</th>
@@ -29,7 +29,8 @@
                 <th>NRP</th>
                 <th>Nama Perangkat</th>
                 <th>No Asset</th>
-                <th>Status</th>
+                <th>Status Peminjaman</th>
+                <th>Status Verifikasi</th>
                 <th>Tanggal Pinjam</th>
                 <th>Tanggal Kembali</th>
             </tr>
@@ -43,6 +44,7 @@
                 <td>{{ $item->nama_perangkat }}</td>
                 <td>{{ $item->no_asset }}</td>
                 <td>{{ $item->status_peminjaman }}</td>
+                <td>{{ $item->status_verifikasi ?? 'Pending' }}</td>
                 <td>{{ $item->tanggal_peminjaman }}</td>
                 <td>{{ $item->tanggal_pengembalian ?? '-' }}</td>
             </tr>

@@ -10,7 +10,18 @@ class BukuTamuExport implements FromCollection, WithHeadings
 {
     public function collection()
     {
-        return BukuTamu::select('no', 'nama', 'nrp', 'instansi', 'keperluan', 'created_at')->get();
+        return BukuTamu::with('pic')->orderBy('no', 'desc')->get()->map(function ($tamu) {
+            return [
+                'no' => $tamu->no,
+                'nama' => $tamu->nama,
+                'nrp' => $tamu->nrp,
+                'instansi' => $tamu->instansi,
+                'keperluan' => $tamu->keperluan,
+                'pic' => $tamu->pic->nama ?? '-',
+                'departemen_pic' => $tamu->pic->departemen ?? '-',
+                'created_at' => $tamu->created_at,
+            ];
+        });
     }
 
     public function headings(): array
@@ -21,7 +32,9 @@ class BukuTamuExport implements FromCollection, WithHeadings
             'NRP',
             'Instansi',
             'Keperluan',
-            'Tanggal Registrasi'
+            'PIC',
+            'Departemen PIC',
+            'Tanggal Registrasi',
         ];
     }
 }

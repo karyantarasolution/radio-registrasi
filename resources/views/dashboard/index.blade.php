@@ -4,481 +4,367 @@
 <div class="container-fluid mt-4">
 
     <style>
-        .text-justify {
-            text-align: justify;
+        .dashboard-header {
+            background: linear-gradient(135deg, #ea6666 0%, #f71414 100%);
+            border-radius: 20px;
+            color: white;
+            padding: 1.75rem 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
         }
-
-        /* Enhanced Card Styling */
+        .module-card {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            border-radius: 15px;
+            border: none;
+            padding: 1.25rem;
+            height: 100%;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .module-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+            color: inherit;
+        }
+        .module-card .count {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+        .module-card .label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            opacity: 0.95;
+        }
+        .module-card .sub {
+            font-size: 0.75rem;
+            opacity: 0.85;
+            margin-top: 0.35rem;
+        }
+        .stat-card-1 { background: linear-gradient(135deg, #ea6666 0%, #df4c4c 100%); color: white; }
+        .stat-card-2 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .stat-card-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+        .stat-card-4 { background: linear-gradient(135deg, #43e97b 0%, #11caa8 100%); color: white; }
+        .stat-card-5 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .stat-card-6 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; }
+        .stat-card-7 { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; }
+        .stat-card-8 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
         .enhanced-card {
             border-radius: 15px;
             border: none;
-            transition: all 0.3s ease;
-            background: linear-gradient(135deg, #ffffff 0%, #ffffffff 100%);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
-
-        .enhanced-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
-        }
-
-        /* Gradient Cards for Stats */
-        .stat-card-1 {
-            background: linear-gradient(135deg, #ea6666ff 0%, #df4c4cff 100%);
-            color: white;
-        }
-
-        .stat-card-2 {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-
-        .stat-card-3 {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-
-        .stat-card-4 {
-            background: linear-gradient(135deg, #43e97b 0%, #11caa8ff 100%);
-            color: white;
-        }
-
-        /* Welcome Banner */
-        .welcome-banner {
-            background: linear-gradient(135deg, #f58585ff 0%, #ff0303ff 100%);
-            border-radius: 20px;
-            color: black;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        /* Safety Status Indicator */
-        .safety-indicator {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse 2s infinite;
-        }
-
-        .safety-safe { background-color: #28a745; }
-        .safety-warning { background-color: #ffc107; }
-        .safety-danger { background-color: #dc3545; }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
-        }
-
-        /* Enhanced Table */
         .table-scroll {
-            max-height: 320px;
+            max-height: 280px;
             overflow-y: auto;
-            overflow-x: auto;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-
-        .table-scroll table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 600px;
-            margin-bottom: 0;
-        }
-
         .table-scroll thead th {
             position: sticky;
             top: 0;
             z-index: 2;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            border: none;
-            padding: 15px;
+            background: #f8f9fa;
         }
-
-        .table-scroll tbody tr:hover {
-            background-color: rgba(102, 126, 234, 0.1);
-            transform: scale(1.02);
-            transition: all 0.2s ease;
-        }
-
-        /* Progress Bar */
-        .progress-custom {
-            height: 8px;
+        .progress-inventaris {
+            height: 6px;
             border-radius: 10px;
-            background-color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.35);
+            margin-top: 8px;
             overflow: hidden;
         }
-
-        .progress-bar-custom {
+        .progress-inventaris-bar {
             height: 100%;
+            background: rgba(255,255,255,0.9);
             border-radius: 10px;
-            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
-            transition: width 1s ease-in-out;
         }
-
-  
-        .weather-widget {
-            background: linear-gradient(135deg, #74e3ffff 0%, #0984e3 100%);
+        .chart-card {
+            background: #fff;
             border-radius: 15px;
-            color: white;
             padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
-
-        /* Quick Actions */
-        .quick-action-btn {
-            border-radius: 15px;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-            padding: 1rem;
-            text-decoration: none;
-            display: block;
+        .chart-wrap {
+            position: relative;
+            height: 280px;
+            max-width: 380px;
+            margin: 0 auto;
         }
-
-        .quick-action-btn:hover {
-            transform: translateY(-3px);
-            border-color: #667eea;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        .chart-empty {
+            text-align: center;
+            color: #6c757d;
+            padding: 2.5rem 1rem;
         }
-
-        /* Notification Badge */
-        .notification-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #dc3545;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
+        .chart-legend-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+        .chart-legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
         }
     </style>
 
-    {{-- Welcome Banner --}}
-        <div class="welcome-banner" data-aos="fade-down" data-aos-duration="1000">
+    <div class="dashboard-header" data-aos="fade-down">
         <div class="row align-items-center">
             <div class="col-md-8 d-flex align-items-center">
-                <!-- Logo -->
-                <img src="{{ asset('images/LogoPPA.png') }}" 
-                    alt="Logo PPA" 
-                    style="height: 100px; margin-right: 15px;">
-                
-                <!-- Teks -->
+                <img src="{{ asset('images/LogoPPA.png') }}" alt="Logo PPA" style="height: 70px; margin-right: 15px;">
                 <div>
-                    <h2 class="fw-bold mb-2">PT. Putra Perkasa Abadi</h2>
-                    <p class="mb-0">Dashboard Keselamatan & Kesehatan Kerja - Monitoring Real-time</p>
-                    <small class="opacity-75">Terakhir diperbarui: {{ date('d F Y, H:i') }} WITA</small>
+                    <h2 class="fw-bold mb-1">Dashboard ICT</h2>
+                    <p class="mb-0 opacity-90">Ringkasan data seluruh modul sistem</p>
+                    <small class="opacity-75">Diperbarui: {{ date('d F Y, H:i') }} WITA</small>
                 </div>
-            </div>
-            <div class="col-md-4 text-end">
-                <div class="safety-indicator safety-safe"></div>
-                <span class="ms-2">Status: AMAN</span>
             </div>
         </div>
     </div>
 
-
-   {{-- Quick Actions & Weather Row --}}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="weather-widget p-4"
-            data-aos="fade-up"
-            data-aos-duration="1000"
-            style="border-radius: 14px; background: #4da4f1; color:white; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-
-            <h6 class="fw-bold mb-3">🌤️ Cuaca Hari Ini</h6>
-
-            @if(!empty($weatherData) && isset($weatherData['main']))
-
-                <div class="d-flex justify-content-between align-items-center flex-wrap">
-
-                    {{-- Temperatur + Lokasi --}}
-                    <div class="mb-3">
-                        <h2 class="fw-bold mb-0">{{ round($weatherData['main']['temp']) }}°C</h2>
-                        <small>{{ $weatherData['name'] }}</small>
+    {{-- Kartu modul --}}
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3" data-aos="fade-up">
+            <a href="{{ route('registrasi.index') }}" class="module-card stat-card-1">
+                <div class="count">{{ $jumlahRegistrasi }}</div>
+                <div class="label">Registrasi Radio</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="50">
+            <a href="{{ route('inventaris.index') }}" class="module-card stat-card-2">
+                <div class="count">{{ $jumlahInventaris }}</div>
+                <div class="label">Inventaris IT</div>
+                <div class="sub">{{ $inventarisDikembalikan }} dikembalikan · {{ $inventarisBelum }} belum</div>
+                @if($jumlahInventaris > 0)
+                    @php $pct = round(($inventarisDikembalikan / $jumlahInventaris) * 100); @endphp
+                    <div class="progress-inventaris">
+                        <div class="progress-inventaris-bar" style="width: {{ $pct }}%;"></div>
                     </div>
-
-                    {{-- Icon + Deskripsi --}}
-                    <div class="text-end mb-3">
-                        @php
-                            $icon = $weatherData['weather'][0]['icon'];
-                        @endphp
-
-                        <img src="http://openweathermap.org/img/wn/{{ $icon }}@2x.png"
-                             alt="Cuaca Icon"
-                             class="img-fluid mb-1"
-                             style="width: 80px;">
-                        <div>
-                            <small>{{ ucfirst($weatherData['weather'][0]['description']) }}</small>
-                        </div>
-                    </div>
-
-                </div>
-
-                <hr class="my-3 opacity-50">
-
-                {{-- Detail Cuaca --}}
-                <div class="row text-center">
-                    <div class="col-md-4 col-4">
-                        <small>Kelembaban</small><br>
-                        <strong>{{ $weatherData['main']['humidity'] }}%</strong>
-                    </div>
-
-                    <div class="col-md-4 col-4">
-                        <small>Angin</small><br>
-                        <strong>{{ $weatherData['wind']['speed'] }} km/h</strong>
-                    </div>
-
-                    <div class="col-md-4 col-4">
-                        <small>Tekanan</small><br>
-                        <strong>{{ $weatherData['main']['pressure'] }} hPa</strong>
-                    </div>
-                </div>
-
-            @else
-                <p class="text-white">Data cuaca tidak tersedia.</p>
-            @endif
-
+                    <div class="sub">{{ $pct }}% dikembalikan</div>
+                @endif
+            </a>
+        </div>
+        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="100">
+            <a href="{{ route('bukutamu.index') }}" class="module-card stat-card-3">
+                <div class="count">{{ $jumlahBukuTamu }}</div>
+                <div class="label">Buku Tamu</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="150">
+            <a href="{{ route('karyawan.index') }}" class="module-card stat-card-4">
+                <div class="count">{{ $jumlahKaryawan }}</div>
+                <div class="label">Karyawan IT</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="200">
+            <a href="{{ route('inspeksiups.index') }}" class="module-card stat-card-5">
+                <div class="count">{{ $jumlahInspeksiUps }}</div>
+                <div class="label">Inspeksi UPS</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="250">
+            <a href="{{ route('inspeksistavolt.index') }}" class="module-card stat-card-6">
+                <div class="count">{{ $jumlahInspeksiStavolt }}</div>
+                <div class="label">Inspeksi Stavolt</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="300">
+            <a href="{{ route('inspeksimonitor.index') }}" class="module-card stat-card-7">
+                <div class="count">{{ $jumlahInspeksiMonitor }}</div>
+                <div class="label">Inspeksi Monitor / TV</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="350">
+            <a href="{{ route('inspeksiproyektor.index') }}" class="module-card stat-card-8">
+                <div class="count">{{ $jumlahInspeksiProyektor }}</div>
+                <div class="label">Inspeksi Proyektor</div>
+            </a>
         </div>
     </div>
-</div>
 
+    {{-- Diagram status peminjaman inventaris --}}
+    <div class="row g-3 mb-4">
+        <div class="col-lg-5" data-aos="fade-up">
+            <div class="chart-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Diagram Status Peminjaman</h5>
+                    <a href="{{ route('inventaris.index') }}" class="btn btn-sm btn-outline-danger">Kelola inventaris</a>
+                </div>
+                <p class="text-muted small mb-3">Perbandingan status peminjaman perangkat IT</p>
+                @if($chartStats['total'] > 0)
+                    <div class="chart-wrap">
+                        <canvas id="inventarisChart"></canvas>
+                    </div>
+                @else
+                    <div class="chart-empty">Belum ada data inventaris untuk ditampilkan.</div>
+                @endif
+            </div>
+        </div>
+        <div class="col-lg-7" data-aos="fade-up" data-aos-delay="100">
+            <div class="chart-card h-100">
+                <h5 class="fw-bold mb-3">Ringkasan Inventaris</h5>
+                <div class="row g-3">
+                    <div class="col-3 text-center">
+                        <div class="fs-2 fw-bold text-primary">{{ $chartStats['total'] }}</div>
+                        <small class="text-muted">Total</small>
+                    </div>
+                    <div class="col-3 text-center">
+                        <div class="fs-2 fw-bold text-warning">{{ $chartStats['pending'] }}</div>
+                        <small class="text-muted">Pending</small>
+                    </div>
+                    <div class="col-3 text-center">
+                        <div class="fs-2 fw-bold text-success">{{ $chartStats['dikembalikan'] }}</div>
+                        <small class="text-muted">Dikembalikan</small>
+                    </div>
+                    <div class="col-3 text-center">
+                        <div class="fs-2 fw-bold text-danger">{{ $chartStats['belum'] }}</div>
+                        <small class="text-muted">Belum dikembalikan</small>
+                    </div>
+                </div>
+                @if($chartStats['total'] > 0)
+                    <hr>
+                    <div class="chart-legend-item">
+                        <span class="chart-legend-dot" style="background:#ffc107;"></span>
+                        <span>Pending — {{ $chartStats['pending'] }} unit ({{ round($chartStats['pending'] / $chartStats['total'] * 100) }}%)</span>
+                    </div>
+                    <div class="chart-legend-item">
+                        <span class="chart-legend-dot" style="background:#28a745;"></span>
+                        <span>Sudah Dikembalikan — {{ $chartStats['dikembalikan'] }} unit ({{ round($chartStats['dikembalikan'] / $chartStats['total'] * 100) }}%)</span>
+                    </div>
+                    <div class="chart-legend-item">
+                        <span class="chart-legend-dot" style="background:#dc3545;"></span>
+                        <span>Belum Dikembalikan — {{ $chartStats['belum'] }} unit ({{ round($chartStats['belum'] / $chartStats['total'] * 100) }}%)</span>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
 
-
-
-    {{-- Safety Tips & Announcements --}}
-    <div class="row mb-4">
-        <div class="col-lg-6 mb-3">
-            <div class="card enhanced-card" data-aos="fade-up" data-aos-duration="1000">
+    {{-- Tabel terbaru --}}
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6" data-aos="fade-up">
+            <div class="card enhanced-card">
                 <div class="card-body">
-                    <h5 class="fw-bold mb-3">💡 Safety Tip of the Day</h5>
-                    <div class="alert alert-info border-0 rounded-3" style="background: linear-gradient(135deg, #a8edea 0%, #80fde2ff 100%);">
-                        <div class="d-flex align-items-center">
-                            <div class="fs-1 me-3">🦺</div>
-                            <div>
-                                <strong>Selalu Gunakan APD Lengkap!</strong><br>
-                                <small>Helm, sarung tangan, sepatu safety, dan kacamata pelindung wajib digunakan di area kerja.</small>
-                            </div>
-                        </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Registrasi Terbaru</h5>
+                        <a href="{{ route('registrasi.index') }}" class="btn btn-sm btn-outline-danger">Lihat semua</a>
+                    </div>
+                    <div class="table-scroll">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Perusahaan</th>
+                                    <th>No Lambung</th>
+                                    <th>Tanggal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($latestRegistrasi as $item)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $item->perusahaan }}</td>
+                                    <td>{{ $item->nomor_lambung }}</td>
+                                    <td><small>{{ $item->created_at->format('d/m/Y') }}</small></td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-3">Belum ada data</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-6 mb-3">
-            <div class="card enhanced-card" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+        <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="card enhanced-card">
                 <div class="card-body">
-                    <h5 class="fw-bold mb-3">📢 Pengumuman Terbaru</h5>
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item border-0 px-0">
-                            <div class="d-flex justify-content-between">
-                                <strong class="text-primary">Pelatihan K3 Wajib</strong>
-                                <small class="text-muted">2 jam lalu</small>
-                            </div>
-                            <small>Pelatihan untuk semua karyawan baru dimulai Senin depan.</small>
-                        </div>
-                        <div class="list-group-item border-0 px-0">
-                            <div class="d-flex justify-content-between">
-                                <strong class="text-success">Safety Award</strong>
-                                <small class="text-muted">1 hari lalu</small>
-                            </div>
-                            <small>Selamat kepada Tim Site ADW atas pencapaian 100 hari tanpa kecelakaan!</small>
-                        </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Buku Tamu Terbaru</h5>
+                        <a href="{{ route('bukutamu.index') }}" class="btn btn-sm btn-outline-danger">Lihat semua</a>
+                    </div>
+                    <div class="table-scroll">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama</th>
+                                    <th>Instansi</th>
+                                    <th>PIC</th>
+                                    <th>Keperluan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($latestBukuTamu as $item)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $item->nama }}</td>
+                                    <td>{{ $item->instansi }}</td>
+                                    <td><small>{{ $item->pic->nama ?? '-' }}</small></td>
+                                    <td><small>{{ Str::limit($item->keperluan, 40) }}</small></td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-3">Belum ada data</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Company Profile --}}
-    <div class="card enhanced-card mb-5" data-aos="fade-right" data-aos-duration="1200">
-        <div class="card-body">
-            <h4 class="fw-bold mb-4">🏢 Profil Perusahaan</h4>
-            <div class="row">
-                <div class="col-lg-8">
-                    <p class="text-justify">
-                        <strong>PT. Putra Perkasa Abadi</strong> adalah sebagai perusahaan rental alat berat. 
-                        Dengan pemahaman yang mendalam mengenai industri pertambangan serta asimiliasi budaya kerja yang baik dengan para customernya,
-                        PPA kemudian menjadi perusahaan jasa kontraktor pertambangan pada tahun 2005 hingga detik ini. 
-                        Pada tahun 2024 ini, PPA dipercaya untuk mengerjakan 11 Jobsite di Kalimantan, Sulawesi, dan Sumatera.
-                    </p>
-                </div>
-                <div class="col-lg-4">
-                    <div class="bg-light rounded-3 p-3">
-                        <h6 class="fw-bold">📊 Statistik Perusahaan</h6>
-                        <ul class="list-unstyled mb-0">
-                            <li>👥 <strong>12.000+</strong> Karyawan</li>
-                            <li>🚛 <strong>2.000+</strong> Unit Alat Berat</li>
-                            <li>🏗️ <strong>11</strong> Jobsite Aktif</li>
-                            <li>🥉 <strong>Peringkat 3</strong> Kontraktor Tambang Indonesia</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="border rounded-3 p-3 bg-light">
-                        <h6 class="fw-bold text-primary">ℹ️   Informasi Perusahaan</h6>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item bg-transparent px-0"><b>Berdiri:</b> 2003</li>
-                            <li class="list-group-item bg-transparent px-0"><b>Alamat:</b> RF69+WQ5, Maburai, Kec. Murung Pudak, Kabupaten Tabalong, Kalimantan Selatan 71571</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="border rounded-3 p-3 bg-light">
-                        <h6 class="fw-bold text-success">🎯 Visi & Misi</h6>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item bg-transparent px-0"><b>Visi:</b> Menjadi perusahaan jasa pertambangan terdepan di Indonesia</li>
-                            <li class="list-group-item bg-transparent px-0"><b>Misi:</b> Memberikan pelayanan terbaik, mengutamakan keselamatan, serta menjaga kelestarian lingkungan</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- K3 Guidelines --}}
-    <div class="card enhanced-card mb-5" data-aos="fade-left" data-aos-duration="1200">
-        <div class="card-body">
-            <h4 class="fw-bold mb-4">⚠️ Keselamatan & Kesehatan Kerja (K3)</h4>
-            <div class="row">
-                <div class="col-lg-8">
-                    <p>
-                        Kami berkomitmen untuk menjaga keselamatan karyawan, mitra kerja, serta lingkungan kerja.
-                        Berikut adalah pedoman K3 yang wajib ditaati:
-                    </p>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <ul class="list-group">
-                                <li class="list-group-item border-0 px-0">✅ Gunakan Alat Pelindung Diri (APD) setiap saat.</li>
-                                <li class="list-group-item border-0 px-0">✅ Ikuti prosedur kerja standar (SOP).</li>
-                                <li class="list-group-item border-0 px-0">✅ Periksa peralatan secara rutin.</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <ul class="list-group">
-                                <li class="list-group-item border-0 px-0">✅ Laporkan kondisi berbahaya atau kecelakaan segera.</li>
-                                <li class="list-group-item border-0 px-0">✅ Utamakan budaya <i>Safety First</i>.</li>
-                                <li class="list-group-item border-0 px-0">🎯 <b>Tujuan:</b> Zero Accident & kesehatan seluruh pekerja.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="text-center">
-                        <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
-                            <div>
-                                <div class="fs-1">🛡️</div>
-                                <div class="fw-bold">SAFETY</div>
-                                <div class="small">FIRST</div>
-                            </div>
-                        </div>
-                        <div class="mt-3">
-                            <h6 class="text-success fw-bold">Status Keselamatan</h6>
-                            <span class="badge bg-success fs-6">AMAN</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Latest Registration Data --}}
-    <div class="card enhanced-card mb-5" data-aos="fade-up" data-aos-duration="1000">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold mb-0">📋 Data Registrasi Terbaru</h5>
-                <div>
-                    <span class="badge bg-primary me-2">Live Data</span>
-                    <button class="btn btn-sm btn-outline-primary" onclick="refreshTable()">
-                        🔄 Refresh
-                    </button>
-                </div>
-            </div>
-
-            <div class="table-scroll">
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th class="fw-bold">No</th>
-                            <th class="fw-bold">Perusahaan</th>
-                            <th class="fw-bold">No Lambung</th>
-                            <th class="fw-bold">ID PTT</th>
-                            <th class="fw-bold">Tanggal</th>
-                            <th class="fw-bold">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($latestRegistrasi as $index => $item)
-                            <tr>
-                                <td><span class="badge bg-secondary">{{ $index + 1 }}</span></td>
-                                <td class="fw-bold">{{ $item->perusahaan }}</td>
-                                <td>
-                                    <span class="badge bg-info">{{ $item->nomor_lambung }}</span>
-                                </td>
-                                <td>{{ $item->id_ptt }}</td>
-                                <td>
-                                    <small class="text-muted">{{ $item->created_at->format('d/m/Y') }}</small><br>
-                                    <small class="text-muted">{{ $item->created_at->format('H:i') }}</small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-success">Aktif</span>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <small class="text-muted">Menampilkan data terbaru - Diperbarui otomatis setiap 30 detik</small>
-                <a href="{{ route('registrasi.index') }}" class="btn btn-primary">
-                    🔎 Lihat Semua Data
-                </a>
             </div>
         </div>
     </div>
 
 </div>
 
+@if($chartStats['total'] > 0)
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+@endif
 <script>
-    // Refresh table function
-    function refreshTable() {
-        // Add loading animation or actual refresh logic here
-        const button = event.target;
-        const originalText = button.innerHTML;
-        button.innerHTML = '⏳ Loading...';
-        button.disabled = true;
-        
-        setTimeout(() => {
-            button.innerHTML = originalText;
-            button.disabled = false;
-        }, 1000);
-    }
-
-    // Auto refresh every 30 seconds
-    setInterval(() => {
-        // Add actual refresh logic here
-        console.log('Auto refreshing data...');
-    }, 30000);
-
-    // Initialize AOS animations
     document.addEventListener('DOMContentLoaded', function() {
-        AOS.init({
-            duration: 1000,
-            once: true,
-            offset: 100
-        });
+        if (typeof AOS !== 'undefined') {
+            AOS.init({ duration: 800, once: true, offset: 80 });
+        }
+
+        @if($chartStats['total'] > 0)
+        const stats = @json($chartStats);
+        const ctx = document.getElementById('inventarisChart');
+        if (ctx && typeof Chart !== 'undefined') {
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pending', 'Sudah Dikembalikan', 'Belum Dikembalikan'],
+                    datasets: [{
+                        data: [stats.pending, stats.dikembalikan, stats.belum],
+                        backgroundColor: ['#ffc107', '#28a745', '#dc3545'],
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = stats.total || 1;
+                                    const value = context.parsed;
+                                    const pct = Math.round((value / total) * 100);
+                                    return context.label + ': ' + value + ' (' + pct + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        @endif
     });
-
-    
 </script>
-
 @endsection

@@ -119,24 +119,86 @@
     }
 
     .search-container {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.15);
         border-radius: 10px;
         padding: 15px 20px;
         margin: 0 25px 20px 25px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .search-input {
         background: white;
-        border: none;
+        border: 2px solid rgba(255, 255, 255, 0.3);
         border-radius: 10px;
         padding: 10px 15px;
         width: 100%;
         transition: all 0.3s ease;
+        color: #2c3e50;
+        font-weight: 500;
     }
 
     .search-input:focus {
         outline: none;
+        border-color: rgba(255, 255, 255, 0.6);
         box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+    }
+
+    .search-input::placeholder {
+        color: #95a5a6;
+    }
+
+    /* Styling khusus untuk select dropdown */
+    .select-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .select-wrapper::after {
+        content: '▼';
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: #667eea;
+        font-size: 12px;
+        font-weight: bold;
+        z-index: 10;
+        background: white;
+        padding: 0 5px;
+    }
+
+    select.search-input {
+        background: white !important;
+        color: #2c3e50 !important;
+        font-weight: 500;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 45px;
+        position: relative;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    select.search-input:hover {
+        border-color: rgba(102, 126, 234, 0.5);
+    }
+
+    select.search-input:focus {
+        border-color: rgba(102, 126, 234, 0.8);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    select.search-input option {
+        background: white !important;
+        color: #2c3e50 !important;
+        padding: 10px;
+    }
+
+    select.search-input:focus {
+        background-color: white !important;
+        color: #2c3e50 !important;
     }
 
     .table-custom {
@@ -410,12 +472,14 @@
                         <input type="text" class="search-input" placeholder="🔍 Cari berdasarkan perusahaan, nomor lambung, atau ID PTT..." id="searchInput">
                     </div>
                     <div class="col-md-3">
-                        <select class="search-input" id="companyFilter">
-                            <option value="">Semua Perusahaan</option>
-                            @foreach($data->pluck('perusahaan')->unique() as $company)
-                                <option value="{{ $company }}">{{ $company }}</option>
-                            @endforeach
-                        </select>
+                        <div class="select-wrapper">
+                            <select class="search-input" id="companyFilter">
+                                <option value="">Semua Perusahaan</option>
+                                @foreach($data->pluck('perusahaan')->unique() as $company)
+                                    <option value="{{ $company }}">{{ $company }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     <div class="col-md-3">
                        <a href="{{ route('registrasi.export.all') }}"

@@ -52,7 +52,7 @@
     <table>
         <thead>
             <tr>
-                <th class="judul" colspan="7">LAPORAN BUKU TAMU</th>
+                <th class="judul" colspan="9">LAPORAN BUKU TAMU</th>
             </tr>
             <tr>
                 <th>No</th>
@@ -61,6 +61,8 @@
                 <th>NRP</th>
                 <th>Instansi</th>
                 <th>Keperluan</th>
+                <th>PIC</th>
+                <th>Departemen PIC</th>
                 <th>Tanggal Registrasi</th>
             </tr>
         </thead>
@@ -73,6 +75,8 @@
                 <td>{{ $tamu->nrp }}</td>
                 <td>{{ $tamu->instansi }}</td>
                 <td>{{ $tamu->keperluan }}</td>
+                <td>{{ $tamu->pic->nama ?? '-' }}</td>
+                <td>{{ $tamu->pic->departemen ?? '-' }}</td>
                 <td>{{ $tamu->created_at->format('d-m-Y H:i') }}</td>
             </tr>
             @endforeach

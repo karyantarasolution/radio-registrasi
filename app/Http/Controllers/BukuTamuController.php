@@ -3,22 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\BukuTamu;
+use App\Models\Pic;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\BukuTamuExport;
+use App\Services\AdminNotificationService;
+use App\Notifications\KunjunganBukuTamuNotification;
 use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class BukuTamuController extends Controller
 {
+    private function picsGrouped()
+    {
+        return Pic::orderBy('departemen')->orderBy('nama')->get()->groupBy('departemen');
+    }
+
     public function index()
     {
-        $bukutamu = BukuTamu::all();
+        $bukutamu = BukuTamu::with('pic')->orderBy('no', 'desc')->get();
         return view('bukutamu.index', compact('bukutamu'));
     }
 
     public function create()
     {
-        return view('bukutamu.create');
+        $picsGrouped = $this->picsGrouped();
+        return view('bukutamu.create', compact('picsGrouped'));
     }
 
     public function store(Request $request)
@@ -29,9 +40,16 @@ class BukuTamuController extends Controller
             'nrp'       => 'required|string|max:50',
             'instansi'  => 'required|string|max:255',
             'keperluan' => 'required|string|max:255',
+            'pic_id'    => 'required|exists:pics,id',
         ]);
 
-        BukuTamu::create($request->only(['nama', 'no_telp', 'nrp', 'instansi', 'keperluan']));
+        $bukutamu = BukuTamu::create($request->only(['nama', 'no_telp', 'nrp', 'instansi', 'keperluan', 'pic_id']));
+        $bukutamu->load('pic');
+
+        if (Auth::user()->name !== 'ICT') {
+            AdminNotificationService::notify(new KunjunganBukuTamuNotification($bukutamu));
+        }
+
         return redirect()->route('bukutamu.index')->with('success', 'Data berhasil ditambahkan.');
     }
 
@@ -43,7 +61,8 @@ class BukuTamuController extends Controller
 
     public function edit(BukuTamu $bukutamu)
     {
-        return view('bukutamu.edit', compact('bukutamu'));
+        $picsGrouped = $this->picsGrouped();
+        return view('bukutamu.form', compact('bukutamu', 'picsGrouped'));
     }
 
     public function update(Request $request, BukuTamu $bukutamu)
@@ -54,9 +73,10 @@ class BukuTamuController extends Controller
             'nrp'       => 'required|string|max:50',
             'instansi'  => 'required|string|max:255',
             'keperluan' => 'required|string|max:255',
+            'pic_id'    => 'required|exists:pics,id',
         ]);
 
-        $bukutamu->update($request->only(['nama', 'no_telp', 'nrp', 'instansi', 'keperluan']));
+        $bukutamu->update($request->only(['nama', 'no_telp', 'nrp', 'instansi', 'keperluan', 'pic_id']));
         return redirect()->route('bukutamu.index')->with('success', 'Data berhasil diupdate.');
     }
 
@@ -73,13 +93,40 @@ class BukuTamuController extends Controller
         return Excel::download(new BukuTamuExport, 'bukutamu.xlsx');
     }
 
-    // Export PDF
+    public function previewReport()
+    {
+        if (Auth::user()->name != 'ICT') {
+            abort(403, 'Tidak punya akses');
+        }
+
+        $bukutamu = BukuTamu::with('pic')->orderBy('no', 'desc')->get();
+
+        return view('bukutamu.preview', compact('bukutamu'));
+    }
+
+    private function buildReportPdf()
+    {
+        $bukutamu = BukuTamu::with('pic')->orderBy('no', 'desc')->get();
+
+        return Pdf::loadView('bukutamu.report', compact('bukutamu'))
+            ->setPaper('A4', 'portrait');
+    }
+
     public function exportPDF()
     {
-        $bukutamu = BukuTamu::all();
-        $pdf = Pdf::loadView('bukutamu.report', compact('bukutamu'))
-                  ->setPaper('A4', 'portrait'); 
+        if (Auth::user()->name != 'ICT') {
+            abort(403, 'Tidak punya akses');
+        }
 
-        return $pdf->stream('laporan-bukutamu.pdf');
+        return $this->buildReportPdf()->stream('laporan-bukutamu.pdf', ['Attachment' => false]);
+    }
+
+    public function downloadPDF()
+    {
+        if (Auth::user()->name != 'ICT') {
+            abort(403, 'Tidak punya akses');
+        }
+
+        return $this->buildReportPdf()->download('laporan-bukutamu.pdf');
     }
 }

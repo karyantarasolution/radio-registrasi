@@ -139,6 +139,7 @@
         </div>
 
         {{-- ===== Statistik ===== --}}
+        @if(Auth::user()->name == 'ICT')
         <div class="row g-3 mb-3">
             <div class="col-6 col-md-2-4">
                 <div class="stat-card">
@@ -155,6 +156,7 @@
                 </div>
             </div>
         </div>
+        @endif
 
         {{-- ===== Table ===== --}}
         <div class="table-card" data-aos="fade-up">
@@ -173,6 +175,8 @@
                             <th>NRP / NIK</th>
                             <th>Instansi</th>
                             <th>Keperluan</th>
+                            <th>PIC</th>
+                            <th>Departemen PIC</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -185,20 +189,20 @@
                             <td>{{ $tamu->nrp }}</td>
                             <td>{{ $tamu->instansi }}</td>
                             <td>{{ $tamu->keperluan }}</td>
+                            <td>{{ $tamu->pic->nama ?? '-' }}</td>
+                            <td>{{ $tamu->pic->departemen ?? '-' }}</td>
                             <td>
                                 <a href="{{ route('bukutamu.edit', $tamu) }}" class="btn btn-edit btn-modern">Edit</a>
-                                <a href="{{ route('bukutamu.export.pdf') }}" target="_blank" class="btn btn-pdf btn-modern">
-                                    PDF
-                                </a>
                                 <form action="{{ route('bukutamu.destroy', $tamu) }}" method="POST" style="display:inline;">
-                                    @csrf @method('DELETE')
+                                    @csrf
+                                    @method('DELETE')
                                     <button type="submit" class="btn btn-delete btn-modern" onclick="return confirm('Yakin hapus?')">Hapus</button>
                                 </form>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-5">📭 Belum ada tamu</td>
+                            <td colspan="9" class="text-center text-muted py-5">📭 Belum ada tamu</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -207,12 +211,12 @@
 
             <div class="table-actions">
                 <div>
-                    <a href="{{ route('bukutamu.export.excel') }}" class="btn btn-excel btn-modern">
-                        <i class="fas fa-file-excel me-1"></i> Export Excel
-                    </a>
-                    
+                   @if(Auth::user()->name == 'ICT')
+                        <a href="{{ route('bukutamu.report.preview') }}" class="btn btn-pdf btn-modern">
+                            <i class="fas fa-eye me-1"></i> Lihat Laporan
+                        </a>
+                    @endif
                 </div>
-                </button>
             </div>
         </div>
     </div>

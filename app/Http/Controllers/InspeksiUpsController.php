@@ -7,20 +7,44 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\InspeksiUpsExport;
+use App\Models\Karyawan;
 
 class InspeksiUpsController extends Controller
 {
     // 📄 Tampilkan semua data inspeksi
-    public function index()
+    public function index(Request $request)
     {
-        $data = InspeksiUps::latest()->paginate(15);
+        $query = InspeksiUps::query();
+
+        // Filter berdasarkan tanggal
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal_inspeksi', $request->tanggal);
+        }
+
+        // Filter berdasarkan bulan
+        if ($request->filled('bulan')) {
+            $query->whereMonth('tanggal_inspeksi', $request->bulan);
+        }
+
+        // Filter berdasarkan tahun
+        if ($request->filled('tahun')) {
+            $query->whereYear('tanggal_inspeksi', $request->tahun);
+        }
+
+        $data = $query->latest()->paginate(15)->withQueryString();
+
         return view('inspeksiups.index', compact('data'));
     }
 
     // ➕ Form tambah inspeksi baru
+
+
     public function create()
     {
-        return view('inspeksiups.create');
+        $karyawans = Karyawan::where('jabatan', 'ICT', 'H.ICT')->get();
+        $leaders = Karyawan::where('jabatan', 'Group Leader ICT')->get();
+
+        return view('inspeksiups.create', compact('karyawans', 'leaders'));
     }
 
     // 💾 Simpan data baru
@@ -55,6 +79,9 @@ class InspeksiUpsController extends Controller
             'tindakan_fungsi_alarm' => 'nullable|string|max:255',
             'tindakan_respon_kehilangan_daya' => 'nullable|string|max:255',
             'tindakan_fuse' => 'nullable|string|max:255',
+
+            'inspektor' => 'nullable|string|max:255',
+            'diketahui_oleh' => 'nullable|string|max:255',
         ];
 
         $validated = $request->validate($rules);
@@ -70,10 +97,19 @@ class InspeksiUpsController extends Controller
     }
 
     // ✏️ Form edit inspeksi
-    public function edit(InspeksiUps $inspeksiup)
+    public function edit($id)
     {
-        return view('inspeksiups.edit', compact('inspeksiup'));
+        $inspeksiups = InspeksiUps::findOrFail($id);
+        $karyawans = Karyawan::where('jabatan', 'ICT', 'H.ICT')->get();
+        $leaders = Karyawan::where('jabatan', 'Group Leader ICT')->get();
+
+        return view('inspeksiups.edit', compact(
+            'inspeksiups',
+            'karyawans',
+            'leaders'
+        ));
     }
+
 
     // 🔄 Update data inspeksi
     public function update(Request $request, InspeksiUps $inspeksiup)
@@ -105,6 +141,9 @@ class InspeksiUpsController extends Controller
             'tindakan_fungsi_alarm' => 'nullable|string|max:255',
             'tindakan_respon_kehilangan_daya' => 'nullable|string|max:255',
             'tindakan_fuse' => 'nullable|string|max:255',
+
+            'inspektor' => 'nullable|string|max:255',
+            'diketahui_oleh' => 'nullable|string|max:255',
         ];
 
         $validated = $request->validate($rules);

@@ -18,7 +18,11 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'password','name    '];
+        'name',
+        'email',
+        'role',
+        'password',
+    ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -41,5 +45,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function routeNotificationForMail($notification): ?string
+    {
+        return $this->email ?? config('notifications.admin_email');
     }
 }

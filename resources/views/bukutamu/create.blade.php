@@ -152,6 +152,22 @@
                         class="form-control" placeholder="Tuliskan keperluan kunjungan">{{ old('keperluan') }}</textarea>
                 </div>
 
+                <div class="form-group">
+                    <label for="pic_id" class="form-label">PIC yang Ditemui</label>
+                    <select name="pic_id" id="pic_id" class="form-select @error('pic_id') is-invalid @enderror" required>
+                        <option value="">-- Pilih PIC --</option>
+                        @foreach($picsGrouped as $departemen => $pics)
+                            <optgroup label="{{ $departemen }}">
+                                @foreach($pics as $pic)
+                                    <option value="{{ $pic->id }}" @selected(old('pic_id') == $pic->id)>
+                                        {{ $pic->nama }}
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    </select>
+                </div>
+
                 <div class="button-group">
                     <a href="{{ route('bukutamu.index') }}" class="btn btn-secondary">⬅ Kembali</a>
                     <button type="submit" class="btn btn-success" id="submitBtn">Simpan Data</button>

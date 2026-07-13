@@ -104,6 +104,8 @@
     }
     .btn-modern:hover { opacity:.9; }
     .btn-add    { background: linear-gradient(135deg,#43e97b,#38f9d7); color:#fff; }
+    .btn-fltr   { background: linear-gradient(135deg,#43e97b,#38f9d7); color:#fff; }
+    .btn-riset  { background: linear-gradient(135deg,#ff6b6b,#ee5a5a); color:#fff; }
     .btn-excel  { background: linear-gradient(135deg,#43cea2,#185a9d); color:#fff; }
     .btn-pdf    { background: linear-gradient(135deg,#ff6b6b,#ee5a5a); color:#fff; }
     .btn-edit   { background: linear-gradient(135deg,#51cf66,#2ecc71); color:#fff; }
@@ -155,6 +157,66 @@
                 </div>
             </div>
         </div>
+
+{{-- ===== FILTER TANGGAL / BULAN / TAHUN ===== --}}
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold text-danger mb-0">🔍 Filter Data Inspeksi</h6>
+            <small class="text-muted">Sesuaikan pencarian data</small>
+        </div>
+
+        <form method="GET" action="{{ route('inspeksiups.index') }}" class="row g-3 align-items-end">
+
+            {{-- Filter Tanggal --}}
+            <div class="col-md-4">
+                <label class="fw-semibold">📅 Tanggal</label>
+                <input type="date" name="tanggal"
+                       class="form-control rounded-3"
+                       value="{{ request('tanggal') }}">
+            </div>
+
+            {{-- Filter Bulan --}}
+            <div class="col-md-3">
+                <label class="fw-semibold">🗓️ Bulan</label>
+                <select name="bulan" class="form-select rounded-3">
+                    <option value="">Semua Bulan</option>
+                    @for($i=1;$i<=12;$i++)
+                        <option value="{{ $i }}" {{ request('bulan') == $i ? 'selected' : '' }}>
+                            {{ date('F', mktime(0,0,0,$i,1)) }}
+                        </option>
+                    @endfor
+                </select>
+            </div>
+
+            {{-- Filter Tahun --}}
+            <div class="col-md-3">
+                <label class="fw-semibold">📆 Tahun</label>
+                <select name="tahun" class="form-select rounded-3">
+                    <option value="">Semua Tahun</option>
+                    @for($y = date('Y'); $y >= 2020; $y--)
+                        <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>
+                            {{ $y }}
+                        </option>
+                    @endfor
+                </select>
+            </div>
+
+            {{-- Tombol --}}
+            <div class="col-md-2 d-grid gap-2">
+                <button type="submit" class="btn btn-fltr fw-bold rounded-3">
+                    Filter
+                </button>
+                <a href="{{ route('inspeksiups.index') }}" class="btn btn-riset fw-bold rounded-3">
+                    Reset
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
 
         {{-- ===== Table ===== --}}
         <div class="table-card" data-aos="fade-up">

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\KaryawanExport;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class KaryawanController extends Controller
 {
@@ -103,5 +104,23 @@ class KaryawanController extends Controller
     public function exportExcel()
     {
         return Excel::download(new KaryawanExport, 'data_karyawan.xlsx');
+    }
+
+    public function exportPDF()
+    {
+        $karyawans = Karyawan::orderBy('nama')->get();
+        $pdf = Pdf::loadView('karyawan.report_all', compact('karyawans'))
+            ->setPaper('A4', 'portrait');
+
+        return $pdf->stream('laporan-karyawan-it.pdf');
+    }
+
+    public function report($id)
+    {
+        $karyawan = Karyawan::findOrFail($id);
+        $pdf = Pdf::loadView('karyawan.report', compact('karyawan'))
+            ->setPaper('A4', 'portrait');
+
+        return $pdf->stream('karyawan-' . $karyawan->nrp . '.pdf');
     }
 }

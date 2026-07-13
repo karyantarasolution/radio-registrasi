@@ -11,11 +11,30 @@ use App\Models\Karyawan;
 
 class InspeksiStavoltController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $data = InspeksiStavolt::latest()->paginate(15);
+        $query = InspeksiStavolt::query();
+
+        // Filter berdasarkan tanggal
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal_inspeksi', $request->tanggal);
+        }
+
+        // Filter berdasarkan bulan
+        if ($request->filled('bulan')) {
+            $query->whereMonth('tanggal_inspeksi', $request->bulan);
+        }
+
+        // Filter berdasarkan tahun
+        if ($request->filled('tahun')) {
+            $query->whereYear('tanggal_inspeksi', $request->tahun);
+        }
+
+        $data = $query->latest()->paginate(15)->withQueryString();
+
         return view('inspeksistavolt.index', compact('data'));
     }
+
 
     public function create()
     {

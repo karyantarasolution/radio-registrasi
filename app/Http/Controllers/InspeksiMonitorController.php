@@ -11,9 +11,27 @@ use App\Models\Karyawan;
 
 class InspeksiMonitorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $data = InspeksiMonitor::latest()->paginate(15);
+        $query = InspeksiMonitor::query();
+
+        // Filter berdasarkan tanggal
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal_inspeksi', $request->tanggal);
+        }
+
+        // Filter berdasarkan bulan
+        if ($request->filled('bulan')) {
+            $query->whereMonth('tanggal_inspeksi', $request->bulan);
+        }
+
+        // Filter berdasarkan tahun
+        if ($request->filled('tahun')) {
+            $query->whereYear('tanggal_inspeksi', $request->tahun);
+        }
+
+        $data = $query->latest()->paginate(15)->withQueryString();
+
         return view('inspeksimonitor.index', compact('data'));
     }
 

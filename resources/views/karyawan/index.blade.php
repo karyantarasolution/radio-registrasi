@@ -85,6 +85,7 @@
     .btn-modern:hover { opacity: .9; }
     .btn-add    { background: linear-gradient(135deg,#43e97b,#38f9d7); color:#fff; }
     .btn-excel  { background: linear-gradient(135deg,#43cea2,#185a9d); color:#fff; }
+    .btn-pdf    { background: linear-gradient(135deg,#ff6b6b,#ee5a5a); color:#fff; }
     .btn-edit   { background: linear-gradient(135deg,#51cf66,#2ecc71); color:#fff; }
     .btn-delete { background: linear-gradient(135deg,#ffa94d,#ff922b); color:#fff; }
 
@@ -154,6 +155,8 @@
                             </td>
                             <td>
                                 <a href="{{ route('karyawan.edit', $k->id) }}" class="btn btn-edit btn-modern">Edit</a>
+                                <a href="{{ route('karyawan.report', $k->id) }}"
+                                   class="btn btn-pdf btn-modern" target="_blank">PDF</a>
                                 <form action="{{ route('karyawan.destroy', $k->id) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
@@ -171,9 +174,12 @@
             </div>
 
             <div class="table-actions">
-                <div>
+                <div class="d-flex gap-2">
                     <a href="{{ route('karyawan.export') }}" class="btn btn-excel btn-modern">
                         <i class="fas fa-file-excel me-1"></i> Export Excel
+                    </a>
+                    <a href="{{ route('karyawan.export.pdf') }}" class="btn btn-pdf btn-modern" target="_blank">
+                        <i class="fas fa-file-pdf me-1"></i> Export PDF
                     </a>
                 </div>
             </div>

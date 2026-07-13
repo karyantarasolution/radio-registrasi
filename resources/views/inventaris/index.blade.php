@@ -114,12 +114,25 @@
         font-size:0.85rem;
     }
 
-    /* ===== Filter Dropdown ===== */
+    .filter-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+    }
     .filter-form select {
         border-radius: 8px;
         border: none;
         padding: 6px 10px;
         font-size: 0.9rem;
+        font-weight: 600;
+    }
+    .verify-select {
+        border-radius: 6px;
+        border: 1px solid #dee2e6;
+        padding: 4px 8px;
+        font-size: 0.75rem;
+        max-width: 110px;
     }
 </style>
 
@@ -142,26 +155,37 @@
             </div>
         </div>
 
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+
         {{-- ===== Statistik ===== --}}
         <div class="row g-3 mb-3">
             <div class="col-6 col-md-3">
                 <div class="stat-card">
                     <div class="stat-icon">📦</div>
-                    <div class="stat-number">{{ $inventaris->count() }}</div>
+                    <div class="stat-number">{{ $chartStats['total'] }}</div>
                     <div class="stat-label">Total Data</div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="stat-card">
+                    <div class="stat-icon text-warning">⏳</div>
+                    <div class="stat-number">{{ $chartStats['pending'] }}</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
                     <div class="stat-icon text-success">✅</div>
-                    <div class="stat-number">{{ $inventaris->where('status_peminjaman','Dikembalikan')->count() }}</div>
+                    <div class="stat-number">{{ $chartStats['dikembalikan'] }}</div>
                     <div class="stat-label">Sudah Dikembalikan</div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="stat-card">
                     <div class="stat-icon text-danger">🔴</div>
-                    <div class="stat-number">{{ $inventaris->where('status_peminjaman','Belum Dikembalikan')->count() }}</div>
+                    <div class="stat-number">{{ $chartStats['belum'] }}</div>
                     <div class="stat-label">Belum Dikembalikan</div>
                 </div>
             </div>
@@ -171,15 +195,27 @@
         <div class="table-card" data-aos="fade-up">
             <div class="table-header">
                 <div>
-                    <h4 class="table-title">📋 Data Inventaris</h4> <td> <small class="table-subtitle">Total: {{ $inventaris->count() }} data</small>
+                    <h4 class="table-title">📋 Data Inventaris</h4>
+                    <small class="table-subtitle">
+                        Total: {{ $inventaris->count() }} data
+                        @if(Auth::user()->name == 'ICT' && $pendingCount > 0)
+                            · {{ $pendingCount }} menunggu verifikasi
+                        @endif
+                    </small>
                 </div>
 
-                {{-- 🔍 Filter Status --}}
                 <form method="GET" action="{{ route('inventaris.index') }}" class="filter-form">
                     <select name="status" onchange="this.form.submit()">
-                        <option value="">Semua Status</option>
+                        <option value="">Semua Peminjaman</option>
+                        <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
                         <option value="Belum Dikembalikan" {{ request('status') == 'Belum Dikembalikan' ? 'selected' : '' }}>Belum Dikembalikan</option>
                         <option value="Dikembalikan" {{ request('status') == 'Dikembalikan' ? 'selected' : '' }}>Dikembalikan</option>
+                    </select>
+                    <select name="verifikasi" onchange="this.form.submit()">
+                        <option value="">Semua Verifikasi</option>
+                        <option value="Pending" {{ request('verifikasi') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="Disetujui" {{ request('verifikasi') == 'Disetujui' ? 'selected' : '' }}>Disetujui</option>
+                        <option value="Ditolak" {{ request('verifikasi') == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
                     </select>
                 </form>
             </div>
@@ -193,7 +229,8 @@
                             <th>NRP</th>
                             <th>Nama Perangkat</th>
                             <th>No Asset</th>
-                            <th>Status</th>
+                            <th>Status Peminjaman</th>
+                            <th>Status Verifikasi</th>
                             <th>Tanggal Pinjam</th>
                             <th>Tanggal Kembali</th>
                             <th>Aksi</th>
@@ -208,15 +245,68 @@
                             <td>{{ $item->nama_perangkat }}</td>
                             <td>{{ $item->no_asset }}</td>
                             <td>
-                                @if($item->status_peminjaman == 'Dikembalikan')
-                                    <span class="badge-status" style="background:#28a745;">{{ $item->status_peminjaman }}</span>
-                                @else
-                                    <span class="badge-status" style="background:#dc3545;">{{ $item->status_peminjaman }}</span>
-                                @endif
+                                @php
+                                    $pinjamColor = match($item->status_peminjaman) {
+                                        'Dikembalikan' => '#28a745',
+                                        'Belum Dikembalikan' => '#dc3545',
+                                        default => '#ffc107',
+                                    };
+                                    $pinjamText = $item->status_peminjaman === 'Pending' ? '#333' : '#fff';
+                                @endphp
+                                <span class="badge-status" style="background:{{ $pinjamColor }}; color:{{ $pinjamText }};">
+                                    {{ $item->status_peminjaman }}
+                                </span>
+                            </td>
+                            <td>
+                                @php
+                                    $verifColor = match($item->status_verifikasi ?? 'Pending') {
+                                        'Disetujui' => '#28a745',
+                                        'Ditolak' => '#dc3545',
+                                        default => '#ffc107',
+                                    };
+                                    $verifTextColor = ($item->status_verifikasi ?? 'Pending') === 'Pending' ? '#333' : '#fff';
+                                @endphp
+                                <span class="badge-status" style="background:{{ $verifColor }}; color:{{ $verifTextColor }};">
+                                    {{ $item->status_verifikasi ?? 'Pending' }}
+                                </span>
                             </td>
                             <td>{{ $item->tanggal_peminjaman }}</td>
                             <td>{{ $item->tanggal_pengembalian ?? '-' }}</td>
                             <td>
+                                @if(Auth::user()->name == 'ICT')
+                                    <form action="{{ route('inventaris.peminjaman', $item->id) }}" method="POST" style="display:inline-block; margin-bottom:4px;">
+                                        @csrf @method('PATCH')
+                                        @if(request('status'))
+                                            <input type="hidden" name="status" value="{{ request('status') }}">
+                                        @endif
+                                        @if(request('verifikasi'))
+                                            <input type="hidden" name="verifikasi" value="{{ request('verifikasi') }}">
+                                        @endif
+                                        <select name="status_peminjaman" class="verify-select" onchange="this.form.submit()" title="Ubah status peminjaman">
+                                            <option value="Pending" @selected($item->status_peminjaman == 'Pending')>Pending</option>
+                                            @if($item->status_verifikasi === 'Disetujui')
+                                                <option value="Belum Dikembalikan" @selected($item->status_peminjaman == 'Belum Dikembalikan')>Belum Dikembalikan</option>
+                                                <option value="Dikembalikan" @selected($item->status_peminjaman == 'Dikembalikan')>Dikembalikan</option>
+                                            @endif
+                                        </select>
+                                    </form>
+                                    <br>
+                                    <form action="{{ route('inventaris.verifikasi', $item->id) }}" method="POST" style="display:inline-block; margin-bottom:4px;">
+                                        @csrf @method('PATCH')
+                                        @if(request('status'))
+                                            <input type="hidden" name="status" value="{{ request('status') }}">
+                                        @endif
+                                        @if(request('verifikasi'))
+                                            <input type="hidden" name="verifikasi" value="{{ request('verifikasi') }}">
+                                        @endif
+                                        <select name="status_verifikasi" class="verify-select" onchange="this.form.submit()" title="Ubah status verifikasi">
+                                            @foreach(['Pending', 'Disetujui', 'Ditolak'] as $v)
+                                                <option value="{{ $v }}" @selected(($item->status_verifikasi ?? 'Pending') == $v)>{{ $v }}</option>
+                                            @endforeach
+                                        </select>
+                                    </form>
+                                    <br>
+                                @endif
                                 <a href="{{ route('inventaris.edit', $item->id) }}" class="btn btn-edit btn-modern">Edit</a>
                                 <form action="{{ route('inventaris.destroy', $item->id) }}" method="POST" style="display:inline;">
                                     @csrf @method('DELETE')
@@ -226,7 +316,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center text-muted py-5">📭 Belum ada data inventaris</td>
+                            <td colspan="10" class="text-center text-muted py-5">📭 Belum ada data inventaris</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -234,11 +324,14 @@
             </div>
 
             <div class="table-actions">
-                <a href="{{ route('inventaris.report') }}" class="btn btn-pdf btn-modern">
-                    <i class="fas fa-file-pdf me-1"></i> Cetak PDF
-                </a>
+                @if(Auth::user()->name == 'ICT')
+                    <a href="{{ route('inventaris.report') }}" class="btn btn-pdf btn-modern">
+                        <i class="fas fa-file-pdf me-1"></i> Cetak PDF
+                    </a>
+                @endif
             </div>
         </div>
     </div>
 </div>
+
 @endsection
