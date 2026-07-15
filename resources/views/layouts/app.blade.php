@@ -477,7 +477,7 @@
             </div>
 
             <div class="user-info-section">
-                @if(Auth::user()->name == 'ICT')
+                @if(Auth::user()->isAdmin())
                 <div class="dropdown notif-dropdown">
                     <button class="btn btn-notif" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifikasi">
                         <i class="fas fa-bell"></i>
@@ -508,16 +508,18 @@
 
                 <!-- User Info -->
                 <div class="user-info">
-                    <div class="user-avatar {{ Auth::user()->name == 'ICT' ? 'admin' : '' }}">
-                        @if(Auth::user()->name == 'ICT')
+                    <div class="user-avatar {{ Auth::user()->isAdmin() ? 'admin' : '' }}">
+                        @if(Auth::user()->isAdmin())
                             <i class="fas fa-user-shield"></i>
+                        @elseif(Auth::user()->isPimpinan())
+                            <i class="fas fa-user-tie"></i>
                         @else
                             <i class="fas fa-user"></i>
                         @endif
                     </div>
                     <div class="user-details">
                         <span class="user-name">{{ Auth::user()->name }}</span>
-                        <span class="user-role">{{ Auth::user()->name == 'ICT' ? 'Administrator' : 'User' }}</span>
+                        <span class="user-role">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</span>
                     </div>
                 </div>
 
@@ -534,104 +536,105 @@
 
         <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
-            @if(Auth::user()->name=='USER')
-                <a href="{{ route('inventaris.index') }}"
-                class="{{ request()->routeIs('inventaris.*') ? 'active' : '' }}">
-                    <i class="fas fa-solid fa-box"></i>
-                    <span class="link-text">Inventaris </span>
-            </a>
+            @php
+                $role = Auth::user()->role;
+                $isAdmin = Auth::user()->isAdmin();
+                $isPimpinan = Auth::user()->isPimpinan();
+                $isKaryawan = Auth::user()->isKaryawan();
+            @endphp
 
-            <a href="{{ route('gudang-barang.index') }}"
-                class="{{ request()->routeIs('gudang*') ? 'active' : '' }}">
-                <i class="fas fa-warehouse"></i>
-                <span class="link-text">Gudang IT</span>
-            </a>
-
-            <a href="{{ route('bukutamu.index') }}"
-                class="{{ request()->routeIs('bukutamu.*') ? 'active' : '' }}">
-                <i class="fas fa-book"></i>
-                <span class="link-text">Buku Tamu</span>
-            </a>
-
-            @elseif(Auth::user()->name=='ICT')
-                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}" >
-                <i class="fas fa-home"></i>
-                <span class="link-text">Beranda</span>
-            </a>
-
-            <a href="{{ route('registrasi.index') }}" class="{{ request()->routeIs('registrasi.*') ? 'active' : '' }}" >
-                <i class="fas fa-broadcast-tower"></i>
-                <span class="link-text">Radio</span>
-            </a>
-
-            <a href="{{ route('inventaris.index') }}"
-                class="{{ request()->routeIs('inventaris.*') ? 'active' : '' }}">
-                    <i class="fas fa-solid fa-box"></i>
-                    <span class="link-text">Inventaris </span>
-            </a>
-
-            <a href="{{ route('gudang-barang.index') }}"
-                class="{{ request()->routeIs('gudang*') ? 'active' : '' }}">
-                <i class="fas fa-warehouse"></i>
-                <span class="link-text">Gudang IT</span>
-            </a>
-
-            <a href="{{ route('bukutamu.index') }}"
-                class="{{ request()->routeIs('bukutamu.*') ? 'active' : '' }}">
-                <i class="fas fa-book"></i>
-                <span class="link-text">Buku Tamu</span>
-            </a>
-
-            <div class="nav-item">
-                <a href="#"
-                class="dropdown-toggle {{ request()->is('inspeksi*') && !request()->routeIs('inspeksiups.*') && !request()->routeIs('inspeksistavolt.*') && !request()->routeIs('inspeksimonitor.*') && !request()->routeIs('inspeksiproyektor.*') ? 'active' : '' }}"
-                data-bs-toggle="collapse"
-                data-bs-target="#submenu-inspeksi"
-                aria-expanded="{{ request()->is('inspeksi*') ? 'true' : 'false' }}">
-                    <i class="fas fa-tools"></i>
-                    <span class="link-text">Inspeksi</span>
+            @if($isAdmin)
+                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    <i class="fas fa-home"></i>
+                    <span class="link-text">Beranda</span>
                 </a>
 
-                <div id="submenu-inspeksi"
-                    class="collapse {{ request()->is('inspeksi*') ? 'show' : '' }}">
-                    <ul class="list-unstyled submenu">
-                        <li>
-                            <a href="{{ route('inspeksiups.index') }}"
-                            class="{{ request()->routeIs('inspeksiups.*') ? 'active' : '' }}">
-                                <i class="fas fa-battery-full"></i>
-                                <span class="submenu-text">UPS</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('inspeksistavolt.index') }}"
-                            class="{{ request()->routeIs('inspeksistavolt.*') ? 'active' : '' }}">
-                                <i class="fas fa-bolt"></i>
-                                <span class="submenu-text">Stavolt</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('inspeksimonitor.index') }}"
-                            class="{{ request()->routeIs('inspeksimonitor.*') ? 'active' : '' }}">
-                                <i class="fas fa-tv"></i>
-                                <span class="submenu-text">Monitor / TV</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('inspeksiproyektor.index') }}"
-                            class="{{ request()->routeIs('inspeksiproyektor.*') ? 'active' : '' }}">
-                                <i class="fas fa-video"></i>
-                                <span class="submenu-text">Proyektor</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+                <a href="{{ route('registrasi.index') }}" class="{{ request()->routeIs('registrasi.*') ? 'active' : '' }}">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <span class="link-text">Radio</span>
+                </a>
 
-            <a href="{{ route('karyawan.index') }}"
-                class="{{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
+                <a href="{{ route('inventaris.index') }}" class="{{ request()->routeIs('inventaris.*') ? 'active' : '' }}">
+                    <i class="fas fa-box"></i>
+                    <span class="link-text">Inventaris</span>
+                </a>
+
+                <a href="{{ route('pengajuan.index') }}" class="{{ request()->routeIs('pengajuan.*') ? 'active' : '' }}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="link-text">Pengajuan</span>
+                </a>
+
+                <a href="{{ route('gudang-barang.index') }}" class="{{ request()->routeIs('gudang*') ? 'active' : '' }}">
+                    <i class="fas fa-warehouse"></i>
+                    <span class="link-text">Gudang IT</span>
+                </a>
+
+                <a href="{{ route('bukutamu.index') }}" class="{{ request()->routeIs('bukutamu.*') ? 'active' : '' }}">
+                    <i class="fas fa-book"></i>
+                    <span class="link-text">Buku Tamu</span>
+                </a>
+
+                <div class="nav-item">
+                    <a href="#"
+                    class="dropdown-toggle {{ request()->is('inspeksi*') && !request()->routeIs('inspeksiups.*') && !request()->routeIs('inspeksistavolt.*') && !request()->routeIs('inspeksimonitor.*') && !request()->routeIs('inspeksiproyektor.*') ? 'active' : '' }}"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#submenu-inspeksi"
+                    aria-expanded="{{ request()->is('inspeksi*') ? 'true' : 'false' }}">
+                        <i class="fas fa-tools"></i>
+                        <span class="link-text">Inspeksi</span>
+                    </a>
+                    <div id="submenu-inspeksi" class="collapse {{ request()->is('inspeksi*') ? 'show' : '' }}">
+                        <ul class="list-unstyled submenu">
+                            <li><a href="{{ route('inspeksiups.index') }}" class="{{ request()->routeIs('inspeksiups.*') ? 'active' : '' }}"><i class="fas fa-battery-full"></i><span class="submenu-text">UPS</span></a></li>
+                            <li><a href="{{ route('inspeksistavolt.index') }}" class="{{ request()->routeIs('inspeksistavolt.*') ? 'active' : '' }}"><i class="fas fa-bolt"></i><span class="submenu-text">Stavolt</span></a></li>
+                            <li><a href="{{ route('inspeksimonitor.index') }}" class="{{ request()->routeIs('inspeksimonitor.*') ? 'active' : '' }}"><i class="fas fa-tv"></i><span class="submenu-text">Monitor / TV</span></a></li>
+                            <li><a href="{{ route('inspeksiproyektor.index') }}" class="{{ request()->routeIs('inspeksiproyektor.*') ? 'active' : '' }}"><i class="fas fa-video"></i><span class="submenu-text">Proyektor</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <a href="{{ route('karyawan.index') }}" class="{{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
                     <i class="fas fa-users"></i>
                     <span class="link-text">Data Karyawan</span>
-            </a>
+                </a>
+
+            @elseif($isPimpinan)
+                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    <i class="fas fa-home"></i>
+                    <span class="link-text">Beranda</span>
+                </a>
+
+                <a href="{{ route('pengajuan.index') }}" class="{{ request()->routeIs('pengajuan.*') ? 'active' : '' }}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="link-text">Pengajuan</span>
+                </a>
+
+                <a href="{{ route('inventaris.index') }}" class="{{ request()->routeIs('inventaris.*') ? 'active' : '' }}">
+                    <i class="fas fa-box"></i>
+                    <span class="link-text">Inventaris</span>
+                </a>
+
+            @elseif($isKaryawan)
+                <a href="{{ route('inventaris.index') }}" class="{{ request()->routeIs('inventaris.*') ? 'active' : '' }}">
+                    <i class="fas fa-box"></i>
+                    <span class="link-text">Inventaris Saya</span>
+                </a>
+
+            @else
+                <a href="{{ route('inventaris.index') }}" class="{{ request()->routeIs('inventaris.*') ? 'active' : '' }}">
+                    <i class="fas fa-box"></i>
+                    <span class="link-text">Inventaris</span>
+                </a>
+
+                <a href="{{ route('gudang-barang.index') }}" class="{{ request()->routeIs('gudang*') ? 'active' : '' }}">
+                    <i class="fas fa-warehouse"></i>
+                    <span class="link-text">Gudang IT</span>
+                </a>
+
+                <a href="{{ route('bukutamu.index') }}" class="{{ request()->routeIs('bukutamu.*') ? 'active' : '' }}">
+                    <i class="fas fa-book"></i>
+                    <span class="link-text">Buku Tamu</span>
+                </a>
             @endif
         </div>
 

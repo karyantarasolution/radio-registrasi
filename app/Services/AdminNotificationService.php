@@ -9,7 +9,7 @@ class AdminNotificationService
 {
     public static function notify(Notification $notification): void
     {
-        $admins = User::where('role', 'ict')->orWhere('name', 'ICT')->get();
+        $admins = User::where('role', 'admin_ict')->orWhere('role', 'ict')->orWhere('name', 'ICT')->get();
 
         foreach ($admins as $admin) {
             $admin->notify($notification);

@@ -144,17 +144,29 @@
                     @method('PUT')
                 @endif
 
-                <div class="form-group">
-                    <label class="form-label">Nama</label>
-                    <input type="text" name="nama" class="form-control"
-                        value="{{ old('nama', $inventaris->nama ?? '') }}" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">NRP</label>
-                    <input type="text" name="nrp" class="form-control"
-                        value="{{ old('nrp', $inventaris->nrp ?? '') }}" required>
-                </div>
+                @if(!isset($inventaris) && isset($user) && $user->isKaryawan())
+                    <div class="form-group">
+                        <label class="form-label">Nama</label>
+                        <input type="text" class="form-control" value="{{ $user->name }}" readonly disabled>
+                        <input type="hidden" name="nama" value="{{ $user->name }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">NRP</label>
+                        <input type="text" class="form-control" value="{{ $user->nrp }}" readonly disabled>
+                        <input type="hidden" name="nrp" value="{{ $user->nrp }}">
+                    </div>
+                @else
+                    <div class="form-group">
+                        <label class="form-label">Nama</label>
+                        <input type="text" name="nama" class="form-control"
+                            value="{{ old('nama', $inventaris->nama ?? '') }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">NRP</label>
+                        <input type="text" name="nrp" class="form-control"
+                            value="{{ old('nrp', $inventaris->nrp ?? '') }}" required>
+                    </div>
+                @endif
 
                 <div class="form-group">
                     <label class="form-label">Pilih Barang dari Gudang IT</label>

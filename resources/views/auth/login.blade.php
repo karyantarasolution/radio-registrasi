@@ -1,150 +1,202 @@
-<x-guest-layout>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - {{ config('app.name', 'Laravel') }}</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     <style>
-        body {
-            background: #f5f7fb;
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        .login-wrapper {
+        body {
+            font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f2744 50%, #0a1929 100%);
             padding: 1.5rem;
         }
 
-        .login-container {
+        .login-card {
             width: 100%;
             max-width: 420px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
         }
 
-        /* Logo */
-        .login-logo {
-            width: 90px;
-            margin: 0 auto 1rem;
-        }
-
-        /* Title */
-        .login-title {
-            font-size: 1.7rem;
-            font-weight: 700;
-            color: #1f3c88;
-            text-align: center;
-        }
-
-        .login-subtitle {
-            font-size: 0.95rem;
-            color: #6b7280;
+        .login-header {
             text-align: center;
             margin-bottom: 2rem;
         }
 
-        /* Input */
-        .login-input {
-            border-radius: 14px;
-            border: 1px solid #d1d5db;
-            padding: 0.85rem 1rem;
-            font-size: 0.95rem;
-            background: #ffffff;
+        .login-logo {
+            width: 80px;
+            height: auto;
+            margin-bottom: 1.25rem;
         }
 
-        .login-input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e3a5f;
+            margin-bottom: 0.35rem;
         }
 
-        /* Button */
-        .login-btn {
-            border-radius: 14px;
-            padding: 0.85rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #2563eb, #1e40af);
-            transition: all 0.3s ease;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-        }
-
-        /* Register link */
-        .register-text {
-            text-align: center;
-            margin-top: 1.2rem;
+        .login-subtitle {
             font-size: 0.9rem;
             color: #6b7280;
         }
 
-        .register-text a {
-            color: #2563eb;
-            font-weight: 600;
-            text-decoration: none;
+        .form-group {
+            margin-bottom: 1.25rem;
         }
 
-        .register-text a:hover {
-            text-decoration: underline;
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: #111827;
+            background: #f9fafb;
+            border: 1.5px solid #d1d5db;
+            border-radius: 12px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            background: #fff;
+        }
+
+        .form-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 0.8rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: inherit;
+            color: #ffffff;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .error-msg {
+            font-size: 0.8rem;
+            color: #dc2626;
+            margin-top: 0.5rem;
+        }
+
+        .success-msg {
+            font-size: 0.85rem;
+            color: #16a34a;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #9ca3af;
         }
     </style>
+</head>
+<body>
 
-    <div class="login-wrapper">
-        <div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <img src="{{ asset('images/LogoPPA.png') }}" alt="Logo PPA" class="login-logo">
+            <h1 class="login-title">Selamat Datang</h1>
+            <p class="login-subtitle">Silakan masuk untuk melanjutkan</p>
+        </div>
 
-            <!-- Logo -->
-            <img src="{{ asset('images/LogoPPA.png') }}" alt="Logo" class="login-logo">
+        @if (session('status'))
+            <div class="success-msg">{{ session('status') }}</div>
+        @endif
 
-            <!-- Title -->
-            <h2 class="login-title">Selamat Datang</h2>
-            <p class="login-subtitle">Silakan login untuk melanjutkan</p>
+        <form method="POST" action="{{ route('login') }}">
+            @csrf
 
-            <!-- Session Status -->
-            <x-auth-session-status class="mb-4" :status="session('status')" />
+            <div class="form-group">
+                <label for="name" class="form-label">Nama</label>
+                <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    class="form-input"
+                    placeholder="Masukkan nama Anda"
+                    value="{{ old('name') }}"
+                    required
+                    autofocus
+                />
+                @error('name')
+                    <p class="error-msg">{{ $message }}</p>
+                @enderror
+            </div>
 
-            <form method="POST" action="{{ route('login') }}">
-                @csrf
+            <div class="form-group">
+                <label for="password" class="form-label">Kata Sandi</label>
+                <input
+                    id="password"
+                    type="password"
+                    name="password"
+                    class="form-input"
+                    placeholder="Masukkan kata sandi"
+                    required
+                    autocomplete="current-password"
+                />
+                @error('password')
+                    <p class="error-msg">{{ $message }}</p>
+                @enderror
+            </div>
 
-                <!-- Nama -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Nama
-                    </label>
-                    <x-text-input
-                        id="name"
-                        class="login-input block w-full"
-                        type="text"
-                        name="name"
-                        required
-                        autofocus
-                    />
-                </div>
+            <button type="submit" class="btn-login">
+                MASUK
+            </button>
+        </form>
 
-                <!-- Password -->
-                <div class="mt-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Kata Sandi
-                    </label>
-                    <x-text-input
-                        id="password"
-                        class="login-input block w-full"
-                        type="password"
-                        name="password"
-                        required
-                        autocomplete="current-password"
-                    />
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                </div>
-
-                <!-- Button -->
-                <div class="mt-6">
-                    <x-primary-button class="login-btn w-full justify-center text-white">
-                        MASUK
-                    </x-primary-button>
-                </div>
-            </form>
-
-            <!-- Register -->
-            @if (Route::has('register'))
-           
-            @endif
-
+        <div class="login-footer">
+            &copy; {{ date('Y') }} PT. Putra Perkasa Abadi
         </div>
     </div>
-</x-guest-layout>
+
+</body>
+</html>

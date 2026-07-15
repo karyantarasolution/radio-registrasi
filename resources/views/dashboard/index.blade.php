@@ -1,254 +1,392 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid mt-4">
+<style>
+    .dash-wrapper {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 0 0 20px;
+    }
+    .dash-header {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 50%, #1a365d 100%);
+        color: white;
+        padding: 2rem 2rem 2.5rem;
+        margin-bottom: -1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .dash-header::before {
+        content: '';
+        position: absolute;
+        top: -60%; right: -5%;
+        width: 300px; height: 300px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 50%;
+    }
+    .dash-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%; left: 20%;
+        width: 200px; height: 200px;
+        background: rgba(255,255,255,0.03);
+        border-radius: 50%;
+    }
+    .dash-greeting {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    .dash-subtitle {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+    .dash-date {
+        font-size: 0.78rem;
+        opacity: 0.6;
+    }
 
-    <style>
-        .dashboard-header {
-            background: linear-gradient(135deg, #ea6666 0%, #f71414 100%);
-            border-radius: 20px;
-            color: white;
-            padding: 1.75rem 2rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-        }
-        .module-card {
-            display: block;
-            text-decoration: none;
-            color: inherit;
-            border-radius: 15px;
-            border: none;
-            padding: 1.25rem;
-            height: 100%;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        .module-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 28px rgba(0,0,0,0.12);
-            color: inherit;
-        }
-        .module-card .count {
-            font-size: 2rem;
-            font-weight: 700;
-            line-height: 1.1;
-        }
-        .module-card .label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            opacity: 0.95;
-        }
-        .module-card .sub {
-            font-size: 0.75rem;
-            opacity: 0.85;
-            margin-top: 0.35rem;
-        }
-        .stat-card-1 { background: linear-gradient(135deg, #ea6666 0%, #df4c4c 100%); color: white; }
-        .stat-card-2 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .stat-card-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
-        .stat-card-4 { background: linear-gradient(135deg, #43e97b 0%, #11caa8 100%); color: white; }
-        .stat-card-5 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
-        .stat-card-6 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; }
-        .stat-card-7 { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; }
-        .stat-card-8 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
-        .enhanced-card {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        .table-scroll {
-            max-height: 280px;
-            overflow-y: auto;
-            border-radius: 10px;
-        }
-        .table-scroll thead th {
-            position: sticky;
-            top: 0;
-            z-index: 2;
-            background: #f8f9fa;
-        }
-        .progress-inventaris {
-            height: 6px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.35);
-            margin-top: 8px;
-            overflow: hidden;
-        }
-        .progress-inventaris-bar {
-            height: 100%;
-            background: rgba(255,255,255,0.9);
-            border-radius: 10px;
-        }
-        .chart-card {
-            background: #fff;
-            border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        .chart-wrap {
-            position: relative;
-            height: 280px;
-            max-width: 380px;
-            margin: 0 auto;
-        }
-        .chart-empty {
-            text-align: center;
-            color: #6c757d;
-            padding: 2.5rem 1rem;
-        }
-        .chart-legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
-            font-size: 0.9rem;
-        }
-        .chart-legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-    </style>
+    .module-card {
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        color: inherit;
+        border-radius: 16px;
+        border: none;
+        padding: 1.25rem 1rem;
+        height: 100%;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        position: relative;
+        overflow: hidden;
+    }
+    .module-card::after {
+        content: '';
+        position: absolute;
+        top: 0; right: 0;
+        width: 60px; height: 60px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 0 16px 0 60px;
+    }
+    .module-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        color: inherit;
+    }
+    .module-card .mc-icon {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+        background: rgba(255,255,255,0.2);
+    }
+    .module-card .mc-count {
+        font-size: 1.8rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+    .module-card .mc-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        opacity: 0.95;
+    }
+    .module-card .mc-sub {
+        font-size: 0.72rem;
+        opacity: 0.8;
+        margin-top: 4px;
+    }
 
-    <div class="dashboard-header" data-aos="fade-down">
-        <div class="row align-items-center">
-            <div class="col-md-8 d-flex align-items-center">
-                <img src="{{ asset('images/LogoPPA.png') }}" alt="Logo PPA" style="height: 70px; margin-right: 15px;">
-                <div>
-                    <h2 class="fw-bold mb-1">Dashboard ICT</h2>
-                    <p class="mb-0 opacity-90">Ringkasan data seluruh modul sistem</p>
-                    <small class="opacity-75">Diperbarui: {{ date('d F Y, H:i') }} WITA</small>
+    .mc-radio   { background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; }
+    .mc-inv     { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+    .mc-guest   { background: linear-gradient(135deg, #4facfe, #00f2fe); color: #fff; }
+    .mc-karyawan{ background: linear-gradient(135deg, #43e97b, #38f9d7); color: #fff; }
+    .mc-ups     { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; }
+    .mc-stavolt { background: linear-gradient(135deg, #fa709a, #fee140); color: #333; }
+    .mc-monitor { background: linear-gradient(135deg, #30cfd0, #330867); color: #fff; }
+    .mc-proyek  { background: linear-gradient(135deg, #a8edea, #fed6e3); color: #333; }
+
+    .section-label {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #495057;
+        margin-bottom: 1rem;
+        padding-left: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .section-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #dee2e6;
+    }
+
+    .chart-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        height: 100%;
+    }
+    .chart-wrap {
+        position: relative;
+        height: 260px;
+        max-width: 340px;
+        margin: 0 auto;
+    }
+    .chart-empty {
+        text-align: center;
+        color: #6c757d;
+        padding: 2.5rem 1rem;
+    }
+    .chart-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
+    }
+    .chart-legend-dot {
+        width: 14px; height: 14px;
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+
+    .summary-stat {
+        text-align: center;
+        padding: 16px 8px;
+        border-radius: 12px;
+        background: #f8f9fa;
+        transition: transform 0.2s;
+    }
+    .summary-stat:hover { transform: translateY(-2px); }
+    .summary-stat .ss-num {
+        font-size: 1.6rem;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+    .summary-stat .ss-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6c757d;
+        margin-top: 2px;
+    }
+
+    .enhanced-card {
+        border-radius: 16px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+    .enhanced-card .card-header-custom {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .enhanced-card .card-header-custom h6 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+    .table-scroll {
+        max-height: 260px;
+        overflow-y: auto;
+    }
+    .table-scroll thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #f8f9fa;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .progress-inventaris {
+        height: 6px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.3);
+        margin-top: 8px;
+        overflow: hidden;
+    }
+    .progress-inventaris-bar {
+        height: 100%;
+        background: rgba(255,255,255,0.9);
+        border-radius: 10px;
+        transition: width 0.6s ease;
+    }
+</style>
+
+<div class="dash-wrapper">
+    <div class="dash-header" data-aos="fade-down">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="{{ asset('images/ppa-logo.png') }}" alt="Logo PPA" style="height: 52px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));">
+                        <div>
+                            <div class="dash-greeting">Dashboard ICT</div>
+                            <div class="dash-subtitle">Ringkasan data seluruh modul sistem manajemen</div>
+                            <div class="dash-date">{{ now()->translatedFormat('l, d F Y') }} &middot; PT. Putra Perkasa Abadi</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Kartu modul --}}
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3" data-aos="fade-up">
-            <a href="{{ route('registrasi.index') }}" class="module-card stat-card-1">
-                <div class="count">{{ $jumlahRegistrasi }}</div>
-                <div class="label">Registrasi Radio</div>
-            </a>
-        </div>
-        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="50">
-            <a href="{{ route('inventaris.index') }}" class="module-card stat-card-2">
-                <div class="count">{{ $jumlahInventaris }}</div>
-                <div class="label">Inventaris IT</div>
-                <div class="sub">{{ $inventarisDikembalikan }} dikembalikan · {{ $inventarisBelum }} belum</div>
-                @if($jumlahInventaris > 0)
-                    @php $pct = round(($inventarisDikembalikan / $jumlahInventaris) * 100); @endphp
-                    <div class="progress-inventaris">
-                        <div class="progress-inventaris-bar" style="width: {{ $pct }}%;"></div>
-                    </div>
-                    <div class="sub">{{ $pct }}% dikembalikan</div>
-                @endif
-            </a>
-        </div>
-        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="100">
-            <a href="{{ route('bukutamu.index') }}" class="module-card stat-card-3">
-                <div class="count">{{ $jumlahBukuTamu }}</div>
-                <div class="label">Buku Tamu</div>
-            </a>
-        </div>
-        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="150">
-            <a href="{{ route('karyawan.index') }}" class="module-card stat-card-4">
-                <div class="count">{{ $jumlahKaryawan }}</div>
-                <div class="label">Karyawan IT</div>
-            </a>
-        </div>
-        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="200">
-            <a href="{{ route('inspeksiups.index') }}" class="module-card stat-card-5">
-                <div class="count">{{ $jumlahInspeksiUps }}</div>
-                <div class="label">Inspeksi UPS</div>
-            </a>
-        </div>
-        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="250">
-            <a href="{{ route('inspeksistavolt.index') }}" class="module-card stat-card-6">
-                <div class="count">{{ $jumlahInspeksiStavolt }}</div>
-                <div class="label">Inspeksi Stavolt</div>
-            </a>
-        </div>
-        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="300">
-            <a href="{{ route('inspeksimonitor.index') }}" class="module-card stat-card-7">
-                <div class="count">{{ $jumlahInspeksiMonitor }}</div>
-                <div class="label">Inspeksi Monitor / TV</div>
-            </a>
-        </div>
-        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="350">
-            <a href="{{ route('inspeksiproyektor.index') }}" class="module-card stat-card-8">
-                <div class="count">{{ $jumlahInspeksiProyektor }}</div>
-                <div class="label">Inspeksi Proyektor</div>
-            </a>
-        </div>
-    </div>
+    <div class="container-fluid" style="position: relative; z-index: 1;">
 
-    {{-- Diagram status peminjaman inventaris --}}
-    <div class="row g-3 mb-4">
-        <div class="col-lg-5" data-aos="fade-up">
-            <div class="chart-card h-100">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold mb-0">Diagram Status Peminjaman</h5>
-                    <a href="{{ route('inventaris.index') }}" class="btn btn-sm btn-outline-danger">Kelola inventaris</a>
-                </div>
-                <p class="text-muted small mb-3">Perbandingan status peminjaman perangkat IT</p>
-                @if($chartStats['total'] > 0)
-                    <div class="chart-wrap">
-                        <canvas id="inventarisChart"></canvas>
-                    </div>
-                @else
-                    <div class="chart-empty">Belum ada data inventaris untuk ditampilkan.</div>
-                @endif
+        {{-- ===== Module Cards ===== --}}
+        <div class="section-label mt-3" data-aos="fade-up">📦 Modul Sistem</div>
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3" data-aos="fade-up">
+                <a href="{{ route('registrasi.index') }}" class="module-card mc-radio">
+                    <div class="mc-icon"><i class="fas fa-broadcast-tower"></i></div>
+                    <div class="mc-count">{{ $jumlahRegistrasi }}</div>
+                    <div class="mc-label">Registrasi Radio</div>
+                </a>
+            </div>
+            <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="50">
+                <a href="{{ route('inventaris.index') }}" class="module-card mc-inv">
+                    <div class="mc-icon"><i class="fas fa-box"></i></div>
+                    <div class="mc-count">{{ $jumlahInventaris }}</div>
+                    <div class="mc-label">Inventaris IT</div>
+                    <div class="mc-sub">{{ $inventarisDikembalikan }} dikembalikan &middot; {{ $inventarisBelum }} belum</div>
+                    @if($jumlahInventaris > 0)
+                        @php $pct = round(($inventarisDikembalikan / $jumlahInventaris) * 100); @endphp
+                        <div class="progress-inventaris">
+                            <div class="progress-inventaris-bar" style="width: {{ $pct }}%;"></div>
+                        </div>
+                        <div class="mc-sub">{{ $pct }}% selesai</div>
+                    @endif
+                </a>
+            </div>
+            <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+                <a href="{{ route('bukutamu.index') }}" class="module-card mc-guest">
+                    <div class="mc-icon"><i class="fas fa-book"></i></div>
+                    <div class="mc-count">{{ $jumlahBukuTamu }}</div>
+                    <div class="mc-label">Buku Tamu</div>
+                </a>
+            </div>
+            <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="150">
+                <a href="{{ route('karyawan.index') }}" class="module-card mc-karyawan">
+                    <div class="mc-icon"><i class="fas fa-users"></i></div>
+                    <div class="mc-count">{{ $jumlahKaryawan }}</div>
+                    <div class="mc-label">Karyawan IT</div>
+                </a>
             </div>
         </div>
-        <div class="col-lg-7" data-aos="fade-up" data-aos-delay="100">
-            <div class="chart-card h-100">
-                <h5 class="fw-bold mb-3">Ringkasan Inventaris</h5>
-                <div class="row g-3">
-                    <div class="col-3 text-center">
-                        <div class="fs-2 fw-bold text-primary">{{ $chartStats['total'] }}</div>
-                        <small class="text-muted">Total</small>
-                    </div>
-                    <div class="col-3 text-center">
-                        <div class="fs-2 fw-bold text-warning">{{ $chartStats['pending'] }}</div>
-                        <small class="text-muted">Pending</small>
-                    </div>
-                    <div class="col-3 text-center">
-                        <div class="fs-2 fw-bold text-success">{{ $chartStats['dikembalikan'] }}</div>
-                        <small class="text-muted">Dikembalikan</small>
-                    </div>
-                    <div class="col-3 text-center">
-                        <div class="fs-2 fw-bold text-danger">{{ $chartStats['belum'] }}</div>
-                        <small class="text-muted">Belum dikembalikan</small>
-                    </div>
-                </div>
-                @if($chartStats['total'] > 0)
-                    <hr>
-                    <div class="chart-legend-item">
-                        <span class="chart-legend-dot" style="background:#ffc107;"></span>
-                        <span>Pending — {{ $chartStats['pending'] }} unit ({{ round($chartStats['pending'] / $chartStats['total'] * 100) }}%)</span>
-                    </div>
-                    <div class="chart-legend-item">
-                        <span class="chart-legend-dot" style="background:#28a745;"></span>
-                        <span>Sudah Dikembalikan — {{ $chartStats['dikembalikan'] }} unit ({{ round($chartStats['dikembalikan'] / $chartStats['total'] * 100) }}%)</span>
-                    </div>
-                    <div class="chart-legend-item">
-                        <span class="chart-legend-dot" style="background:#dc3545;"></span>
-                        <span>Belum Dikembalikan — {{ $chartStats['belum'] }} unit ({{ round($chartStats['belum'] / $chartStats['total'] * 100) }}%)</span>
-                    </div>
-                @endif
+
+        <div class="section-label" data-aos="fade-up">🔍 Inspeksi Perangkat</div>
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+                <a href="{{ route('inspeksiups.index') }}" class="module-card mc-ups">
+                    <div class="mc-icon"><i class="fas fa-battery-full"></i></div>
+                    <div class="mc-count">{{ $jumlahInspeksiUps }}</div>
+                    <div class="mc-label">Inspeksi UPS</div>
+                </a>
+            </div>
+            <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="250">
+                <a href="{{ route('inspeksistavolt.index') }}" class="module-card mc-stavolt">
+                    <div class="mc-icon"><i class="fas fa-bolt"></i></div>
+                    <div class="mc-count">{{ $jumlahInspeksiStavolt }}</div>
+                    <div class="mc-label">Inspeksi Stavolt</div>
+                </a>
+            </div>
+            <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+                <a href="{{ route('inspeksimonitor.index') }}" class="module-card mc-monitor">
+                    <div class="mc-icon"><i class="fas fa-tv"></i></div>
+                    <div class="mc-count">{{ $jumlahInspeksiMonitor }}</div>
+                    <div class="mc-label">Monitor / TV</div>
+                </a>
+            </div>
+            <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="350">
+                <a href="{{ route('inspeksiproyektor.index') }}" class="module-card mc-proyek">
+                    <div class="mc-icon"><i class="fas fa-video"></i></div>
+                    <div class="mc-count">{{ $jumlahInspeksiProyektor }}</div>
+                    <div class="mc-label">Proyektor</div>
+                </a>
             </div>
         </div>
-    </div>
 
-    {{-- Tabel terbaru --}}
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6" data-aos="fade-up">
-            <div class="card enhanced-card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0">Registrasi Terbaru</h5>
-                        <a href="{{ route('registrasi.index') }}" class="btn btn-sm btn-outline-danger">Lihat semua</a>
+        {{-- ===== Chart + Summary ===== --}}
+        <div class="section-label" data-aos="fade-up">📊 Statistik Inventaris</div>
+        <div class="row g-3 mb-4">
+            <div class="col-lg-5" data-aos="fade-up">
+                <div class="chart-card">
+                    <h6 class="fw-bold mb-1">Status Peminjaman</h6>
+                    <small class="text-muted">Perbandingan status perangkat IT</small>
+                    @if($chartStats['total'] > 0)
+                        <div class="chart-wrap mt-3">
+                            <canvas id="inventarisChart"></canvas>
+                        </div>
+                    @else
+                        <div class="chart-empty mt-3">Belum ada data inventaris.</div>
+                    @endif
+                </div>
+            </div>
+            <div class="col-lg-7" data-aos="fade-up" data-aos-delay="100">
+                <div class="chart-card">
+                    <h6 class="fw-bold mb-3">Ringkasan Inventaris</h6>
+                    <div class="row g-3 mb-3">
+                        <div class="col-3">
+                            <div class="summary-stat">
+                                <div class="ss-num" style="color:#667eea;">{{ $chartStats['total'] }}</div>
+                                <div class="ss-label">Total</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="summary-stat">
+                                <div class="ss-num" style="color:#e67e22;">{{ $chartStats['pending'] }}</div>
+                                <div class="ss-label">Pending</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="summary-stat">
+                                <div class="ss-num" style="color:#28a745;">{{ $chartStats['dikembalikan'] }}</div>
+                                <div class="ss-label">Dikembalikan</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="summary-stat">
+                                <div class="ss-num" style="color:#dc3545;">{{ $chartStats['belum'] }}</div>
+                                <div class="ss-label">Belum</div>
+                            </div>
+                        </div>
+                    </div>
+                    @if($chartStats['total'] > 0)
+                        <hr style="margin: 0.5rem 0;">
+                        <div class="chart-legend-item">
+                            <span class="chart-legend-dot" style="background:#ffc107;"></span>
+                            <span><strong>Pending</strong> — {{ $chartStats['pending'] }} unit ({{ round($chartStats['pending'] / $chartStats['total'] * 100) }}%)</span>
+                        </div>
+                        <div class="chart-legend-item">
+                            <span class="chart-legend-dot" style="background:#28a745;"></span>
+                            <span><strong>Dikembalikan</strong> — {{ $chartStats['dikembalikan'] }} unit ({{ round($chartStats['dikembalikan'] / $chartStats['total'] * 100) }}%)</span>
+                        </div>
+                        <div class="chart-legend-item">
+                            <span class="chart-legend-dot" style="background:#dc3545;"></span>
+                            <span><strong>Belum Dikembalikan</strong> — {{ $chartStats['belum'] }} unit ({{ round($chartStats['belum'] / $chartStats['total'] * 100) }}%)</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- ===== Recent Tables ===== --}}
+        <div class="section-label" data-aos="fade-up">📋 Data Terbaru</div>
+        <div class="row g-3 mb-4">
+            <div class="col-lg-6" data-aos="fade-up">
+                <div class="card enhanced-card h-100">
+                    <div class="card-header-custom">
+                        <h6><i class="fas fa-broadcast-tower me-2 text-danger"></i>Registrasi Terbaru</h6>
+                        <a href="{{ route('registrasi.index') }}" class="btn btn-sm btn-outline-secondary" style="border-radius:8px;">Lihat semua</a>
                     </div>
                     <div class="table-scroll">
                         <table class="table table-sm table-hover mb-0">
@@ -265,12 +403,12 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $item->perusahaan }}</td>
-                                    <td>{{ $item->nomor_lambung }}</td>
-                                    <td><small>{{ $item->created_at->format('d/m/Y') }}</small></td>
+                                    <td><code>{{ $item->nomor_lambung }}</code></td>
+                                    <td><small class="text-muted">{{ $item->created_at->format('d/m/Y') }}</small></td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-3">Belum ada data</td>
+                                    <td colspan="4" class="text-center text-muted py-4">Belum ada data</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -278,13 +416,11 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
-            <div class="card enhanced-card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0">Buku Tamu Terbaru</h5>
-                        <a href="{{ route('bukutamu.index') }}" class="btn btn-sm btn-outline-danger">Lihat semua</a>
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="card enhanced-card h-100">
+                    <div class="card-header-custom">
+                        <h6><i class="fas fa-book me-2 text-info"></i>Buku Tamu Terbaru</h6>
+                        <a href="{{ route('bukutamu.index') }}" class="btn btn-sm btn-outline-secondary" style="border-radius:8px;">Lihat semua</a>
                     </div>
                     <div class="table-scroll">
                         <table class="table table-sm table-hover mb-0">
@@ -302,13 +438,13 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $item->nama }}</td>
-                                    <td>{{ $item->instansi }}</td>
+                                    <td><small>{{ $item->instansi }}</small></td>
                                     <td><small>{{ $item->pic->nama ?? '-' }}</small></td>
-                                    <td><small>{{ Str::limit($item->keperluan, 40) }}</small></td>
+                                    <td><small class="text-muted">{{ Str::limit($item->keperluan, 35) }}</small></td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted py-3">Belum ada data</td>
+                                    <td colspan="5" class="text-center text-muted py-4">Belum ada data</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -317,8 +453,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
+    </div>
 </div>
 
 @if($chartStats['total'] > 0)
@@ -327,7 +463,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof AOS !== 'undefined') {
-            AOS.init({ duration: 800, once: true, offset: 80 });
+            AOS.init({ duration: 700, once: true, offset: 60 });
         }
 
         @if($chartStats['total'] > 0)
@@ -337,26 +473,33 @@
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Pending', 'Sudah Dikembalikan', 'Belum Dikembalikan'],
+                    labels: ['Pending', 'Dikembalikan', 'Belum Dikembalikan'],
                     datasets: [{
                         data: [stats.pending, stats.dikembalikan, stats.belum],
                         backgroundColor: ['#ffc107', '#28a745', '#dc3545'],
-                        borderWidth: 2,
+                        borderWidth: 3,
                         borderColor: '#fff',
+                        hoverBorderWidth: 0,
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    cutout: '60%',
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: { display: false },
                         tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            padding: 12,
+                            cornerRadius: 8,
+                            titleFont: { size: 13, weight: '600' },
+                            bodyFont: { size: 12 },
                             callbacks: {
                                 label: function(context) {
                                     const total = stats.total || 1;
                                     const value = context.parsed;
                                     const pct = Math.round((value / total) * 100);
-                                    return context.label + ': ' + value + ' (' + pct + '%)';
+                                    return context.label + ': ' + value + ' unit (' + pct + '%)';
                                 }
                             }
                         }

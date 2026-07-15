@@ -14,11 +14,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class InventarisController extends Controller
 {
-    private function isAdmin(): bool
-    {
-        return Auth::user()->name == 'ICT';
-    }
-
     private function availableGudangBarang()
     {
         return GudangBarang::available()->orderBy('nama_perangkat')->get();
@@ -37,7 +32,12 @@ class InventarisController extends Controller
 
     public function index(Request $request)
     {
-        $query = Inventaris::with('gudangBarang');
+        $user = Auth::user();
+        $query = Inventaris::with('gudangBarang', 'approver');
+
+        if ($user->isKaryawan()) {
+            $query->where('nrp', $user->nrp);
+        }
 
         if ($request->filled('status')) {
             $query->where('status_peminjaman', $request->status);
@@ -47,7 +47,11 @@ class InventarisController extends Controller
             $query->where('status_verifikasi', $request->verifikasi);
         }
 
-        $inventaris = $query->orderBy('tanggal_peminjaman', 'desc')->get();
+        if ($request->filled('persetujuan')) {
+            $query->where('status_persetujuan', $request->persetujuan);
+        }
+
+        $inventaris = $query->orderBy('created_at', 'desc')->get();
 
         $chartStats = [
             'dikembalikan' => $inventaris->where('status_peminjaman', 'Dikembalikan')->count(),
@@ -57,21 +61,23 @@ class InventarisController extends Controller
         ];
 
         $pendingCount = Inventaris::where('status_verifikasi', 'Pending')->count();
+        $pendingApprovalCount = Inventaris::where('status_persetujuan', 'Pending')->count();
 
-        return view('inventaris.index', compact('inventaris', 'chartStats', 'pendingCount'));
+        return view('inventaris.index', compact('inventaris', 'chartStats', 'pendingCount', 'pendingApprovalCount'));
     }
 
     public function create()
     {
+        $user = Auth::user();
         $gudangBarang = $this->availableGudangBarang();
-        return view('inventaris.form', compact('gudangBarang'));
+        return view('inventaris.form', compact('gudangBarang', 'user'));
     }
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+
         $request->validate([
-            'nama' => 'required|string',
-            'nrp' => 'required|string',
             'gudang_barang_id' => 'required|exists:gudang_barang,id',
             'tanggal_peminjaman' => 'required|date',
         ]);
@@ -83,19 +89,20 @@ class InventarisController extends Controller
         }
 
         $data = [
-            'nama' => $request->nama,
-            'nrp' => $request->nrp,
+            'nama' => $user->name,
+            'nrp' => $user->nrp,
             'gudang_barang_id' => $barang->id,
             'nama_perangkat' => $barang->nama_perangkat,
             'no_asset' => $barang->kategori . '-' . str_pad($barang->id, 4, '0', STR_PAD_LEFT),
             'tanggal_peminjaman' => $request->tanggal_peminjaman,
             'status_verifikasi' => 'Pending',
             'status_peminjaman' => 'Pending',
+            'status_persetujuan' => 'Pending',
         ];
 
         $inventaris = Inventaris::create($data);
 
-        if (!$this->isAdmin()) {
+        if (!$user->isAdmin()) {
             AdminNotificationService::notify(new PengajuanInventarisNotification($inventaris));
         }
 
@@ -104,9 +111,18 @@ class InventarisController extends Controller
 
     public function edit($id)
     {
+        $user = Auth::user();
         $inventaris = Inventaris::findOrFail($id);
-        $gudangBarang = $this->availableGudangBarang();
 
+        if ($user->isKaryawan() && $inventaris->nrp !== $user->nrp) {
+            abort(403, 'Anda tidak memiliki akses ke data ini.');
+        }
+
+        if ($inventaris->status_verifikasi !== 'Pending' && !$user->isAdmin()) {
+            return back()->with('error', 'Data yang sudah diverifikasi tidak dapat diedit.');
+        }
+
+        $gudangBarang = $this->availableGudangBarang();
         if ($inventaris->gudang_barang_id && !$gudangBarang->contains('id', $inventaris->gudang_barang_id)) {
             $current = GudangBarang::find($inventaris->gudang_barang_id);
             if ($current) {
@@ -114,39 +130,36 @@ class InventarisController extends Controller
             }
         }
 
-        return view('inventaris.form', compact('inventaris', 'gudangBarang'));
+        return view('inventaris.form', compact('inventaris', 'gudangBarang', 'user'));
     }
 
     public function update(Request $request, $id)
     {
+        $user = Auth::user();
         $inventaris = Inventaris::findOrFail($id);
 
+        if ($user->isKaryawan() && $inventaris->nrp !== $user->nrp) {
+            abort(403);
+        }
+
         $request->validate([
-            'nama' => 'required|string',
-            'nrp' => 'required|string',
             'gudang_barang_id' => 'required|exists:gudang_barang,id',
             'tanggal_peminjaman' => 'required|date',
         ]);
 
         $barang = GudangBarang::findOrFail($request->gudang_barang_id);
-        $wasApproved = $inventaris->status_verifikasi === 'Disetujui';
 
         $data = [
-            'nama' => $request->nama,
-            'nrp' => $request->nrp,
             'gudang_barang_id' => $barang->id,
             'nama_perangkat' => $barang->nama_perangkat,
             'no_asset' => $barang->kategori . '-' . str_pad($barang->id, 4, '0', STR_PAD_LEFT),
             'tanggal_peminjaman' => $request->tanggal_peminjaman,
         ];
 
-        if (!$this->isAdmin()) {
+        if (!$user->isAdmin()) {
             $data['status_verifikasi'] = 'Pending';
-            if (!$wasApproved) {
-                $data['status_peminjaman'] = 'Pending';
-            } else {
-                $data['status_peminjaman'] = $inventaris->status_peminjaman;
-            }
+            $data['status_persetujuan'] = 'Pending';
+            $data['status_peminjaman'] = 'Pending';
         }
 
         $inventaris->update($data);
@@ -154,111 +167,163 @@ class InventarisController extends Controller
         return redirect()->route('inventaris.index')->with('success', 'Data berhasil diperbarui.');
     }
 
-    public function updatePeminjaman(Request $request, $id)
-    {
-        if (!$this->isAdmin()) {
-            abort(403, 'Hanya admin yang dapat mengubah status peminjaman.');
-        }
-
-        $request->validate([
-            'status_peminjaman' => 'required|in:Pending,Belum Dikembalikan,Dikembalikan',
-        ]);
-
-        $inventaris = Inventaris::with('gudangBarang')->findOrFail($id);
-        $newStatus = $request->status_peminjaman;
-
-        if (in_array($newStatus, ['Belum Dikembalikan', 'Dikembalikan']) && $inventaris->status_verifikasi !== 'Disetujui') {
-            return redirect()->route('inventaris.index', request()->only(['status', 'verifikasi']))
-                ->with('error', 'Status peminjaman hanya bisa diubah setelah verifikasi Disetujui.');
-        }
-
-        $oldStatus = $inventaris->status_peminjaman;
-
-        DB::transaction(function () use ($inventaris, $newStatus, $oldStatus) {
-            if ($newStatus === 'Dikembalikan' && $oldStatus === 'Belum Dikembalikan' && $inventaris->gudangBarang) {
-                $inventaris->gudangBarang->increment('stok_tersedia');
-                $this->recordMutasi($inventaris->gudangBarang, 'Masuk', 1, $inventaris, 'Pengembalian barang');
-                $inventaris->update([
-                    'status_peminjaman' => 'Dikembalikan',
-                    'tanggal_pengembalian' => $inventaris->tanggal_pengembalian ?? now(),
-                ]);
-            } elseif ($newStatus === 'Belum Dikembalikan') {
-                $inventaris->update([
-                    'status_peminjaman' => 'Belum Dikembalikan',
-                    'tanggal_pengembalian' => null,
-                ]);
-            } else {
-                $inventaris->update(['status_peminjaman' => $newStatus]);
-            }
-        });
-
-        return redirect()->route('inventaris.index', request()->only(['status', 'verifikasi']))
-            ->with('success', 'Status peminjaman berhasil diperbarui.');
-    }
-
     public function verifikasi(Request $request, $id)
     {
-        if (!$this->isAdmin()) {
-            abort(403, 'Tidak punya akses verifikasi');
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
+            abort(403, 'Hanya admin yang dapat melakukan verifikasi.');
         }
 
         $request->validate([
-            'status_verifikasi' => 'required|in:Pending,Disetujui,Ditolak',
+            'status_verifikasi' => 'required|in:Disetujui,Ditolak',
         ]);
 
         $inventaris = Inventaris::with('gudangBarang')->findOrFail($id);
         $newVerifikasi = $request->status_verifikasi;
-        $oldVerifikasi = $inventaris->status_verifikasi;
 
         try {
-            DB::transaction(function () use ($inventaris, $newVerifikasi, $oldVerifikasi) {
-                if ($newVerifikasi === 'Disetujui' && $oldVerifikasi !== 'Disetujui') {
+            DB::transaction(function () use ($inventaris, $newVerifikasi) {
+                if ($newVerifikasi === 'Disetujui') {
+                    $inventaris->update([
+                        'status_verifikasi' => 'Disetujui',
+                        'status_peminjaman' => 'Menunggu Persetujuan',
+                    ]);
+                } else {
+                    $inventaris->update([
+                        'status_verifikasi' => 'Ditolak',
+                        'status_peminjaman' => 'Pending',
+                        'status_persetujuan' => 'Pending',
+                    ]);
+                }
+            });
+        } catch (\RuntimeException $e) {
+            return redirect()->route('inventaris.index')->with('error', $e->getMessage());
+        }
+
+        return redirect()->route('inventaris.index')->with('success', 'Verifikasi berhasil diperbarui.');
+    }
+
+    public function persetujuan(Request $request, $id)
+    {
+        $user = Auth::user();
+        if (!$user->isPimpinan()) {
+            abort(403, 'Hanya pimpinan yang dapat melakukan persetujuan.');
+        }
+
+        $request->validate([
+            'status_persetujuan' => 'required|in:Disetujui,Ditolak',
+        ]);
+
+        $inventaris = Inventaris::with('gudangBarang')->findOrFail($id);
+        $newStatus = $request->status_persetujuan;
+
+        try {
+            DB::transaction(function () use ($inventaris, $newStatus, $user) {
+                if ($newStatus === 'Disetujui') {
                     if ($inventaris->gudangBarang) {
                         if ($inventaris->gudangBarang->stok_tersedia <= 0) {
                             throw new \RuntimeException('Stok barang tidak tersedia.');
                         }
                         $inventaris->gudangBarang->decrement('stok_tersedia');
-                        $this->recordMutasi($inventaris->gudangBarang, 'Keluar', 1, $inventaris, 'Peminjaman disetujui');
+                        StokMutasi::create([
+                            'gudang_barang_id' => $inventaris->gudangBarang->id,
+                            'inventaris_id' => $inventaris->id,
+                            'jenis' => 'Keluar',
+                            'jumlah' => 1,
+                            'keterangan' => 'Peminjaman disetujui pimpinan',
+                        ]);
                     }
                     $inventaris->update([
-                        'status_verifikasi' => 'Disetujui',
+                        'status_persetujuan' => 'Disetujui',
                         'status_peminjaman' => 'Belum Dikembalikan',
-                    ]);
-                } elseif ($newVerifikasi === 'Ditolak') {
-                    $inventaris->update([
-                        'status_verifikasi' => 'Ditolak',
-                        'status_peminjaman' => 'Pending',
+                        'approved_by' => $user->id,
+                        'approved_at' => now(),
                     ]);
                 } else {
-                    $inventaris->update(['status_verifikasi' => $newVerifikasi]);
+                    $inventaris->update([
+                        'status_persetujuan' => 'Ditolak',
+                        'status_peminjaman' => 'Pending',
+                        'status_verifikasi' => 'Pending',
+                        'approved_by' => $user->id,
+                        'approved_at' => now(),
+                    ]);
                 }
             });
         } catch (\RuntimeException $e) {
-            return redirect()->route('inventaris.index', request()->only(['status', 'verifikasi']))
-                ->with('error', $e->getMessage());
+            return redirect()->route('inventaris.index')->with('error', $e->getMessage());
         }
 
-        return redirect()->route('inventaris.index', request()->only(['status', 'verifikasi']))
-            ->with('success', 'Status verifikasi berhasil diperbarui.');
+        return redirect()->route('inventaris.index')->with('success', 'Persetujuan berhasil diperbarui.');
+    }
+
+    public function pengembalian(Request $request, $id)
+    {
+        $user = Auth::user();
+        $inventaris = Inventaris::with('gudangBarang')->findOrFail($id);
+
+        if ($user->isKaryawan() && $inventaris->nrp !== $user->nrp) {
+            abort(403);
+        }
+
+        if ($inventaris->status_peminjaman !== 'Belum Dikembalikan') {
+            return back()->with('error', 'Barang sedang tidak dipinjam.');
+        }
+
+        $request->validate([
+            'kondisi_barang' => 'required|in:Baik,Rusak Ringan,Rusak Berat',
+            'catatan' => 'nullable|string',
+        ]);
+
+        DB::transaction(function () use ($inventaris, $request, $user) {
+            if ($inventaris->gudangBarang && $request->kondisi_barang === 'Baik') {
+                $inventaris->gudangBarang->increment('stok_tersedia');
+                StokMutasi::create([
+                    'gudang_barang_id' => $inventaris->gudangBarang->id,
+                    'inventaris_id' => $inventaris->id,
+                    'jenis' => 'Masuk',
+                    'jumlah' => 1,
+                    'keterangan' => 'Pengembalian barang - kondisi baik',
+                ]);
+            }
+
+            \App\Models\DokumentasiPengembalian::create([
+                'inventaris_id' => $inventaris->id,
+                'kondisi_barang' => $request->kondisi_barang,
+                'catatan' => $request->catatan,
+                'dikembalikan_oleh' => $user->name,
+            ]);
+
+            $inventaris->update([
+                'status_peminjaman' => 'Dikembalikan',
+                'tanggal_actual_kembali' => now()->toDateString(),
+                'kondisi_pengembalian' => $request->kondisi_barang,
+                'catatan_pengembalian' => $request->catatan,
+            ]);
+        });
+
+        return redirect()->route('inventaris.index')->with('success', 'Pengembalian berhasil didokumentasikan.');
     }
 
     public function destroy($id)
     {
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
+            abort(403, 'Hanya admin yang dapat menghapus data.');
+        }
+
         Inventaris::findOrFail($id)->delete();
         return redirect()->route('inventaris.index')->with('success', 'Data berhasil dihapus.');
     }
 
     public function report()
     {
-        if (!$this->isAdmin()) {
-            abort(403, 'Tidak punya akses mencetak laporan');
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
+            abort(403);
         }
 
-        $inventaris = Inventaris::with('gudangBarang')->get();
-
-        $pdf = Pdf::loadView('inventaris.report', compact('inventaris'))
-                ->setPaper('a4', 'portrait');
-
+        $inventaris = Inventaris::with('gudangBarang', 'approver')->get();
+        $pdf = Pdf::loadView('inventaris.report', compact('inventaris'))->setPaper('a4', 'portrait');
         return $pdf->stream('Laporan-Inventaris.pdf');
     }
 }
