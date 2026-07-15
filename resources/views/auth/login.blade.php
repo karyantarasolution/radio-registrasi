@@ -152,8 +152,9 @@
             <div class="success-msg">{{ session('status') }}</div>
         @endif
 
-        <form method="POST" action="{{ route('login') }}">
+        <form method="POST" action="{{ route('login.post') }}">
             @csrf
+            <input type="hidden" name="login_type" value="tamu">
 
             <div class="form-group">
                 <label for="name" class="form-label">Nama</label>

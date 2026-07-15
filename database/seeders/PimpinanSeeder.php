@@ -49,5 +49,15 @@ class PimpinanSeeder extends Seeder
                 'nrp' => '25200412',
             ]
         );
+
+        User::updateOrCreate(
+            ['name' => 'Tamu'],
+            [
+                'email' => 'tamu@ppa.co.id',
+                'password' => Hash::make('password'),
+                'role' => 'tamu',
+                'nrp' => null,
+            ]
+        );
     }
 }
