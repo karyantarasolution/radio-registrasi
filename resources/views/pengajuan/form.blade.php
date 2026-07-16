@@ -100,6 +100,11 @@
                 </div>
 
                 <div class="mb-3">
+                    <label class="form-label fw-semibold">Estimasi Biaya (Rp)</label>
+                    <input type="number" name="estimasi_biaya" class="form-control" style="border-radius:10px;" value="{{ old('estimasi_biaya') }}" min="0" step="1000" placeholder="Contoh: 5000000">
+                </div>
+
+                <div class="mb-3">
                     <label class="form-label fw-semibold">Deskripsi / Keterangan</label>
                     <textarea name="deskripsi" class="form-control" style="border-radius:10px;" rows="4" placeholder="Jelaskan alasan atau kebutuhan pengajuan...">{{ old('deskripsi') }}</textarea>
                 </div>

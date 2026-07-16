@@ -29,6 +29,7 @@
         background: rgba(255,255,255,0.1);
         border-radius: 50%;
         animation: float 6s ease-in-out infinite;
+        pointer-events: none;
     }
 
     @keyframes float {

@@ -37,6 +37,11 @@ class PengajuanController extends Controller
 
     public function create()
     {
+        $user = Auth::user();
+        if ($user->isPimpinan()) {
+            abort(403, 'Pimpinan tidak dapat membuat pengajuan.');
+        }
+
         $barangMaintenance = GudangBarang::whereIn('kondisi', ['Perlu Maintenance', 'Rusak'])
             ->orderBy('nama_perangkat')
             ->get();
@@ -51,6 +56,7 @@ class PengajuanController extends Controller
             'nama_barang' => 'required|string|max:255',
             'jumlah_diminta' => 'required|integer|min:1',
             'satuan' => 'required|string|max:255',
+            'estimasi_biaya' => 'nullable|numeric|min:0',
             'deskripsi' => 'nullable|string',
             'judul' => 'required|string|max:255',
             'gudang_barang_id' => 'required_if:kategori,Maintenance|nullable|exists:gudang_barang,id',
@@ -66,6 +72,7 @@ class PengajuanController extends Controller
             'nama_barang' => $request->nama_barang,
             'jumlah_diminta' => $request->jumlah_diminta,
             'satuan' => $request->satuan,
+            'estimasi_biaya' => $request->estimasi_biaya,
             'deskripsi' => $request->deskripsi,
             'status' => 'Menunggu',
             'diajukan_oleh' => Auth::id(),

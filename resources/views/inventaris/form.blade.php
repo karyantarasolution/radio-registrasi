@@ -50,6 +50,7 @@
         top:0;left:0;right:0;
         height:4px;
         background:linear-gradient(90deg,#2980b9,#3498db,#6dd5fa);
+        pointer-events: none;
     }
     .card-header {
         background:linear-gradient(135deg,#2c3e50 0%,#34495e 50%,#2c3e50 100%);
@@ -155,6 +156,17 @@
                         <input type="text" class="form-control" value="{{ $user->nrp }}" readonly disabled>
                         <input type="hidden" name="nrp" value="{{ $user->nrp }}">
                     </div>
+                @elseif(isset($user) && $user->isAdmin())
+                    <div class="form-group" style="position:relative;">
+                        <label class="form-label">Cari Karyawan (Ketik NRP / Nama)</label>
+                        <input type="text" id="nrpSearch" class="form-control" autocomplete="off"
+                            placeholder="Ketik NRP atau nama karyawan..."
+                            value="{{ old('nama', $inventaris->nama ?? '') ? old('nrp', $inventaris->nrp ?? '') . ' - ' . old('nama', $inventaris->nama ?? '') : '' }}">
+                        <input type="hidden" name="nrp" id="nrpHidden" value="{{ old('nrp', $inventaris->nrp ?? '') }}">
+                        <input type="hidden" name="nama" id="namaHidden" value="{{ old('nama', $inventaris->nama ?? '') }}">
+                        <div id="nrpDropdown" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:999; background:#fff; border:1px solid #ddd; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.15); max-height:220px; overflow-y:auto;"></div>
+                        <small class="text-muted d-block mt-1">Ketik untuk mencari karyawan berdasarkan NRP atau nama.</small>
+                    </div>
                 @else
                     <div class="form-group">
                         <label class="form-label">Nama</label>
@@ -212,6 +224,28 @@
                         value="{{ old('tanggal_peminjaman', $inventaris->tanggal_peminjaman ?? '') }}" required>
                 </div>
 
+                <div class="form-group">
+                    <label class="form-label">Lama Peminjaman (Hari)</label>
+                    <input type="number" name="lama_pinjam" class="form-control"
+                        value="{{ old('lama_pinjam', $inventaris->lama_pinjam ?? '') }}" min="1" max="365" required
+                        placeholder="Contoh: 7">
+                    <small class="text-muted d-block mt-1">Tanggal pengembalian dihitung otomatis dari lama peminjaman.</small>
+                </div>
+
+                @if(isset($inventaris) && $inventaris->tanggal_pengembalian)
+                <div class="form-group" id="estKembaliGroup">
+                    <label class="form-label">Estimasi Tanggal Pengembalian</label>
+                    <input type="text" id="estKembaliInput" class="form-control"
+                        value="{{ \Carbon\Carbon::parse($inventaris->tanggal_pengembalian)->format('d/m/Y') }}"
+                        readonly disabled>
+                </div>
+                @else
+                <div class="form-group" id="estKembaliGroup" style="display:none;">
+                    <label class="form-label">Estimasi Tanggal Pengembalian</label>
+                    <input type="text" id="estKembaliInput" class="form-control" readonly disabled>
+                </div>
+                @endif
+
                 <div class="button-group">
                     <a href="{{ route('inventaris.index') }}" class="btn btn-secondary">⬅ Kembali</a>
                     <button type="submit" class="btn btn-success" id="submitBtn">
@@ -229,6 +263,100 @@ document.getElementById('inventarisForm').addEventListener('submit', function(){
     const btn = document.getElementById('submitBtn');
     btn.textContent = 'Menyimpan...';
     btn.disabled = true;
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // ====== AUTOCOMPLETE NRP KARYAWAN ======
+    var nrpSearch = document.getElementById('nrpSearch');
+    var nrpHidden = document.getElementById('nrpHidden');
+    var namaHidden = document.getElementById('namaHidden');
+    var nrpDropdown = document.getElementById('nrpDropdown');
+    var searchTimer = null;
+
+    if (nrpSearch) {
+        nrpSearch.addEventListener('input', function() {
+            var val = this.value.trim();
+            clearTimeout(searchTimer);
+
+            if (val.length < 1) {
+                nrpDropdown.style.display = 'none';
+                nrpHidden.value = '';
+                namaHidden.value = '';
+                return;
+            }
+
+            searchTimer = setTimeout(function() {
+                fetch('{{ route("inventaris.search-karyawan") }}?q=' + encodeURIComponent(val), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.length === 0) {
+                        nrpDropdown.style.display = 'none';
+                        return;
+                    }
+                    var html = '';
+                    data.forEach(function(k) {
+                        html += '<div class="nrp-item" style="padding:10px 14px; cursor:pointer; border-bottom:1px solid #f0f0f0; transition:background 0.15s;" '
+                            + 'onmouseenter="this.style.background=\'#f0f7ff\'" onmouseleave="this.style.background=\'#fff\'" '
+                            + 'data-nrp="' + k.nrp + '" data-name="' + k.name + '">'
+                            + '<div style="font-weight:600; font-size:0.9rem; color:#2c3e50;">' + k.name + '</div>'
+                            + '<div style="font-size:0.78rem; color:#7f8c8d;">NRP: ' + k.nrp
+                            + (k.jabatan ? ' &middot; ' + k.jabatan : '') + '</div>'
+                            + '</div>';
+                    });
+                    nrpDropdown.innerHTML = html;
+                    nrpDropdown.style.display = 'block';
+
+                    nrpDropdown.querySelectorAll('.nrp-item').forEach(function(item) {
+                        item.addEventListener('click', function() {
+                            nrpSearch.value = this.dataset.nrp + ' - ' + this.dataset.name;
+                            nrpHidden.value = this.dataset.nrp;
+                            namaHidden.value = this.dataset.name;
+                            nrpDropdown.style.display = 'none';
+                        });
+                    });
+                });
+            }, 250);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!nrpSearch.contains(e.target) && !nrpDropdown.contains(e.target)) {
+                nrpDropdown.style.display = 'none';
+            }
+        });
+
+        nrpSearch.addEventListener('focus', function() {
+            if (this.value.trim().length >= 1 && nrpDropdown.innerHTML) {
+                nrpDropdown.style.display = 'block';
+            }
+        });
+    }
+
+    // ====== ESTIMASI TANGGAL KEMBALI ======
+    var tglPinjam = document.querySelector('input[name="tanggal_peminjaman"]');
+    var lamaPinjam = document.querySelector('input[name="lama_pinjam"]');
+    var estKembaliGroup = document.getElementById('estKembaliGroup');
+    var estKembaliInput = document.getElementById('estKembaliInput');
+
+    function updateEstimate() {
+        if (tglPinjam.value && lamaPinjam.value) {
+            var tgl = new Date(tglPinjam.value);
+            tgl.setDate(tgl.getDate() + parseInt(lamaPinjam.value));
+            var dd = String(tgl.getDate()).padStart(2, '0');
+            var mm = String(tgl.getMonth() + 1).padStart(2, '0');
+            var yyyy = tgl.getFullYear();
+            estKembaliInput.value = dd + '/' + mm + '/' + yyyy;
+            estKembaliGroup.style.display = 'block';
+        } else {
+            estKembaliGroup.style.display = 'none';
+        }
+    }
+
+    if (tglPinjam) tglPinjam.addEventListener('change', updateEstimate);
+    if (lamaPinjam) lamaPinjam.addEventListener('input', updateEstimate);
+    updateEstimate();
 });
 </script>
 @endsection

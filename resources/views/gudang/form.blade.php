@@ -48,6 +48,7 @@
         top: 0; left: 0; right: 0;
         height: 4px;
         background: linear-gradient(90deg, #2980b9, #3498db, #6dd5fa);
+        pointer-events: none;
     }
     .card-header {
         background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);

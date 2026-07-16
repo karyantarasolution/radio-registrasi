@@ -25,6 +25,7 @@
         background: rgba(255,255,255,0.1);
         border-radius: 50%;
         animation: float 6s ease-in-out infinite;
+        pointer-events: none;
     }
     @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
     .table-card {
@@ -126,9 +127,11 @@
                     <small>PT. Putra Perkasa Abadi</small>
                 </div>
                 <div class="col-md-4 text-end">
+                    @if(!Auth::user()->isPimpinan())
                     <a href="{{ route('pengajuan.create') }}" class="btn btn-add btn-modern">
                         <i class="fas fa-plus me-1"></i> Ajukan Pengajuan
                     </a>
+                    @endif
                 </div>
             </div>
         </div>
@@ -198,7 +201,13 @@
                                 @endif
                             </td>
                             <td>{{ $p->jumlah_diminta }} {{ $p->satuan }}</td>
-                            <td>-</td>
+                            <td>
+                                @if($p->estimasi_biaya)
+                                    <small>Rp {{ number_format($p->estimasi_biaya, 0, ',', '.') }}</small>
+                                @else
+                                    -
+                                @endif
+                            </td>
                             <td>{{ $p->user->name ?? '-' }}</td>
                             <td><small>{{ $p->tanggal_pengajuan?->format('d/m/Y') ?? '-' }}</small></td>
                             <td>

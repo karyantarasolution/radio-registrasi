@@ -27,9 +27,31 @@ Route::get('/portal', fn() => view('portal'))->name('portal');
 Route::get('/login/admin', fn() => view('auth.login-admin'))->name('login.admin');
 Route::get('/login/pimpinan', fn() => view('auth.login-pimpinan'))->name('login.pimpinan');
 Route::get('/login/inventaris', function () {
-    $karyawanUsers = \App\Models\User::where('role', 'karyawan')->whereNotNull('nrp')->orderBy('name')->get();
-    return view('auth.login-inventaris', compact('karyawanUsers'));
+    return view('auth.login-inventaris');
 })->name('login.inventaris');
+
+Route::get('/register/inventaris', function () {
+    return view('auth.register-inventaris');
+})->name('register.inventaris');
+
+Route::post('/register/inventaris', function (\Illuminate\Http\Request $request) {
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'nrp' => 'required|string|unique:users,nrp',
+        'jabatan' => 'required|string|max:255',
+        'password' => 'required|string|min:6|confirmed',
+    ]);
+
+    \App\Models\User::create([
+        'name' => $request->name,
+        'nrp' => $request->nrp,
+        'role' => 'karyawan',
+        'is_approved' => false,
+        'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+    ]);
+
+    return redirect()->route('login.inventaris')->with('success', 'Pendaftaran berhasil! Silakan tunggu persetujuan admin sebelum bisa login.');
+})->name('register.inventaris.post');
 
 Route::post('/login/inventaris', function (\Illuminate\Http\Request $request) {
     $request->validate([
@@ -38,6 +60,10 @@ Route::post('/login/inventaris', function (\Illuminate\Http\Request $request) {
     ]);
 
     $user = \App\Models\User::where('nrp', $request->nrp)->first();
+
+    if ($user && $user->isKaryawan() && !$user->is_approved) {
+        return back()->withErrors(['nrp' => 'Akun Anda belum disetujui oleh admin.'])->withInput();
+    }
 
     if (!Auth::attempt(['name' => $user->name, 'password' => $request->password])) {
         return back()->withErrors(['password' => 'Kata sandi salah.'])->withInput();
@@ -77,7 +103,7 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
         return redirect()->route('dashboard');
     }
     if ($user->isPimpinan()) {
-        return redirect()->route('pengajuan.index');
+        return redirect()->route('dashboard');
     }
     return redirect()->route('dashboard');
 })->name('login.post');
@@ -128,10 +154,17 @@ Route::middleware('auth')->group(function () {
 
     // Inventaris - All authenticated users
     Route::resource('inventaris', InventarisController::class)->except(['show']);
+    Route::get('inventaris/search-karyawan', [InventarisController::class, 'searchKaryawan'])->name('inventaris.search-karyawan');
     Route::patch('inventaris/{inventaris}/verifikasi', [InventarisController::class, 'verifikasi'])->name('inventaris.verifikasi');
     Route::patch('inventaris/{inventaris}/persetujuan', [InventarisController::class, 'persetujuan'])->name('inventaris.persetujuan');
     Route::patch('inventaris/{inventaris}/pengembalian', [InventarisController::class, 'pengembalian'])->name('inventaris.pengembalian');
     Route::get('inventaris-report', [InventarisController::class, 'report'])->name('inventaris.report');
+    Route::get('inventaris-riwayat', [InventarisController::class, 'riwayat'])->name('inventaris.riwayat');
+
+    // Daftar Akun Inventaris - Admin only
+    Route::get('admin/daftar-akun', [InventarisController::class, 'daftarAkun'])->name('admin.daftar-akun');
+    Route::post('admin/daftar-akun/{id}/approve', [InventarisController::class, 'approveAkun'])->name('admin.approve-akun');
+    Route::delete('admin/daftar-akun/{id}', [InventarisController::class, 'destroyAkun'])->name('admin.destroy-akun');
 
     // Gudang IT
     Route::resource('gudang-barang', GudangBarangController::class)->except(['show']);

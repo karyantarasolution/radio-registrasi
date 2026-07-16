@@ -37,6 +37,7 @@ class PimpinanSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role' => 'karyawan',
                 'nrp' => '26200305',
+                'is_approved' => true,
             ]
         );
 
@@ -47,6 +48,7 @@ class PimpinanSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role' => 'karyawan',
                 'nrp' => '25200412',
+                'is_approved' => true,
             ]
         );
 

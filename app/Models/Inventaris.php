@@ -29,6 +29,7 @@ class Inventaris extends Model
         'approved_by',
         'approved_at',
         'tanggal_peminjaman',
+        'lama_pinjam',
         'tanggal_pengembalian',
         'tanggal_actual_kembali',
         'kondisi_pengembalian',

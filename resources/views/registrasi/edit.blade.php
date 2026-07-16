@@ -42,6 +42,7 @@
         right: 0;
         height: 4px;
         background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+        pointer-events: none;
     }
 
     .card-header {
@@ -63,6 +64,7 @@
         background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
         transform: rotate(45deg);
         animation: shimmer 3s infinite;
+        pointer-events: none;
     }
 
     .card-header h4 {
@@ -177,6 +179,7 @@
         height: 100%;
         background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
         transition: left 0.6s;
+        pointer-events: none;
     }
 
     .btn:hover::before {

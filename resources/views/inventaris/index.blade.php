@@ -25,6 +25,7 @@
         background: rgba(255,255,255,0.1);
         border-radius: 50%;
         animation: float 6s ease-in-out infinite;
+        pointer-events: none;
     }
     @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
 
@@ -275,9 +276,11 @@
                             <th>Perangkat</th>
                             <th>No Asset</th>
                             <th>Peminjaman</th>
+                            <th>Lama</th>
                             <th>Verifikasi</th>
                             <th>Persetujuan</th>
                             <th>Tgl Pinjam</th>
+                            <th>Est. Kembali</th>
                             <th style="width:80px;">Aksi</th>
                         </tr>
                     </thead>
@@ -306,6 +309,7 @@
                                     <br><span class="overdue-badge">⚠ Terlambat</span>
                                 @endif
                             </td>
+                            <td><small>{{ $item->lama_pinjam ? $item->lama_pinjam . ' hari' : '-' }}</small></td>
                             <td>
                                 @php
                                     $verifColor = match($item->status_verifikasi ?? 'Pending') {
@@ -333,6 +337,7 @@
                                 </span>
                             </td>
                             <td>{{ $item->tanggal_peminjaman }}</td>
+                            <td><small>{{ $item->tanggal_pengembalian ? \Carbon\Carbon::parse($item->tanggal_pengembalian)->format('d/m/Y') : '-' }}</small></td>
                             <td>
                                 <div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:center;">
                                     @if(Auth::user()->isAdmin() && ($item->status_verifikasi ?? 'Pending') === 'Pending')
@@ -386,7 +391,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="10" class="text-center text-muted py-5">
+                            <td colspan="12" class="text-center text-muted py-5">
                                 <div style="font-size:2.5rem; margin-bottom:8px;">📭</div>
                                 Belum ada data inventaris
                             </td>
@@ -451,7 +456,7 @@ function openReturnModal(id, name) {
     form.action = '/inventaris/' + id + '/pengembalian';
     document.getElementById('returnItemName').textContent = name;
     var modalEl = document.getElementById('returnModal');
-    var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    var modal = new bootstrap.Modal(modalEl);
     modal.show();
 }
 </script>

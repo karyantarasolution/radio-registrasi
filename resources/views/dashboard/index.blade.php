@@ -2,48 +2,32 @@
 
 @section('content')
 <style>
-    .dash-wrapper {
+    .page-container {
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         min-height: 100vh;
-        padding: 0 0 20px;
+        padding: 20px 0;
     }
-    .dash-header {
-        background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 50%, #1a365d 100%);
+    .page-header {
+        background: linear-gradient(135deg, #ea6666 0%, #f71414 100%);
         color: white;
-        padding: 2rem 2rem 2.5rem;
-        margin-bottom: -1.5rem;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         position: relative;
         overflow: hidden;
     }
-    .dash-header::before {
+    .page-header::before {
         content: '';
         position: absolute;
-        top: -60%; right: -5%;
-        width: 300px; height: 300px;
-        background: rgba(255,255,255,0.05);
-        border-radius: 50%;
-    }
-    .dash-header::after {
-        content: '';
-        position: absolute;
-        bottom: -40%; left: 20%;
+        top: -50%; right: -10%;
         width: 200px; height: 200px;
-        background: rgba(255,255,255,0.03);
+        background: rgba(255,255,255,0.1);
         border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+        pointer-events: none;
     }
-    .dash-greeting {
-        font-size: 1.6rem;
-        font-weight: 700;
-        margin-bottom: 0.25rem;
-    }
-    .dash-subtitle {
-        font-size: 0.9rem;
-        opacity: 0.8;
-    }
-    .dash-date {
-        font-size: 0.78rem;
-        opacity: 0.6;
-    }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
 
     .module-card {
         display: flex;
@@ -100,13 +84,13 @@
     }
 
     .mc-radio   { background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; }
-    .mc-inv     { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
-    .mc-guest   { background: linear-gradient(135deg, #4facfe, #00f2fe); color: #fff; }
-    .mc-karyawan{ background: linear-gradient(135deg, #43e97b, #38f9d7); color: #fff; }
-    .mc-ups     { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; }
-    .mc-stavolt { background: linear-gradient(135deg, #fa709a, #fee140); color: #333; }
-    .mc-monitor { background: linear-gradient(135deg, #30cfd0, #330867); color: #fff; }
-    .mc-proyek  { background: linear-gradient(135deg, #a8edea, #fed6e3); color: #333; }
+    .mc-inv     { background: linear-gradient(135deg, #ea6666, #f71414); color: #fff; }
+    .mc-guest   { background: linear-gradient(135deg, #dc3545, #c0392b); color: #fff; }
+    .mc-karyawan{ background: linear-gradient(135deg, #ff6b6b, #ee5a24); color: #fff; }
+    .mc-ups     { background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; }
+    .mc-stavolt { background: linear-gradient(135deg, #ea6666, #d63031); color: #fff; }
+    .mc-monitor { background: linear-gradient(135deg, #ff4757, #c0392b); color: #fff; }
+    .mc-proyek  { background: linear-gradient(135deg, #ff7675, #d63031); color: #fff; }
 
     .section-label {
         font-size: 0.9rem;
@@ -222,23 +206,17 @@
     }
 </style>
 
-<div class="dash-wrapper">
-    <div class="dash-header" data-aos="fade-down">
-        <div class="container-fluid">
+<div class="page-container">
+    <div class="container-fluid">
+        <div class="page-header" data-aos="fade-down">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <div class="d-flex align-items-center gap-3">
-                        <img src="{{ asset('images/ppa-logo.png') }}" alt="Logo PPA" style="height: 52px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));">
-                        <div>
-                            <div class="dash-greeting">Dashboard ICT</div>
-                            <div class="dash-subtitle">Ringkasan data seluruh modul sistem manajemen</div>
-                            <div class="dash-date">{{ now()->translatedFormat('l, d F Y') }} &middot; PT. Putra Perkasa Abadi</div>
-                        </div>
-                    </div>
+                    <h2 class="fw-bold mb-1">🏠 Dashboard ICT</h2>
+                    <p class="mb-0">Ringkasan data seluruh modul sistem manajemen</p>
+                    <small>{{ now()->translatedFormat('l, d F Y') }}</small>
                 </div>
             </div>
         </div>
-    </div>
 
     <div class="container-fluid" style="position: relative; z-index: 1;">
 
@@ -337,25 +315,25 @@
                     <div class="row g-3 mb-3">
                         <div class="col-3">
                             <div class="summary-stat">
-                                <div class="ss-num" style="color:#667eea;">{{ $chartStats['total'] }}</div>
+                                <div class="ss-num" style="color:#3b82f6;">{{ $chartStats['total'] }}</div>
                                 <div class="ss-label">Total</div>
                             </div>
                         </div>
                         <div class="col-3">
                             <div class="summary-stat">
-                                <div class="ss-num" style="color:#e67e22;">{{ $chartStats['pending'] }}</div>
+                                <div class="ss-num" style="color:#3b82f6;">{{ $chartStats['pending'] }}</div>
                                 <div class="ss-label">Pending</div>
                             </div>
                         </div>
                         <div class="col-3">
                             <div class="summary-stat">
-                                <div class="ss-num" style="color:#28a745;">{{ $chartStats['dikembalikan'] }}</div>
+                                <div class="ss-num" style="color:#3b82f6;">{{ $chartStats['dikembalikan'] }}</div>
                                 <div class="ss-label">Dikembalikan</div>
                             </div>
                         </div>
                         <div class="col-3">
                             <div class="summary-stat">
-                                <div class="ss-num" style="color:#dc3545;">{{ $chartStats['belum'] }}</div>
+                                <div class="ss-num" style="color:#3b82f6;">{{ $chartStats['belum'] }}</div>
                                 <div class="ss-label">Belum</div>
                             </div>
                         </div>

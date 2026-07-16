@@ -73,6 +73,25 @@ class InventarisController extends Controller
         return view('inventaris.form', compact('gudangBarang', 'user'));
     }
 
+    public function searchKaryawan(Request $request)
+    {
+        $q = $request->input('q', '');
+        if (strlen($q) < 1) {
+            return response()->json([]);
+        }
+
+        $karyawan = \App\Models\User::where('role', 'karyawan')
+            ->where(function ($query) use ($q) {
+                $query->where('nrp', 'LIKE', "%{$q}%")
+                      ->orWhere('name', 'LIKE', "%{$q}%");
+            })
+            ->select('id', 'name', 'nrp', 'jabatan')
+            ->limit(10)
+            ->get();
+
+        return response()->json($karyawan);
+    }
+
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -80,6 +99,9 @@ class InventarisController extends Controller
         $request->validate([
             'gudang_barang_id' => 'required|exists:gudang_barang,id',
             'tanggal_peminjaman' => 'required|date',
+            'lama_pinjam' => 'required|integer|min:1',
+            'nama' => 'required|string|max:255',
+            'nrp' => 'required|string|max:255',
         ]);
 
         $barang = GudangBarang::findOrFail($request->gudang_barang_id);
@@ -88,13 +110,18 @@ class InventarisController extends Controller
             return back()->withErrors(['gudang_barang_id' => 'Barang tidak tersedia untuk dipinjam.'])->withInput();
         }
 
+        $tanggalPeminjaman = \Carbon\Carbon::parse($request->tanggal_peminjaman);
+        $tanggalPengembalian = $tanggalPeminjaman->copy()->addDays((int) $request->lama_pinjam);
+
         $data = [
-            'nama' => $user->name,
-            'nrp' => $user->nrp,
+            'nama' => $request->nama,
+            'nrp' => $request->nrp,
             'gudang_barang_id' => $barang->id,
             'nama_perangkat' => $barang->nama_perangkat,
             'no_asset' => $barang->kategori . '-' . str_pad($barang->id, 4, '0', STR_PAD_LEFT),
             'tanggal_peminjaman' => $request->tanggal_peminjaman,
+            'lama_pinjam' => $request->lama_pinjam,
+            'tanggal_pengembalian' => $tanggalPengembalian->toDateString(),
             'status_verifikasi' => 'Pending',
             'status_peminjaman' => 'Pending',
             'status_persetujuan' => 'Pending',
@@ -145,15 +172,21 @@ class InventarisController extends Controller
         $request->validate([
             'gudang_barang_id' => 'required|exists:gudang_barang,id',
             'tanggal_peminjaman' => 'required|date',
+            'lama_pinjam' => 'required|integer|min:1',
         ]);
 
         $barang = GudangBarang::findOrFail($request->gudang_barang_id);
+
+        $tanggalPeminjaman = \Carbon\Carbon::parse($request->tanggal_peminjaman);
+        $tanggalPengembalian = $tanggalPeminjaman->copy()->addDays((int) $request->lama_pinjam);
 
         $data = [
             'gudang_barang_id' => $barang->id,
             'nama_perangkat' => $barang->nama_perangkat,
             'no_asset' => $barang->kategori . '-' . str_pad($barang->id, 4, '0', STR_PAD_LEFT),
             'tanggal_peminjaman' => $request->tanggal_peminjaman,
+            'lama_pinjam' => $request->lama_pinjam,
+            'tanggal_pengembalian' => $tanggalPengembalian->toDateString(),
         ];
 
         if (!$user->isAdmin()) {
@@ -325,5 +358,61 @@ class InventarisController extends Controller
         $inventaris = Inventaris::with('gudangBarang', 'approver')->get();
         $pdf = Pdf::loadView('inventaris.report', compact('inventaris'))->setPaper('a4', 'portrait');
         return $pdf->stream('Laporan-Inventaris.pdf');
+    }
+
+    public function riwayat()
+    {
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
+            abort(403);
+        }
+
+        $riwayat = Inventaris::with('gudangBarang', 'approver')
+            ->where('status_peminjaman', '!=', 'Pending')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('nrp');
+
+        return view('inventaris.riwayat', compact('riwayat'));
+    }
+
+    public function daftarAkun()
+    {
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
+            abort(403);
+        }
+
+        $akunKaryawan = \App\Models\User::where('role', 'karyawan')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('inventaris.daftar-akun', compact('akunKaryawan'));
+    }
+
+    public function approveAkun($id)
+    {
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
+            abort(403);
+        }
+
+        $akun = \App\Models\User::findOrFail($id);
+        $akun->update(['is_approved' => true]);
+
+        return redirect()->route('admin.daftar-akun')->with('success', 'Akun ' . $akun->name . ' berhasil disetujui.');
+    }
+
+    public function destroyAkun($id)
+    {
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
+            abort(403);
+        }
+
+        $akun = \App\Models\User::findOrFail($id);
+        $akun->delete();
+
+        return redirect()->route('admin.daftar-akun')->with('success', 'Akun berhasil dihapus.');
     }
 }

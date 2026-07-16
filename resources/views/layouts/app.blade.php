@@ -506,6 +506,39 @@
                 </div>
                 @endif
 
+                @if(Auth::user()->isKaryawan() && (($h1Warnings->count() ?? 0) > 0 || ($overdueItems->count() ?? 0) > 0))
+                <div class="dropdown notif-dropdown">
+                    <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Peringatan Pengembalian" style="background:#fff3cd; border:1px solid #ffc107; border-radius:50%; width:38px; height:38px; display:flex; align-items:center; justify-content:center; color:#856404; position:relative;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        @php $totalWarnings = ($h1Warnings->count() ?? 0) + ($overdueItems->count() ?? 0); @endphp
+                        @if($totalWarnings > 0)
+                            <span class="notif-badge" style="background:#dc3545;">{{ $totalWarnings }}</span>
+                        @endif
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end notif-menu shadow">
+                        <li><h6 class="dropdown-header" style="color:#856404;">⚠️ Peringatan Pengembalian</h6></li>
+                        @forelse($overdueItems ?? [] as $item)
+                            <li>
+                                <span class="dropdown-item unread">
+                                    <strong class="d-block text-danger">Terlambat!</strong>
+                                    <small>{{ $item->nama_perangkat }} - Deadline: {{ \Carbon\Carbon::parse($item->tanggal_pengembalian)->format('d/m/Y') }}</small>
+                                </span>
+                            </li>
+                        @empty
+                        @endforelse
+                        @forelse($h1Warnings ?? [] as $item)
+                            <li>
+                                <span class="dropdown-item unread">
+                                    <strong class="d-block text-warning">H-1 Besok Deadline</strong>
+                                    <small>{{ $item->nama_perangkat }} - Kembalikan besok: {{ \Carbon\Carbon::parse($item->tanggal_pengembalian)->format('d/m/Y') }}</small>
+                                </span>
+                            </li>
+                        @empty
+                        @endforelse
+                    </ul>
+                </div>
+                @endif
+
                 <!-- User Info -->
                 <div class="user-info">
                     <div class="user-avatar {{ Auth::user()->isAdmin() ? 'admin' : '' }}">
@@ -545,8 +578,8 @@
 
             @if($isAdmin)
                 <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <i class="fas fa-home"></i>
-                    <span class="link-text">Beranda</span>
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="link-text">Dashboard ICT</span>
                 </a>
 
                 <a href="{{ route('registrasi.index') }}" class="{{ request()->routeIs('registrasi.*') ? 'active' : '' }}">
@@ -598,10 +631,20 @@
                     <span class="link-text">Data Karyawan</span>
                 </a>
 
+                <a href="{{ route('inventaris.riwayat') }}" class="{{ request()->routeIs('inventaris.riwayat') ? 'active' : '' }}">
+                    <i class="fas fa-history"></i>
+                    <span class="link-text">Riwayat Peminjaman</span>
+                </a>
+
+                <a href="{{ route('admin.daftar-akun') }}" class="{{ request()->routeIs('admin.daftar-akun') ? 'active' : '' }}">
+                    <i class="fas fa-user-cog"></i>
+                    <span class="link-text">Daftar Akun</span>
+                </a>
+
             @elseif($isPimpinan)
                 <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <i class="fas fa-home"></i>
-                    <span class="link-text">Beranda</span>
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="link-text">Dashboard</span>
                 </a>
 
                 <a href="{{ route('pengajuan.index') }}" class="{{ request()->routeIs('pengajuan.*') ? 'active' : '' }}">
@@ -621,16 +664,6 @@
                 </a>
 
             @else
-                <a href="{{ route('inventaris.index') }}" class="{{ request()->routeIs('inventaris.*') ? 'active' : '' }}">
-                    <i class="fas fa-box"></i>
-                    <span class="link-text">Inventaris</span>
-                </a>
-
-                <a href="{{ route('gudang-barang.index') }}" class="{{ request()->routeIs('gudang*') ? 'active' : '' }}">
-                    <i class="fas fa-warehouse"></i>
-                    <span class="link-text">Gudang IT</span>
-                </a>
-
                 <a href="{{ route('bukutamu.index') }}" class="{{ request()->routeIs('bukutamu.*') ? 'active' : '' }}">
                     <i class="fas fa-book"></i>
                     <span class="link-text">Buku Tamu</span>

@@ -18,6 +18,7 @@ class Pengajuan extends Model
         'nama_barang',
         'jumlah_diminta',
         'satuan',
+        'estimasi_biaya',
         'deskripsi',
         'status',
         'catatan_pimpinan',

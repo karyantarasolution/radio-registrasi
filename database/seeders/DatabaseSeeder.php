@@ -24,3 +24,5 @@ class DatabaseSeeder extends Seeder
         $this->call(GudangBarangSeeder::class);
     }
 }
+
+//3312231

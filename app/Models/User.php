@@ -14,7 +14,9 @@ class User extends Authenticatable
         'name',
         'email',
         'nrp',
+        'jabatan',
         'role',
+        'is_approved',
         'password',
     ];
 
