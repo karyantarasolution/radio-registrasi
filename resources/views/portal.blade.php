@@ -166,6 +166,9 @@
 </head>
 <body>
     <div class="portal-container">
+        <div class="logo-section">
+            <img src="{{ asset('images/logo.PNG') }}" alt="Logo PPA">
+        </div>
         <div class="company-name">PT. Putra Perkasa Abadi</div>
         <div class="company-subtitle">Sistem Manajemen ICT</div>
         <div class="portal-title">Portal Akses</div>
