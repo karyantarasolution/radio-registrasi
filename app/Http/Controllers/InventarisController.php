@@ -10,6 +10,7 @@ use App\Notifications\PengajuanInventarisNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class InventarisController extends Controller
@@ -305,9 +306,21 @@ class InventarisController extends Controller
         $request->validate([
             'kondisi_barang' => 'required|in:Baik,Rusak Ringan,Rusak Berat',
             'catatan' => 'nullable|string',
+            'foto_sebelum' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'foto_sesudah' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
         ]);
 
-        DB::transaction(function () use ($inventaris, $request, $user) {
+        $fotoSebelum = null;
+        $fotoSesudah = null;
+
+        if ($request->hasFile('foto_sebelum')) {
+            $fotoSebelum = $request->file('foto_sebelum')->store('pengembalian', 'public');
+        }
+        if ($request->hasFile('foto_sesudah')) {
+            $fotoSesudah = $request->file('foto_sesudah')->store('pengembalian', 'public');
+        }
+
+        DB::transaction(function () use ($inventaris, $request, $user, $fotoSebelum, $fotoSesudah) {
             if ($inventaris->gudangBarang && $request->kondisi_barang === 'Baik') {
                 $inventaris->gudangBarang->increment('stok_tersedia');
                 StokMutasi::create([
@@ -322,6 +335,8 @@ class InventarisController extends Controller
             \App\Models\DokumentasiPengembalian::create([
                 'inventaris_id' => $inventaris->id,
                 'kondisi_barang' => $request->kondisi_barang,
+                'foto_sebelum' => $fotoSebelum,
+                'foto_sesudah' => $fotoSesudah,
                 'catatan' => $request->catatan,
                 'dikembalikan_oleh' => $user->name,
             ]);
@@ -374,6 +389,44 @@ class InventarisController extends Controller
             ->groupBy('nrp');
 
         return view('inventaris.riwayat', compact('riwayat'));
+    }
+
+    public function riwayatPdf()
+    {
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
+            abort(403);
+        }
+
+        $riwayat = Inventaris::with('gudangBarang', 'approver')
+            ->where('status_peminjaman', '!=', 'Pending')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('nrp');
+
+        $pdf = Pdf::loadView('inventaris.riwayat-pdf', compact('riwayat'))->setPaper('a4', 'landscape');
+        return $pdf->stream('Laporan-Riwayat-Peminjaman.pdf');
+    }
+
+    public function riwayatPdfPerAkun($nrp)
+    {
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
+            abort(403);
+        }
+
+        $riwayat = Inventaris::with('gudangBarang', 'approver')
+            ->where('status_peminjaman', '!=', 'Pending')
+            ->where('nrp', $nrp)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('nrp');
+
+        $akun = \App\Models\User::where('nrp', $nrp)->first();
+        $namaAkun = $akun->name ?? $nrp;
+
+        $pdf = Pdf::loadView('inventaris.riwayat-pdf', compact('riwayat'))->setPaper('a4', 'landscape');
+        return $pdf->stream("Laporan-Riwayat-Peminjaman-{$namaAkun}.pdf");
     }
 
     public function daftarAkun()

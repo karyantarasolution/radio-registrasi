@@ -592,14 +592,24 @@
                     <span class="link-text">Inventaris</span>
                 </a>
 
-                <a href="{{ route('pengajuan.index') }}" class="{{ request()->routeIs('pengajuan.*') ? 'active' : '' }}">
-                    <i class="fas fa-clipboard-list"></i>
-                    <span class="link-text">Pengajuan</span>
-                </a>
-
                 <a href="{{ route('gudang-barang.index') }}" class="{{ request()->routeIs('gudang*') ? 'active' : '' }}">
                     <i class="fas fa-warehouse"></i>
                     <span class="link-text">Gudang IT</span>
+                </a>
+
+                <a href="{{ route('inventaris.riwayat') }}" class="{{ request()->routeIs('inventaris.riwayat') ? 'active' : '' }}">
+                    <i class="fas fa-history"></i>
+                    <span class="link-text">Riwayat Peminjaman</span>
+                </a>
+
+                <a href="{{ route('admin.daftar-akun') }}" class="{{ request()->routeIs('admin.daftar-akun') ? 'active' : '' }}">
+                    <i class="fas fa-user-cog"></i>
+                    <span class="link-text">Daftar Akun</span>
+                </a>
+
+                <a href="{{ route('pengajuan.index') }}" class="{{ request()->routeIs('pengajuan.*') ? 'active' : '' }}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="link-text">Pengajuan</span>
                 </a>
 
                 <a href="{{ route('bukutamu.index') }}" class="{{ request()->routeIs('bukutamu.*') ? 'active' : '' }}">
@@ -629,16 +639,6 @@
                 <a href="{{ route('karyawan.index') }}" class="{{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
                     <i class="fas fa-users"></i>
                     <span class="link-text">Data Karyawan</span>
-                </a>
-
-                <a href="{{ route('inventaris.riwayat') }}" class="{{ request()->routeIs('inventaris.riwayat') ? 'active' : '' }}">
-                    <i class="fas fa-history"></i>
-                    <span class="link-text">Riwayat Peminjaman</span>
-                </a>
-
-                <a href="{{ route('admin.daftar-akun') }}" class="{{ request()->routeIs('admin.daftar-akun') ? 'active' : '' }}">
-                    <i class="fas fa-user-cog"></i>
-                    <span class="link-text">Daftar Akun</span>
                 </a>
 
             @elseif($isPimpinan)
@@ -672,7 +672,7 @@
         </div>
 
         <!-- Content -->
-        <div class="content" data-aos="fade-up">
+        <div class="content">
             @yield('content')
         </div>
 
@@ -699,6 +699,12 @@
             toggleBtn.addEventListener("click", function() {
                 sidebar.classList.toggle("collapsed");
                 toggleBtn.classList.toggle("active");
+            });
+
+            document.querySelectorAll('.sidebar .dropdown-toggle').forEach(function(el) {
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                });
             });
 
             // FORCE FIX untuk icon dan text submenu

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PengajuanController extends Controller
 {
@@ -106,21 +107,44 @@ class PengajuanController extends Controller
                 'jumlah_disetujui' => $request->jumlah_disetujui,
             ]);
 
-            if ($request->status === 'Disetujui' && $pengajuan->kategori === 'Maintenance' && $pengajuan->gudangBarang) {
-                $barang = $pengajuan->gudangBarang;
+            if ($request->status === 'Disetujui') {
                 $qty = $request->jumlah_disetujui ?? $pengajuan->jumlah_diminta;
 
-                $barang->update([
-                    'kondisi' => 'Baik',
-                    'stok_tersedia' => $barang->stok_tersedia + $qty,
-                ]);
+                if ($pengajuan->kategori === 'Pembelian') {
+                    $barang = GudangBarang::create([
+                        'nama_perangkat' => $pengajuan->nama_barang,
+                        'kategori' => 'Pembelian',
+                        'stok_total' => $qty,
+                        'stok_tersedia' => $qty,
+                        'kondisi' => 'Baik',
+                        'tanggal_masuk' => now()->toDateString(),
+                        'keterangan' => "Hasil pengajuan pembelian {$pengajuan->nomor_pengajuan}",
+                    ]);
 
-                StokMutasi::create([
-                    'gudang_barang_id' => $barang->id,
-                    'jenis' => 'Masuk',
-                    'jumlah' => $qty,
-                    'keterangan' => "Maintenance selesai - Pengajuan {$pengajuan->nomor_pengajuan}",
-                ]);
+                    StokMutasi::create([
+                        'gudang_barang_id' => $barang->id,
+                        'jenis' => 'Masuk',
+                        'jumlah' => $qty,
+                        'keterangan' => "Barang baru dari pengajuan {$pengajuan->nomor_pengajuan}",
+                    ]);
+
+                    $pengajuan->update(['gudang_barang_id' => $barang->id]);
+
+                } elseif ($pengajuan->kategori === 'Maintenance' && $pengajuan->gudangBarang) {
+                    $barang = $pengajuan->gudangBarang;
+
+                    $barang->update([
+                        'kondisi' => 'Baik',
+                        'stok_tersedia' => $barang->stok_tersedia + $qty,
+                    ]);
+
+                    StokMutasi::create([
+                        'gudang_barang_id' => $barang->id,
+                        'jenis' => 'Masuk',
+                        'jumlah' => $qty,
+                        'keterangan' => "Maintenance selesai - Pengajuan {$pengajuan->nomor_pengajuan}",
+                    ]);
+                }
             }
         });
 
@@ -137,5 +161,20 @@ class PengajuanController extends Controller
 
         Pengajuan::findOrFail($id)->delete();
         return redirect()->route('pengajuan.index')->with('success', 'Pengajuan berhasil dihapus.');
+    }
+
+    public function report()
+    {
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
+            abort(403);
+        }
+
+        $pengajuans = Pengajuan::with('user', 'approver', 'gudangBarang')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $pdf = Pdf::loadView('pengajuan.report', compact('pengajuans'))->setPaper('a4', 'landscape');
+        return $pdf->stream('Laporan-Pengajuan.pdf');
     }
 }

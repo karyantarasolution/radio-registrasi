@@ -8,7 +8,7 @@
         padding: 20px 0;
     }
     .page-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #ea6666 0%, #f71414 100%);
         color: white;
         padding: 30px;
         border-radius: 20px;
@@ -34,7 +34,7 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
     .table-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #ea6666 0%, #f71414 100%);
         color: white;
         padding: 15px 25px;
         display: flex;
@@ -251,6 +251,14 @@
                     </tbody>
                 </table>
             </div>
+
+            @if(Auth::user()->isAdmin())
+            <div class="table-actions" style="background:#f8f9fa; padding:12px 25px; border-top:1px solid #e9ecef;">
+                <a href="{{ route('pengajuan.report') }}" class="btn btn-modern" style="background:linear-gradient(135deg, #ff6b6b, #ee5a5a); color:#fff;" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Cetak PDF
+                </a>
+            </div>
+            @endif
         </div>
     </div>
 </div>

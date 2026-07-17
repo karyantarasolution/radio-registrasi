@@ -9,7 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pengajuans', function (Blueprint $table) {
-            $table->decimal('estimasi_biaya', 15, 2)->nullable()->after('satuan');
+            if (!Schema::hasColumn('pengajuans', 'estimasi_biaya')) {
+                $table->decimal('estimasi_biaya', 15, 2)->nullable()->after('satuan');
+            }
         });
     }
 

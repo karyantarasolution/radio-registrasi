@@ -9,7 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_approved')->default(false)->after('role');
+            if (!Schema::hasColumn('users', 'is_approved')) {
+                $table->boolean('is_approved')->default(false)->after('role');
+            }
         });
     }
 

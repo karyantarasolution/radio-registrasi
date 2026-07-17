@@ -9,7 +9,7 @@ class NotificationController extends Controller
 {
     private function ensureAdmin(): void
     {
-        if (Auth::user()->name !== 'ICT') {
+        if (!Auth::user()->isAdmin()) {
             abort(403, 'Hanya admin yang dapat mengakses notifikasi.');
         }
     }

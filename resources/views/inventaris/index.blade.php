@@ -418,7 +418,7 @@
             <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 20px 24px; color: #fff;">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-undo-alt me-2"></i>Dokumentasi Pengembalian</h5>
             </div>
-            <form id="returnForm" method="POST">
+            <form id="returnForm" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PATCH')
                 <div class="modal-body p-4">
@@ -429,10 +429,20 @@
                         <label class="form-label fw-semibold">Kondisi Barang <span class="text-danger">*</span></label>
                         <select name="kondisi_barang" class="form-select" style="border-radius:10px;" required>
                             <option value="">-- Pilih Kondisi --</option>
-                            <option value="Baik">✅ Baik</option>
-                            <option value="Rusak Ringan">⚠️ Rusak Ringan</option>
-                            <option value="Rusak Berat">❌ Rusak Berat</option>
+                            <option value="Baik">Baik</option>
+                            <option value="Rusak Ringan">Rusak Ringan</option>
+                            <option value="Rusak Berat">Rusak Berat</option>
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Foto Sebelum <small class="text-muted">(opsional)</small></label>
+                        <input type="file" name="foto_sebelum" class="form-control" style="border-radius:10px;" accept="image/*" onchange="previewImage(this, 'previewSebelum')">
+                        <img id="previewSebelum" src="" alt="" style="display:none; max-width:100%; max-height:150px; border-radius:8px; margin-top:8px;">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Foto Sesudah <small class="text-muted">(opsional)</small></label>
+                        <input type="file" name="foto_sesudah" class="form-control" style="border-radius:10px;" accept="image/*" onchange="previewImage(this, 'previewSesudah')">
+                        <img id="previewSesudah" src="" alt="" style="display:none; max-width:100%; max-height:150px; border-radius:8px; margin-top:8px;">
                     </div>
                     <div class="mb-0">
                         <label class="form-label fw-semibold">Catatan</label>
@@ -458,6 +468,20 @@ function openReturnModal(id, name) {
     var modalEl = document.getElementById('returnModal');
     var modal = new bootstrap.Modal(modalEl);
     modal.show();
+}
+function previewImage(input, previewId) {
+    var preview = document.getElementById(previewId);
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.src = '';
+        preview.style.display = 'none';
+    }
 }
 </script>
 @endsection

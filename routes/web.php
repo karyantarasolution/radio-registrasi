@@ -151,6 +151,7 @@ Route::middleware('auth')->group(function () {
     Route::post('pengajuan', [PengajuanController::class, 'store'])->name('pengajuan.store');
     Route::post('pengajuan/{id}/approve', [PengajuanController::class, 'approve'])->name('pengajuan.approve');
     Route::delete('pengajuan/{id}', [PengajuanController::class, 'destroy'])->name('pengajuan.destroy');
+    Route::get('pengajuan-report', [PengajuanController::class, 'report'])->name('pengajuan.report');
 
     // Inventaris - All authenticated users
     Route::resource('inventaris', InventarisController::class)->except(['show']);
@@ -160,6 +161,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('inventaris/{inventaris}/pengembalian', [InventarisController::class, 'pengembalian'])->name('inventaris.pengembalian');
     Route::get('inventaris-report', [InventarisController::class, 'report'])->name('inventaris.report');
     Route::get('inventaris-riwayat', [InventarisController::class, 'riwayat'])->name('inventaris.riwayat');
+    Route::get('inventaris-riwayat-pdf', [InventarisController::class, 'riwayatPdf'])->name('inventaris.riwayat-pdf');
+    Route::get('inventaris-riwayat-pdf/{nrp}', [InventarisController::class, 'riwayatPdfPerAkun'])->name('inventaris.riwayat-pdf-akun');
 
     // Daftar Akun Inventaris - Admin only
     Route::get('admin/daftar-akun', [InventarisController::class, 'daftarAkun'])->name('admin.daftar-akun');

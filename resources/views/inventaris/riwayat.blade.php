@@ -73,6 +73,9 @@
                     <small>PT. Putra Perkasa Abadi</small>
                 </div>
                 <div class="col-md-4 text-end">
+                    <a href="{{ route('inventaris.riwayat-pdf') }}" class="btn btn-sm" style="background:linear-gradient(135deg, #ff6b6b, #ee5a5a); color:#fff; border-radius:10px;" target="_blank">
+                        <i class="fas fa-file-pdf me-1"></i> Cetak PDF
+                    </a>
                     <a href="{{ route('inventaris.index') }}" class="btn btn-sm" style="background:rgba(255,255,255,0.2); color:#fff; border-radius:10px;">
                         <i class="fas fa-arrow-left me-1"></i> Kembali
                     </a>
@@ -88,7 +91,12 @@
                         <h6><i class="fas fa-user me-2"></i>{{ $first->nama }}</h6>
                         <small class="opacity-75">{{ $items->count() }} peminjaman</small>
                     </div>
-                    <span class="badge-nrp">NRP: {{ $nrp }}</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <a href="{{ route('inventaris.riwayat-pdf-akun', $nrp) }}" class="btn btn-sm" style="background:rgba(255,255,255,0.2); color:#fff; border-radius:8px; font-size:0.75rem;" target="_blank" title="Cetak PDF {{ $first->nama }}">
+                            <i class="fas fa-file-pdf me-1"></i> PDF
+                        </a>
+                        <span class="badge-nrp">NRP: {{ $nrp }}</span>
+                    </div>
                 </div>
                 <div style="overflow-x:auto;">
                     <table class="table-custom">

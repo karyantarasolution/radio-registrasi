@@ -12,7 +12,7 @@ class GudangBarangController extends Controller
 {
     private function isAdmin(): bool
     {
-        return Auth::user()->name == 'ICT';
+        return Auth::user()->isAdmin();
     }
 
     private function reportPdf(string $view, array $data, string $filename)
