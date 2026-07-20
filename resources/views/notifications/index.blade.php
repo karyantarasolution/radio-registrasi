@@ -47,8 +47,8 @@
 
         <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <h2 class="fw-bold mb-1">Notifikasi Admin</h2>
-                <p class="mb-0">Pengajuan inventaris dan kunjungan buku tamu</p>
+                <h2 class="fw-bold mb-1">Notifikasi</h2>
+                <p class="mb-0">{{ Auth::user()->isPimpinan() ? 'Pengajuan peminjaman dan informasi terbaru' : 'Pengajuan inventaris dan kunjungan buku tamu' }}</p>
             </div>
             @if(auth()->user()->unreadNotifications->count() > 0)
                 <form action="{{ route('notifications.read-all') }}" method="POST">

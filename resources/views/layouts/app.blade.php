@@ -477,7 +477,7 @@
             </div>
 
             <div class="user-info-section">
-                @if(Auth::user()->isAdmin())
+                @if(Auth::user()->isAdmin() || Auth::user()->isPimpinan())
                 <div class="dropdown notif-dropdown">
                     <button class="btn btn-notif" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifikasi">
                         <i class="fas fa-bell"></i>
@@ -589,12 +589,17 @@
 
                 <a href="{{ route('inventaris.index') }}" class="{{ request()->routeIs('inventaris.*') ? 'active' : '' }}">
                     <i class="fas fa-box"></i>
-                    <span class="link-text">Inventaris</span>
+                    <span class="link-text">Peminjaman</span>
                 </a>
 
                 <a href="{{ route('gudang-barang.index') }}" class="{{ request()->routeIs('gudang*') ? 'active' : '' }}">
                     <i class="fas fa-warehouse"></i>
                     <span class="link-text">Gudang IT</span>
+                </a>
+
+                <a href="{{ route('barang-maintenance.index') }}" class="{{ request()->routeIs('barang-maintenance.*') ? 'active' : '' }}">
+                    <i class="fas fa-tools"></i>
+                    <span class="link-text">Barang Maintenance</span>
                 </a>
 
                 <a href="{{ route('inventaris.riwayat') }}" class="{{ request()->routeIs('inventaris.riwayat') ? 'active' : '' }}">
@@ -623,7 +628,7 @@
                     data-bs-toggle="collapse"
                     data-bs-target="#submenu-inspeksi"
                     aria-expanded="{{ request()->is('inspeksi*') ? 'true' : 'false' }}">
-                        <i class="fas fa-tools"></i>
+                        <i class="fas fa-clipboard-check"></i>
                         <span class="link-text">Inspeksi</span>
                     </a>
                     <div id="submenu-inspeksi" class="collapse {{ request()->is('inspeksi*') ? 'show' : '' }}">
@@ -654,13 +659,18 @@
 
                 <a href="{{ route('inventaris.index') }}" class="{{ request()->routeIs('inventaris.*') ? 'active' : '' }}">
                     <i class="fas fa-box"></i>
-                    <span class="link-text">Inventaris</span>
+                    <span class="link-text">Peminjaman</span>
+                </a>
+
+                <a href="{{ route('pimpinan.laporan') }}" class="{{ request()->routeIs('pimpinan.laporan*') ? 'active' : '' }}">
+                    <i class="fas fa-chart-bar"></i>
+                    <span class="link-text">Laporan</span>
                 </a>
 
             @elseif($isKaryawan)
                 <a href="{{ route('inventaris.index') }}" class="{{ request()->routeIs('inventaris.*') ? 'active' : '' }}">
                     <i class="fas fa-box"></i>
-                    <span class="link-text">Inventaris Saya</span>
+                    <span class="link-text">Peminjaman Saya</span>
                 </a>
 
             @else

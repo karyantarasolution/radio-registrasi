@@ -15,6 +15,8 @@ use App\Http\Controllers\InspeksiProyektorController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PengajuanController;
+use App\Http\Controllers\BarangMaintenanceController;
+use App\Http\Controllers\LaporanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -140,7 +142,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Notifications
+    // Notifications - Admin & Pimpinan
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
@@ -157,8 +159,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('inventaris', InventarisController::class)->except(['show']);
     Route::get('inventaris/search-karyawan', [InventarisController::class, 'searchKaryawan'])->name('inventaris.search-karyawan');
     Route::patch('inventaris/{inventaris}/verifikasi', [InventarisController::class, 'verifikasi'])->name('inventaris.verifikasi');
-    Route::patch('inventaris/{inventaris}/persetujuan', [InventarisController::class, 'persetujuan'])->name('inventaris.persetujuan');
     Route::patch('inventaris/{inventaris}/pengembalian', [InventarisController::class, 'pengembalian'])->name('inventaris.pengembalian');
+    Route::patch('inventaris/{inventaris}/acc-pengembalian', [InventarisController::class, 'accPengembalian'])->name('inventaris.acc-pengembalian');
     Route::get('inventaris-report', [InventarisController::class, 'report'])->name('inventaris.report');
     Route::get('inventaris-riwayat', [InventarisController::class, 'riwayat'])->name('inventaris.riwayat');
     Route::get('inventaris-riwayat-pdf', [InventarisController::class, 'riwayatPdf'])->name('inventaris.riwayat-pdf');
@@ -178,6 +180,16 @@ Route::middleware('auth')->group(function () {
     Route::get('gudang-laporan/maintenance/report', [GudangBarangController::class, 'reportMaintenance'])->name('gudang.report.maintenance');
     Route::get('gudang-laporan/barang-baru/report', [GudangBarangController::class, 'reportBaru'])->name('gudang.report.baru');
     Route::get('gudang-laporan/mutasi/report', [GudangBarangController::class, 'reportMutasi'])->name('gudang.report.mutasi');
+
+    // Barang Maintenance - Admin only
+    Route::get('barang-maintenance', [BarangMaintenanceController::class, 'index'])->name('barang-maintenance.index');
+
+    // Laporan Pimpinan - Pimpinan & Admin
+    Route::get('laporan', [LaporanController::class, 'index'])->name('pimpinan.laporan');
+    Route::get('laporan/gudang', [LaporanController::class, 'gudang'])->name('pimpinan.laporan.gudang');
+    Route::get('laporan/peminjaman', [LaporanController::class, 'peminjaman'])->name('pimpinan.laporan.peminjaman');
+    Route::get('laporan/pengajuan', [LaporanController::class, 'pengajuan'])->name('pimpinan.laporan.pengajuan');
+    Route::get('laporan/maintenance', [LaporanController::class, 'maintenance'])->name('pimpinan.laporan.maintenance');
 
     // Karyawan - Admin only
     Route::resource('karyawan', KaryawanController::class);

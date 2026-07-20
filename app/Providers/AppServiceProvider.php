@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
             if (Auth::check()) {
                 $user = Auth::user();
 
-                if ($user->isAdmin()) {
+                if ($user->isAdmin() || $user->isPimpinan()) {
                     $view->with([
                         'unreadNotificationsCount' => $user->unreadNotifications()->count(),
                         'latestNotifications' => $user->notifications()->limit(5)->get(),

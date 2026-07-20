@@ -10,7 +10,7 @@ class Inventaris extends Model
     use HasFactory;
 
     public const VERIFIKASI = ['Pending', 'Disetujui', 'Ditolak'];
-    public const PEMINJAMAN = ['Pending', 'Menunggu Persetujuan', 'Belum Dikembalikan', 'Dikembalikan'];
+    public const PEMINJAMAN = ['Pending', 'Belum Dikembalikan', 'Pending Pengembalian', 'Dikembalikan'];
     public const PERSETUJUAN = ['Pending', 'Disetujui', 'Ditolak'];
     public const KONDISI_PENGEMBALIAN = ['Baik', 'Rusak Ringan', 'Rusak Berat'];
 

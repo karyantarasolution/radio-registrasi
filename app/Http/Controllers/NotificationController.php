@@ -7,16 +7,16 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    private function ensureAdmin(): void
+    private function ensureAuthorized(): void
     {
-        if (!Auth::user()->isAdmin()) {
-            abort(403, 'Hanya admin yang dapat mengakses notifikasi.');
+        if (!Auth::user()->isAdmin() && !Auth::user()->isPimpinan()) {
+            abort(403, 'Hanya admin atau pimpinan yang dapat mengakses notifikasi.');
         }
     }
 
     public function index()
     {
-        $this->ensureAdmin();
+        $this->ensureAuthorized();
 
         $notifications = Auth::user()->notifications()->paginate(15);
 
@@ -25,7 +25,7 @@ class NotificationController extends Controller
 
     public function markAsRead(string $id)
     {
-        $this->ensureAdmin();
+        $this->ensureAuthorized();
 
         $notification = Auth::user()->notifications()->where('id', $id)->firstOrFail();
         $notification->markAsRead();
@@ -37,7 +37,7 @@ class NotificationController extends Controller
 
     public function markAllAsRead()
     {
-        $this->ensureAdmin();
+        $this->ensureAuthorized();
 
         Auth::user()->unreadNotifications->markAsRead();
 

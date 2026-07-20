@@ -196,13 +196,22 @@
                 <div class="form-group">
                     <label class="form-label">Kondisi</label>
                     <div class="select-wrapper">
-                        <select name="kondisi" class="form-select" required>
+                        <select name="kondisi" class="form-select" required id="kondisiSelect">
                             @foreach(['Baik', 'Perlu Maintenance', 'Rusak'] as $k)
                                 <option value="{{ $k }}" @selected(old('kondisi', $barang->kondisi ?? 'Baik') == $k)>{{ $k }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
+
+                @if(isset($barang) && $barang->kondisi === 'Baik')
+                <div class="form-group" id="jumlahMaintenanceGroup" style="display:none;">
+                    <label class="form-label">Jumlah Unit yang di-Maintenance</label>
+                    <input type="number" name="jumlah_maintenance" class="form-control" min="1"
+                        max="{{ $barang->stok_tersedia }}" value="1">
+                    <small class="text-muted d-block mt-1">Stok tersedia saat ini: <strong>{{ $barang->stok_tersedia }}</strong>. Jumlah ini akan dikurangi dari stok tersedia.</small>
+                </div>
+                @endif
 
                 <div class="form-group">
                     <label class="form-label">Tanggal Masuk</label>
@@ -229,6 +238,21 @@ document.getElementById('gudangForm').addEventListener('submit', function() {
     const btn = document.getElementById('submitBtn');
     btn.textContent = 'Menyimpan...';
     btn.disabled = true;
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    var kondisiSelect = document.getElementById('kondisiSelect');
+    var jumlahGroup = document.getElementById('jumlahMaintenanceGroup');
+
+    if (kondisiSelect && jumlahGroup) {
+        kondisiSelect.addEventListener('change', function() {
+            if (this.value === 'Perlu Maintenance' || this.value === 'Rusak') {
+                jumlahGroup.style.display = 'block';
+            } else {
+                jumlahGroup.style.display = 'none';
+            }
+        });
+    }
 });
 </script>
 @endsection

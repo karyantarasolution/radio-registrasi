@@ -114,12 +114,32 @@ class GudangBarangController extends Controller
             'kondisi' => 'required|in:Baik,Perlu Maintenance,Rusak',
             'tanggal_masuk' => 'required|date',
             'keterangan' => 'nullable|string',
+            'jumlah_maintenance' => 'nullable|integer|min:1',
         ]);
+
+        $oldKondisi = $gudang_barang->kondisi;
+        $newKondisi = $request->kondisi;
 
         $gudang_barang->update($request->only([
             'nama_perangkat', 'merk', 'kategori', 'stok_total',
             'stok_tersedia', 'kondisi', 'tanggal_masuk', 'keterangan',
         ]));
+
+        if ($oldKondisi === 'Baik' && in_array($newKondisi, ['Perlu Maintenance', 'Rusak'])) {
+            $jumlah = (int) ($request->jumlah_maintenance ?? 1);
+            if ($jumlah > $gudang_barang->stok_tersedia) {
+                $jumlah = $gudang_barang->stok_tersedia;
+            }
+            if ($jumlah > 0) {
+                $gudang_barang->decrement('stok_tersedia', $jumlah);
+                StokMutasi::create([
+                    'gudang_barang_id' => $gudang_barang->id,
+                    'jenis' => 'Keluar',
+                    'jumlah' => $jumlah,
+                    'keterangan' => 'Dikirim ke maintenance - ' . $newKondisi,
+                ]);
+            }
+        }
 
         return redirect()->route('gudang-barang.index')->with('success', 'Data gudang berhasil diperbarui.');
     }

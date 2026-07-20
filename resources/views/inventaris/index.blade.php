@@ -172,6 +172,7 @@
     .action-btn.btn-warning { background: linear-gradient(135deg, #e67e22, #f39c12); }
     .action-btn.btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); }
     .action-btn.btn-info { background: linear-gradient(135deg, #17a2b8, #20c997); }
+    .action-btn.btn-purple { background: linear-gradient(135deg, #8e44ad, #9b59b6); }
 </style>
 
 <div class="page-container">
@@ -180,14 +181,16 @@
         <div class="page-header" data-aos="fade-down">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h2 class="fw-bold mb-1">📦 Inventaris Perangkat IT</h2>
+                    <h2 class="fw-bold mb-1">📦 Peminjaman Perangkat IT</h2>
                     <p class="mb-0">Kelola data peminjaman dan pengembalian perangkat IT</p>
                     <small>PT. Putra Perkasa Abadi</small>
                 </div>
                 <div class="col-md-4 text-end">
+                    @if(!Auth::user()->isPimpinan())
                     <a href="{{ route('inventaris.create') }}" class="btn btn-add btn-modern">
                         <i class="fas fa-plus me-1"></i> Ajukan Peminjaman
                     </a>
+                    @endif
                 </div>
             </div>
         </div>
@@ -233,21 +236,21 @@
         <div class="table-card" data-aos="fade-up">
             <div class="table-header">
                 <div>
-                    <h4 class="table-title">📋 Data Inventaris</h4>
+                    <h4 class="table-title">📋 Data Peminjaman</h4>
                     <small class="table-subtitle">
                         Total: {{ $inventaris->count() }} data
                         @if(Auth::user()->isAdmin() && $pendingCount > 0)
                             &middot; {{ $pendingCount }} menunggu verifikasi
                         @endif
-                        @if(Auth::user()->isPimpinan() && $pendingApprovalCount > 0)
-                            &middot; {{ $pendingApprovalCount }} menunggu persetujuan
+                        @if(Auth::user()->isAdmin() && ($pendingReturnCount ?? 0) > 0)
+                            &middot; {{ $pendingReturnCount }} menunggu acc pengembalian
                         @endif
                     </small>
                 </div>
                 <form method="GET" action="{{ route('inventaris.index') }}" class="filter-form">
                     <select name="status" onchange="this.form.submit()">
                         <option value="">Semua Peminjaman</option>
-                        @foreach(['Pending','Menunggu Persetujuan','Belum Dikembalikan','Dikembalikan'] as $s)
+                        @foreach(['Pending','Belum Dikembalikan','Pending Pengembalian','Dikembalikan'] as $s)
                             <option value="{{ $s }}" {{ request('status') == $s ? 'selected' : '' }}>{{ $s }}</option>
                         @endforeach
                     </select>
@@ -255,12 +258,6 @@
                         <option value="">Semua Verifikasi</option>
                         @foreach(['Pending','Disetujui','Ditolak'] as $v)
                             <option value="{{ $v }}" {{ request('verifikasi') == $v ? 'selected' : '' }}>{{ $v }}</option>
-                        @endforeach
-                    </select>
-                    <select name="persetujuan" onchange="this.form.submit()">
-                        <option value="">Semua Persetujuan</option>
-                        @foreach(['Pending','Disetujui','Ditolak'] as $p)
-                            <option value="{{ $p }}" {{ request('persetujuan') == $p ? 'selected' : '' }}>{{ $p }}</option>
                         @endforeach
                     </select>
                 </form>
@@ -275,10 +272,9 @@
                             <th>NRP</th>
                             <th>Perangkat</th>
                             <th>No Asset</th>
-                            <th>Peminjaman</th>
+                            <th>Status Peminjaman</th>
                             <th>Lama</th>
                             <th>Verifikasi</th>
-                            <th>Persetujuan</th>
                             <th>Tgl Pinjam</th>
                             <th>Est. Kembali</th>
                             <th style="width:80px;">Aksi</th>
@@ -297,10 +293,10 @@
                                     $pinjamColor = match($item->status_peminjaman) {
                                         'Dikembalikan' => '#28a745',
                                         'Belum Dikembalikan' => '#dc3545',
-                                        'Menunggu Persetujuan' => '#17a2b8',
+                                        'Pending Pengembalian' => '#17a2b8',
                                         default => '#ffc107',
                                     };
-                                    $pinjamText = $item->status_peminjaman === 'Pending' ? '#333' : '#fff';
+                                    $pinjamText = in_array($item->status_peminjaman, ['Pending']) ? '#333' : '#fff';
                                 @endphp
                                 <span class="badge-status" style="background:{{ $pinjamColor }}; color:{{ $pinjamText }};">
                                     {{ $item->status_peminjaman }}
@@ -323,19 +319,6 @@
                                     {{ $item->status_verifikasi ?? 'Pending' }}
                                 </span>
                             </td>
-                            <td>
-                                @php
-                                    $persColor = match($item->status_persetujuan ?? 'Pending') {
-                                        'Disetujui' => '#28a745',
-                                        'Ditolak' => '#dc3545',
-                                        default => '#ffc107',
-                                    };
-                                    $persTextColor = ($item->status_persetujuan ?? 'Pending') === 'Pending' ? '#333' : '#fff';
-                                @endphp
-                                <span class="badge-status" style="background:{{ $persColor }}; color:{{ $persTextColor }};">
-                                    {{ $item->status_persetujuan ?? 'Pending' }}
-                                </span>
-                            </td>
                             <td>{{ $item->tanggal_peminjaman }}</td>
                             <td><small>{{ $item->tanggal_pengembalian ? \Carbon\Carbon::parse($item->tanggal_pengembalian)->format('d/m/Y') : '-' }}</small></td>
                             <td>
@@ -353,16 +336,10 @@
                                         </form>
                                     @endif
 
-                                    @if(Auth::user()->isPimpinan() && ($item->status_verifikasi ?? '') === 'Disetujui' && ($item->status_persetujuan ?? 'Pending') === 'Pending')
-                                        <form action="{{ route('inventaris.persetujuan', $item->id) }}" method="POST" style="display:inline;">
+                                    @if(Auth::user()->isAdmin() && $item->status_peminjaman === 'Pending Pengembalian')
+                                        <form action="{{ route('inventaris.acc-pengembalian', $item->id) }}" method="POST" style="display:inline;">
                                             @csrf @method('PATCH')
-                                            <input type="hidden" name="status_persetujuan" value="Disetujui">
-                                            <button type="submit" class="action-btn btn-success" title="Setujui Pengajuan"><i class="fas fa-thumbs-up"></i></button>
-                                        </form>
-                                        <form action="{{ route('inventaris.persetujuan', $item->id) }}" method="POST" style="display:inline;">
-                                            @csrf @method('PATCH')
-                                            <input type="hidden" name="status_persetujuan" value="Ditolak">
-                                            <button type="submit" class="action-btn btn-danger" title="Tolak Pengajuan" onclick="return confirm('Tolak pengajuan ini?')"><i class="fas fa-thumbs-down"></i></button>
+                                            <button type="submit" class="action-btn btn-purple" title="ACC Pengembalian" onclick="return confirm('Setujui pengembalian ini?')"><i class="fas fa-check-double"></i></button>
                                         </form>
                                     @endif
 
@@ -391,9 +368,9 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="12" class="text-center text-muted py-5">
+                            <td colspan="11" class="text-center text-muted py-5">
                                 <div style="font-size:2.5rem; margin-bottom:8px;">📭</div>
-                                Belum ada data inventaris
+                                Belum ada data peminjaman
                             </td>
                         </tr>
                         @endforelse
@@ -452,7 +429,7 @@
                 <div class="modal-footer border-0 px-4 pb-4">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius:10px;">Batal</button>
                     <button type="submit" class="btn" style="background: linear-gradient(135deg, #667eea, #764ba2); color:#fff; border-radius:10px; padding: 8px 24px;">
-                        <i class="fas fa-save me-1"></i> Simpan
+                        <i class="fas fa-save me-1"></i> Kirim Dokumentasi
                     </button>
                 </div>
             </form>
