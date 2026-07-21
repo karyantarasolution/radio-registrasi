@@ -15,15 +15,18 @@ class BarangMaintenanceController extends Controller
             abort(403);
         }
 
-        $items = GudangBarang::whereIn('kondisi', ['Perlu Maintenance', 'Rusak'])
+        $items = GudangBarang::where('kondisi', 'Baik')
+            ->whereColumn('stok_tersedia', '<', 'stok_total')
             ->orderBy('nama_perangkat')
             ->get();
 
         $stats = [
             'total' => $items->count(),
-            'maintenance' => $items->where('kondisi', 'Perlu Maintenance')->count(),
-            'rusak' => $items->where('kondisi', 'Rusak')->count(),
-            'total_stok' => $items->sum('stok_tersedia'),
+            'total_unit_maintenance' => $items->sum(function ($item) {
+                return $item->stok_total - $item->stok_tersedia;
+            }),
+            'total_stok_tersedia' => $items->sum('stok_tersedia'),
+            'total_stok' => $items->sum('stok_total'),
         ];
 
         return view('gudang.maintenance', compact('items', 'stats'));

@@ -84,6 +84,17 @@
     }
     .stat-mini .num { font-size: 1.5rem; font-weight: 700; }
     .stat-mini .lbl { font-size: 0.8rem; color: #6c757d; margin-top: 2px; }
+    .section-divider {
+        border: none;
+        border-top: 2px dashed #dee2e6;
+        margin: 30px 0;
+    }
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
 </style>
 
 <div class="page-container">
@@ -173,10 +184,73 @@
                 </div>
                 <div>
                     <h5>4. Laporan Barang Maintenance</h5>
-                    <p>Daftar barang yang dalam kondisi perlu maintenance atau rusak</p>
+                    <p>Daftar barang yang sedang dalam perbaikan/maintenance</p>
                 </div>
             </div>
             <a href="{{ route('pimpinan.laporan.maintenance') }}" class="btn-modern btn-view">
+                <i class="fas fa-eye me-1"></i> Lihat Detail
+            </a>
+        </div>
+
+        <hr class="section-divider">
+        <div class="section-title"><i class="fas fa-search me-2"></i>Laporan Inspeksi</div>
+
+        <div class="laporan-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="laporan-icon" style="background:linear-gradient(135deg, #f39c12, #f1c40f);">
+                    <i class="fas fa-car-battery"></i>
+                </div>
+                <div>
+                    <h5>5. Laporan Inspeksi UPS</h5>
+                    <p>Daftar inspeksi perangkat UPS - Total: {{ $stats['total_ups'] }} data</p>
+                </div>
+            </div>
+            <a href="{{ route('pimpinan.laporan.inspeksi.ups') }}" class="btn-modern btn-view">
+                <i class="fas fa-eye me-1"></i> Lihat Detail
+            </a>
+        </div>
+
+        <div class="laporan-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="laporan-icon" style="background:linear-gradient(135deg, #3498db, #2980b9);">
+                    <i class="fas fa-plug"></i>
+                </div>
+                <div>
+                    <h5>6. Laporan Inspeksi Stavolt</h5>
+                    <p>Daftar inspeksi perangkat Stavolt - Total: {{ $stats['total_stavolt'] }} data</p>
+                </div>
+            </div>
+            <a href="{{ route('pimpinan.laporan.inspeksi.stavolt') }}" class="btn-modern btn-view">
+                <i class="fas fa-eye me-1"></i> Lihat Detail
+            </a>
+        </div>
+
+        <div class="laporan-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="laporan-icon" style="background:linear-gradient(135deg, #9b59b6, #8e44ad);">
+                    <i class="fas fa-tv"></i>
+                </div>
+                <div>
+                    <h5>7. Laporan Inspeksi Monitor / TV</h5>
+                    <p>Daftar inspeksi monitor dan TV - Total: {{ $stats['total_monitor'] }} data</p>
+                </div>
+            </div>
+            <a href="{{ route('pimpinan.laporan.inspeksi.monitor') }}" class="btn-modern btn-view">
+                <i class="fas fa-eye me-1"></i> Lihat Detail
+            </a>
+        </div>
+
+        <div class="laporan-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="laporan-icon" style="background:linear-gradient(135deg, #1abc9c, #16a085);">
+                    <i class="fas fa-video"></i>
+                </div>
+                <div>
+                    <h5>8. Laporan Inspeksi Proyektor</h5>
+                    <p>Daftar inspeksi proyektor - Total: {{ $stats['total_proyektor'] }} data</p>
+                </div>
+            </div>
+            <a href="{{ route('pimpinan.laporan.inspeksi.proyektor') }}" class="btn-modern btn-view">
                 <i class="fas fa-eye me-1"></i> Lihat Detail
             </a>
         </div>

@@ -108,30 +108,30 @@
         <div class="row g-3 mb-3">
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-icon">🔧</div>
-                    <div class="stat-number" style="color:#e67e22;">{{ $stats['total'] }}</div>
-                    <div class="stat-label">Total Maintenance</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="stat-icon">⚠️</div>
-                    <div class="stat-number" style="color:#f39c12;">{{ $stats['maintenance'] }}</div>
-                    <div class="stat-label">Perlu Maintenance</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="stat-icon">❌</div>
-                    <div class="stat-number" style="color:#dc3545;">{{ $stats['rusak'] }}</div>
-                    <div class="stat-label">Rusak</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
                     <div class="stat-icon">📦</div>
-                    <div class="stat-number" style="color:#667eea;">{{ $stats['total_stok'] }}</div>
-                    <div class="stat-label">Stok di Maintenance</div>
+                    <div class="stat-number" style="color:#667eea;">{{ $stats['total'] }}</div>
+                    <div class="stat-label">Jenis Barang di Maintenance</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">🔧</div>
+                    <div class="stat-number" style="color:#e67e22;">{{ $stats['total_unit_maintenance'] }}</div>
+                    <div class="stat-label">Total Unit di Maintenance</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-number" style="color:#28a745;">{{ $stats['total_stok_tersedia'] }}</div>
+                    <div class="stat-label">Stok Tersedia</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-number" style="color:#6c757d;">{{ $stats['total_stok'] }}</div>
+                    <div class="stat-label">Stok Total</div>
                 </div>
             </div>
         </div>
@@ -153,7 +153,7 @@
                             <th>Kategori</th>
                             <th>Stok Total</th>
                             <th>Stok Tersedia</th>
-                            <th>Kondisi</th>
+                            <th>Unit di Maintenance</th>
                             <th>Tgl Masuk</th>
                             <th>Keterangan</th>
                         </tr>
@@ -168,14 +168,9 @@
                             <td>{{ $b->stok_total }}</td>
                             <td>{{ $b->stok_tersedia }}</td>
                             <td>
-                                @php
-                                    $kColor = match($b->kondisi) {
-                                        'Perlu Maintenance' => '#ffc107',
-                                        default => '#dc3545',
-                                    };
-                                @endphp
-                                <span class="badge-kondisi" style="background:{{ $kColor }}; color:{{ $b->kondisi === 'Perlu Maintenance' ? '#333' : '#fff' }};">
-                                    {{ $b->kondisi }}
+                                @php $unitMaintenance = $b->stok_total - $b->stok_tersedia; @endphp
+                                <span class="badge-kondisi" style="background:#ffc107; color:#333;">
+                                    {{ $unitMaintenance }} unit
                                 </span>
                             </td>
                             <td>{{ $b->tanggal_masuk->format('d-m-Y') }}</td>
@@ -185,7 +180,7 @@
                         <tr>
                             <td colspan="9" class="text-muted py-4">
                                 <div style="font-size:2rem;">✅</div>
-                                Tidak ada barang yang perlu maintenance
+                                Tidak ada barang yang sedang di-maintenance
                             </td>
                         </tr>
                         @endforelse

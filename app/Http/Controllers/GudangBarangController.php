@@ -67,15 +67,27 @@ class GudangBarangController extends Controller
             'kondisi' => 'required|in:Baik,Perlu Maintenance,Rusak',
             'tanggal_masuk' => 'required|date',
             'keterangan' => 'nullable|string',
+            'jumlah_maintenance' => 'nullable|integer|min:1',
         ]);
+
+        $stokTotal = (int) $request->stok_total;
+        $stokTersedia = $stokTotal;
+
+        if (in_array($request->kondisi, ['Perlu Maintenance', 'Rusak'])) {
+            $jumlah = (int) ($request->jumlah_maintenance ?? 0);
+            if ($jumlah > $stokTotal) {
+                $jumlah = $stokTotal;
+            }
+            $stokTersedia = $stokTotal - $jumlah;
+        }
 
         $barang = GudangBarang::create([
             'nama_perangkat' => $request->nama_perangkat,
             'merk' => $request->merk,
             'kategori' => $request->kategori,
-            'stok_total' => $request->stok_total,
-            'stok_tersedia' => $request->stok_total,
-            'kondisi' => $request->kondisi,
+            'stok_total' => $stokTotal,
+            'stok_tersedia' => $stokTersedia,
+            'kondisi' => 'Baik',
             'tanggal_masuk' => $request->tanggal_masuk,
             'keterangan' => $request->keterangan,
         ]);
@@ -83,9 +95,18 @@ class GudangBarangController extends Controller
         StokMutasi::create([
             'gudang_barang_id' => $barang->id,
             'jenis' => 'Masuk',
-            'jumlah' => $barang->stok_total,
+            'jumlah' => $stokTotal,
             'keterangan' => 'Barang baru masuk gudang',
         ]);
+
+        if ($stokTersedia < $stokTotal) {
+            StokMutasi::create([
+                'gudang_barang_id' => $barang->id,
+                'jenis' => 'Keluar',
+                'jumlah' => $stokTotal - $stokTersedia,
+                'keterangan' => 'Dikirim ke maintenance',
+            ]);
+        }
 
         return redirect()->route('gudang-barang.index')->with('success', 'Barang gudang berhasil ditambahkan.');
     }
@@ -110,33 +131,46 @@ class GudangBarangController extends Controller
             'merk' => 'nullable|string|max:100',
             'kategori' => 'required|string|max:100',
             'stok_total' => 'required|integer|min:0',
-            'stok_tersedia' => 'required|integer|min:0',
             'kondisi' => 'required|in:Baik,Perlu Maintenance,Rusak',
             'tanggal_masuk' => 'required|date',
             'keterangan' => 'nullable|string',
-            'jumlah_maintenance' => 'nullable|integer|min:1',
+            'jumlah_maintenance' => 'nullable|integer|min:0',
         ]);
 
-        $oldKondisi = $gudang_barang->kondisi;
-        $newKondisi = $request->kondisi;
+        $stokTotal = (int) $request->stok_total;
+        $stokTersedia = $stokTotal;
 
-        $gudang_barang->update($request->only([
-            'nama_perangkat', 'merk', 'kategori', 'stok_total',
-            'stok_tersedia', 'kondisi', 'tanggal_masuk', 'keterangan',
-        ]));
-
-        if ($oldKondisi === 'Baik' && in_array($newKondisi, ['Perlu Maintenance', 'Rusak'])) {
-            $jumlah = (int) ($request->jumlah_maintenance ?? 1);
-            if ($jumlah > $gudang_barang->stok_tersedia) {
-                $jumlah = $gudang_barang->stok_tersedia;
+        if (in_array($request->kondisi, ['Perlu Maintenance', 'Rusak'])) {
+            $jumlah = (int) ($request->jumlah_maintenance ?? 0);
+            if ($jumlah > $stokTotal) {
+                $jumlah = $stokTotal;
             }
-            if ($jumlah > 0) {
-                $gudang_barang->decrement('stok_tersedia', $jumlah);
+            $stokTersedia = $stokTotal - $jumlah;
+        }
+
+        $gudang_barang->update([
+            'nama_perangkat' => $request->nama_perangkat,
+            'merk' => $request->merk,
+            'kategori' => $request->kategori,
+            'stok_total' => $stokTotal,
+            'stok_tersedia' => $stokTersedia,
+            'kondisi' => 'Baik',
+            'tanggal_masuk' => $request->tanggal_masuk,
+            'keterangan' => $request->keterangan,
+        ]);
+
+        if ($stokTersedia < $stokTotal) {
+            $existingMutasi = StokMutasi::where('gudang_barang_id', $gudang_barang->id)
+                ->where('keterangan', 'Dikirim ke maintenance')
+                ->where('created_at', '>=', now()->subHour())
+                ->first();
+
+            if (!$existingMutasi) {
                 StokMutasi::create([
                     'gudang_barang_id' => $gudang_barang->id,
                     'jenis' => 'Keluar',
-                    'jumlah' => $jumlah,
-                    'keterangan' => 'Dikirim ke maintenance - ' . $newKondisi,
+                    'jumlah' => $stokTotal - $stokTersedia,
+                    'keterangan' => 'Dikirim ke maintenance',
                 ]);
             }
         }

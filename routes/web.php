@@ -190,6 +190,10 @@ Route::middleware('auth')->group(function () {
     Route::get('laporan/peminjaman', [LaporanController::class, 'peminjaman'])->name('pimpinan.laporan.peminjaman');
     Route::get('laporan/pengajuan', [LaporanController::class, 'pengajuan'])->name('pimpinan.laporan.pengajuan');
     Route::get('laporan/maintenance', [LaporanController::class, 'maintenance'])->name('pimpinan.laporan.maintenance');
+    Route::get('laporan/inspeksi-ups', [LaporanController::class, 'inspeksiUps'])->name('pimpinan.laporan.inspeksi.ups');
+    Route::get('laporan/inspeksi-stavolt', [LaporanController::class, 'inspeksiStavolt'])->name('pimpinan.laporan.inspeksi.stavolt');
+    Route::get('laporan/inspeksi-monitor', [LaporanController::class, 'inspeksiMonitor'])->name('pimpinan.laporan.inspeksi.monitor');
+    Route::get('laporan/inspeksi-proyektor', [LaporanController::class, 'inspeksiProyektor'])->name('pimpinan.laporan.inspeksi.proyektor');
 
     // Karyawan - Admin only
     Route::resource('karyawan', KaryawanController::class);

@@ -8,8 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\BukuTamuExport;
-use App\Services\AdminNotificationService;
-use App\Notifications\KunjunganBukuTamuNotification;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 
@@ -45,10 +43,6 @@ class BukuTamuController extends Controller
 
         $bukutamu = BukuTamu::create($request->only(['nama', 'no_telp', 'nrp', 'instansi', 'keperluan', 'pic_id']));
         $bukutamu->load('pic');
-
-        if (Auth::user()->name !== 'ICT') {
-            AdminNotificationService::notify(new KunjunganBukuTamuNotification($bukutamu));
-        }
 
         return redirect()->route('bukutamu.index')->with('success', 'Data berhasil ditambahkan.');
     }

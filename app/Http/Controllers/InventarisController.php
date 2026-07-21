@@ -9,6 +9,8 @@ use App\Services\AdminNotificationService;
 use App\Services\PimpinanNotificationService;
 use App\Notifications\PengajuanInventarisNotification;
 use App\Notifications\PengajuanPimpinanNotification;
+use App\Notifications\PengembalianInventarisNotification;
+use App\Notifications\PengembalianDisetujuiNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +38,7 @@ class InventarisController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $query = Inventaris::with('gudangBarang', 'approver');
+        $query = Inventaris::with('gudangBarang', 'approver', 'dokumentasi');
 
         if ($user->isKaryawan()) {
             $query->where('nrp', $user->nrp);
@@ -297,6 +299,8 @@ class InventarisController extends Controller
                 'kondisi_pengembalian' => $request->kondisi_barang,
                 'catatan_pengembalian' => $request->catatan,
             ]);
+
+            AdminNotificationService::notify(new PengembalianInventarisNotification($inventaris));
         });
 
         return redirect()->route('inventaris.index')->with('success', 'Dokumentasi pengembalian berhasil dikirim. Menunggu persetujuan admin.');
@@ -333,6 +337,11 @@ class InventarisController extends Controller
                 'approved_by' => $user->id,
                 'approved_at' => now(),
             ]);
+
+            $karyawan = \App\Models\User::where('nrp', $inventaris->nrp)->first();
+            if ($karyawan) {
+                $karyawan->notify(new PengembalianDisetujuiNotification($inventaris));
+            }
         });
 
         return redirect()->route('inventaris.index')->with('success', 'Pengembalian berhasil disetujui.');

@@ -185,7 +185,13 @@
                             <td>{{ $b->merk ?? '-' }}</td>
                             <td>{{ $b->kategori }}</td>
                             <td>{{ $b->stok_total }}</td>
-                            <td>{{ $b->stok_tersedia }}</td>
+                            <td>
+                                {{ $b->stok_tersedia }}
+                                @if($b->stok_tersedia < $b->stok_total)
+                                    @php $unitMaintenance = $b->stok_total - $b->stok_tersedia; @endphp
+                                    <br><small class="text-warning fw-bold"><i class="fas fa-wrench"></i> {{ $unitMaintenance }} di maintenance</small>
+                                @endif
+                            </td>
                             <td>
                                 @php
                                     $kColor = match($b->kondisi) {

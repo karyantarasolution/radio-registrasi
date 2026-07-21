@@ -6,7 +6,7 @@ use App\Models\Inventaris;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class PengajuanInventarisNotification extends Notification
+class PengembalianInventarisNotification extends Notification
 {
     use Queueable;
 
@@ -21,25 +21,16 @@ class PengajuanInventarisNotification extends Notification
 
     public function toArray(object $notifiable): array
     {
-        return $this->payload();
-    }
-
-    private function payload(): array
-    {
         return [
-            'type' => 'inventaris_pengajuan',
-            'title' => 'Pengajuan Peminjaman Baru',
+            'type' => 'inventaris_pengembalian',
+            'title' => 'Pengajuan Pengembalian Baru',
             'message' => sprintf(
-                '%s (%s) mengajukan peminjaman %s',
+                '%s (%s) mengajukan pengembalian %s. Menunggu persetujuan admin.',
                 $this->inventaris->nama,
                 $this->inventaris->nrp,
                 $this->inventaris->nama_perangkat
             ),
-            'url' => route('inventaris.index', ['verifikasi' => 'Pending']),
-            'nama' => $this->inventaris->nama,
-            'nrp' => $this->inventaris->nrp,
-            'nama_perangkat' => $this->inventaris->nama_perangkat,
-            'tanggal_peminjaman' => $this->inventaris->tanggal_peminjaman,
+            'url' => route('inventaris.index', ['status' => 'Pending Pengembalian']),
         ];
     }
 }

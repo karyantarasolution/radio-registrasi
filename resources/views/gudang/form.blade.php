@@ -185,14 +185,6 @@
                         value="{{ old('stok_total', $barang->stok_total ?? 1) }}">
                 </div>
 
-                @if(isset($barang))
-                <div class="form-group">
-                    <label class="form-label">Stok Tersedia</label>
-                    <input type="number" name="stok_tersedia" class="form-control" min="0" required
-                        value="{{ old('stok_tersedia', $barang->stok_tersedia) }}">
-                </div>
-                @endif
-
                 <div class="form-group">
                     <label class="form-label">Kondisi</label>
                     <div class="select-wrapper">
@@ -204,14 +196,13 @@
                     </div>
                 </div>
 
-                @if(isset($barang) && $barang->kondisi === 'Baik')
                 <div class="form-group" id="jumlahMaintenanceGroup" style="display:none;">
                     <label class="form-label">Jumlah Unit yang di-Maintenance</label>
-                    <input type="number" name="jumlah_maintenance" class="form-control" min="1"
-                        max="{{ $barang->stok_tersedia }}" value="1">
-                    <small class="text-muted d-block mt-1">Stok tersedia saat ini: <strong>{{ $barang->stok_tersedia }}</strong>. Jumlah ini akan dikurangi dari stok tersedia.</small>
+                    <input type="number" name="jumlah_maintenance" class="form-control" min="1" id="jumlahMaintenanceInput"
+                        max="{{ $barang->stok_total ?? 1 }}" value="{{ old('jumlah_maintenance', 1) }}">
+                    <small class="text-muted d-block mt-1">Stok total: <strong id="stokTotalLabel">{{ $barang->stok_total ?? 1 }}</strong>. Stok tersedia: <strong id="stokTersediaLabel">{{ $barang->stok_tersedia ?? 1 }}</strong>.</small>
+                    <small class="text-info d-block" id="maintenanceInfo"></small>
                 </div>
-                @endif
 
                 <div class="form-group">
                     <label class="form-label">Tanggal Masuk</label>
@@ -243,16 +234,63 @@ document.getElementById('gudangForm').addEventListener('submit', function() {
 document.addEventListener('DOMContentLoaded', function() {
     var kondisiSelect = document.getElementById('kondisiSelect');
     var jumlahGroup = document.getElementById('jumlahMaintenanceGroup');
+    var jumlahInput = document.getElementById('jumlahMaintenanceInput');
+    var stokTotalInput = document.querySelector('input[name="stok_total"]');
+    var stokTotalLabel = document.getElementById('stokTotalLabel');
+    var stokTersediaLabel = document.getElementById('stokTersediaLabel');
+    var maintenanceInfo = document.getElementById('maintenanceInfo');
 
-    if (kondisiSelect && jumlahGroup) {
-        kondisiSelect.addEventListener('change', function() {
-            if (this.value === 'Perlu Maintenance' || this.value === 'Rusak') {
-                jumlahGroup.style.display = 'block';
+    function updateMaintenanceVisibility() {
+        if (!kondisiSelect || !jumlahGroup) return;
+        if (kondisiSelect.value === 'Perlu Maintenance' || kondisiSelect.value === 'Rusak') {
+            jumlahGroup.style.display = 'block';
+            updateStokPreview();
+        } else {
+            jumlahGroup.style.display = 'none';
+        }
+    }
+
+    function updateStokPreview() {
+        var stokTotal = parseInt(stokTotalInput ? stokTotalInput.value : 1) || 1;
+        var jumlah = parseInt(jumlahInput ? jumlahInput.value : 0) || 0;
+
+        if (jumlahInput) {
+            jumlahInput.max = stokTotal;
+        }
+        if (stokTotalLabel) {
+            stokTotalLabel.textContent = stokTotal;
+        }
+
+        var stokTersedia = stokTotal - jumlah;
+        if (stokTersedia < 0) stokTersedia = 0;
+
+        if (stokTersediaLabel) {
+            stokTersediaLabel.textContent = stokTersedia;
+        }
+        if (maintenanceInfo) {
+            if (jumlah > 0) {
+                maintenanceInfo.textContent = jumlah + ' unit akan masuk ke Barang Maintenance';
             } else {
-                jumlahGroup.style.display = 'none';
+                maintenanceInfo.textContent = '';
+            }
+        }
+    }
+
+    if (kondisiSelect) {
+        kondisiSelect.addEventListener('change', updateMaintenanceVisibility);
+    }
+    if (jumlahInput) {
+        jumlahInput.addEventListener('input', updateStokPreview);
+    }
+    if (stokTotalInput) {
+        stokTotalInput.addEventListener('input', function() {
+            if (kondisiSelect && (kondisiSelect.value === 'Perlu Maintenance' || kondisiSelect.value === 'Rusak')) {
+                updateStokPreview();
             }
         });
     }
+
+    updateMaintenanceVisibility();
 });
 </script>
 @endsection

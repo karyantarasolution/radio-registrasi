@@ -180,12 +180,24 @@
 
         <div class="page-header" data-aos="fade-down">
             <div class="row align-items-center">
-                <div class="col-md-8">
+                <div class="col-md-6">
                     <h2 class="fw-bold mb-1">📦 Peminjaman Perangkat IT</h2>
                     <p class="mb-0">Kelola data peminjaman dan pengembalian perangkat IT</p>
                     <small>PT. Putra Perkasa Abadi</small>
                 </div>
-                <div class="col-md-4 text-end">
+                <div class="col-md-6 text-end d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                    <a href="{{ route('notifications.index') }}" class="btn btn-light btn-modern position-relative" style="border-radius:12px; padding:10px 16px; color:#333; font-weight:600;">
+                        <i class="fas fa-bell me-1"></i> Notifikasi
+                        @if(Auth::user()->isKaryawan() && ($karyawanNotificationsCount ?? 0) > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background:#ea6666; color:#fff; font-size:0.7rem;">
+                                {{ $karyawanNotificationsCount }}
+                            </span>
+                        @elseif(Auth::user()->isAdmin() && ($unreadNotificationsCount ?? 0) > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background:#ea6666; color:#fff; font-size:0.7rem;">
+                                {{ $unreadNotificationsCount > 99 ? '99+' : $unreadNotificationsCount }}
+                            </span>
+                        @endif
+                    </a>
                     @if(!Auth::user()->isPimpinan())
                     <a href="{{ route('inventaris.create') }}" class="btn btn-add btn-modern">
                         <i class="fas fa-plus me-1"></i> Ajukan Peminjaman
@@ -349,6 +361,19 @@
                                         </button>
                                     @endif
 
+                                    @if(($item->status_peminjaman === 'Pending Pengembalian' || $item->status_peminjaman === 'Dikembalikan') && $item->dokumentasi)
+                                        <button type="button" class="action-btn btn-info" title="Lihat Bukti Pengembalian"
+                                            data-doc-kondisi="{{ $item->dokumentasi->kondisi_barang }}"
+                                            data-doc-oleh="{{ $item->dokumentasi->dikembalikan_oleh }}"
+                                            data-doc-catatan="{{ $item->dokumentasi->catatan ?? '' }}"
+                                            data-doc-foto-sebelum="{{ $item->dokumentasi->foto_sebelum ?? '' }}"
+                                            data-doc-foto-sesudah="{{ $item->dokumentasi->foto_sesudah ?? '' }}"
+                                            data-doc-nama="{{ addslashes($item->nama_perangkat) }}"
+                                            onclick="openViewDocModal(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    @endif
+
                                     @if(!Auth::user()->isPimpinan())
                                         <a href="{{ route('inventaris.edit', $item->id) }}" class="action-btn btn-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
@@ -437,6 +462,46 @@
     </div>
 </div>
 
+<div class="modal fade" id="viewDocModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius:16px; border:none; overflow:hidden;">
+            <div style="background: linear-gradient(135deg, #17a2b8, #20c997); padding: 20px 24px; color: #fff;">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-eye me-2"></i>Bukti Pengembalian</h5>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-info mb-3" style="border-radius:10px; font-size:0.85rem;">
+                    Barang: <strong id="viewDocItemName"></strong>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Kondisi Pengembalian</label>
+                        <div id="viewDocKondisi" class="p-2 rounded" style="background:#f8f9fa; font-weight:600;"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Dikembalikan Oleh</label>
+                        <div id="viewDocOleh" class="p-2 rounded" style="background:#f8f9fa;"></div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Catatan</label>
+                        <div id="viewDocCatatan" class="p-2 rounded" style="background:#f8f9fa; min-height:40px;"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Foto Sebelum</label>
+                        <div id="viewDocFotoSebelum" class="text-center"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Foto Sesudah</label>
+                        <div id="viewDocFotoSesudah" class="text-center"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 px-4 pb-4">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:10px;">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function openReturnModal(id, name) {
     var form = document.getElementById('returnForm');
@@ -459,6 +524,38 @@ function previewImage(input, previewId) {
         preview.src = '';
         preview.style.display = 'none';
     }
+}
+function openViewDocModal(btn) {
+    var doc = {
+        kondisi_barang: btn.getAttribute('data-doc-kondisi'),
+        dikembalikan_oleh: btn.getAttribute('data-doc-oleh'),
+        catatan: btn.getAttribute('data-doc-catatan'),
+        foto_sebelum: btn.getAttribute('data-doc-foto-sebelum'),
+        foto_sesudah: btn.getAttribute('data-doc-foto-sesudah')
+    };
+    var itemName = btn.getAttribute('data-doc-nama');
+
+    document.getElementById('viewDocItemName').textContent = itemName;
+    document.getElementById('viewDocKondisi').textContent = doc.kondisi_barang || '-';
+    document.getElementById('viewDocOleh').textContent = doc.dikembalikan_oleh || '-';
+    document.getElementById('viewDocCatatan').textContent = doc.catatan || 'Tidak ada catatan';
+
+    var fotoSebelum = document.getElementById('viewDocFotoSebelum');
+    if (doc.foto_sebelum) {
+        fotoSebelum.innerHTML = '<img src="/storage/' + doc.foto_sebelum + '" alt="Foto Sebelum" style="max-width:100%; max-height:250px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">';
+    } else {
+        fotoSebelum.innerHTML = '<div class="text-muted py-4" style="background:#f8f9fa; border-radius:10px;"><i class="fas fa-image fa-2x mb-2 d-block"></i>Tidak ada foto</div>';
+    }
+
+    var fotoSesudah = document.getElementById('viewDocFotoSesudah');
+    if (doc.foto_sesudah) {
+        fotoSesudah.innerHTML = '<img src="/storage/' + doc.foto_sesudah + '" alt="Foto Sesudah" style="max-width:100%; max-height:250px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">';
+    } else {
+        fotoSesudah.innerHTML = '<div class="text-muted py-4" style="background:#f8f9fa; border-radius:10px;"><i class="fas fa-image fa-2x mb-2 d-block"></i>Tidak ada foto</div>';
+    }
+
+    var modal = new bootstrap.Modal(document.getElementById('viewDocModal'));
+    modal.show();
 }
 </script>
 @endsection

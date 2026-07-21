@@ -9,8 +9,8 @@ class NotificationController extends Controller
 {
     private function ensureAuthorized(): void
     {
-        if (!Auth::user()->isAdmin() && !Auth::user()->isPimpinan()) {
-            abort(403, 'Hanya admin atau pimpinan yang dapat mengakses notifikasi.');
+        if (!Auth::user()->isAdmin() && !Auth::user()->isPimpinan() && !Auth::user()->isKaryawan()) {
+            abort(403, 'Hanya admin, pimpinan, atau karyawan yang dapat mengakses notifikasi.');
         }
     }
 

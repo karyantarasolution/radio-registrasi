@@ -211,9 +211,19 @@
         <div class="page-header" data-aos="fade-down">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h2 class="fw-bold mb-1">🏠 Dashboard ICT</h2>
-                    <p class="mb-0">Ringkasan data seluruh modul sistem manajemen</p>
+                    <h2 class="fw-bold mb-1">🏠 {{ Auth::user()->isPimpinan() ? 'Dashboard Pimpinan' : 'Dashboard ICT' }}</h2>
+                    <p class="mb-0">{{ Auth::user()->isPimpinan() ? 'Ringkasan pengajuan dan peminjaman perangkat IT' : 'Ringkasan data seluruh modul sistem manajemen' }}</p>
                     <small>{{ now()->translatedFormat('l, d F Y') }}</small>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="{{ route('notifications.index') }}" class="btn btn-light btn-modern position-relative" style="border-radius:12px; padding:10px 20px; color:#333; font-weight:600;">
+                        <i class="fas fa-bell me-1"></i> Notifikasi
+                        @if(($unreadNotificationsCount ?? 0) > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background:#ea6666; color:#fff; font-size:0.7rem;">
+                                {{ $unreadNotificationsCount > 99 ? '99+' : $unreadNotificationsCount }}
+                            </span>
+                        @endif
+                    </a>
                 </div>
             </div>
         </div>

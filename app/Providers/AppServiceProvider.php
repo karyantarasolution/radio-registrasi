@@ -28,6 +28,11 @@ class AppServiceProvider extends ServiceProvider
                 }
 
                 if ($user->isKaryawan()) {
+                    $notificationsCount = $user->notifications()->count();
+                    $view->with([
+                        'karyawanNotificationsCount' => $notificationsCount,
+                    ]);
+
                     $tomorrow = now()->addDay()->toDateString();
                     $h1Warnings = Inventaris::where('nrp', $user->nrp)
                         ->where('status_peminjaman', 'Belum Dikembalikan')
