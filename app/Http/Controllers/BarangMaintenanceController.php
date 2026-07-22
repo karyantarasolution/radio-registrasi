@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\GudangBarang;
+use App\Models\Pengajuan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BarangMaintenanceController extends Controller
 {
@@ -15,8 +17,7 @@ class BarangMaintenanceController extends Controller
             abort(403);
         }
 
-        $items = GudangBarang::where('kondisi', 'Baik')
-            ->whereColumn('stok_tersedia', '<', 'stok_total')
+        $items = GudangBarang::where('stok_tersedia', '<', DB::raw('stok_total'))
             ->orderBy('nama_perangkat')
             ->get();
 

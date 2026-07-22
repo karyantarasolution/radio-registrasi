@@ -28,7 +28,12 @@
                 <h2 class="fw-bold mb-1"><i class="fas fa-clipboard-list me-2"></i>Laporan Pengajuan</h2>
                 <p class="mb-0">Detail seluruh data pengajuan barang IT</p>
             </div>
-            <a href="{{ route('pimpinan.laporan') }}" class="btn btn-light btn-sm fw-bold"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('pimpinan.laporan.pdf.pengajuan') }}" class="btn btn-danger btn-sm fw-bold" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+                <a href="{{ route('pimpinan.laporan') }}" class="btn btn-light btn-sm fw-bold"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
+            </div>
         </div>
 
         <div class="stat-row">

@@ -62,22 +62,21 @@
 
                 <div id="maintenanceSection" class="{{ old('kategori') == 'Maintenance' ? 'show' : '' }}">
                     <div class="alert alert-warning mb-3" style="border-radius:10px; font-size:0.85rem;">
-                        <i class="fas fa-tools me-1"></i> Pilih barang yang perlu maintenance dari daftar berikut:
+                        <i class="fas fa-tools me-1"></i> Pilih barang dari gudang IT yang perlu dikirim ke maintenance:
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Barang yang Perlu Maintenance <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold">Pilih Barang dari Gudang <span class="text-danger">*</span></label>
                         <select name="gudang_barang_id" id="barangMaintenanceSelect" class="form-select" style="border-radius:10px;">
                             <option value="">-- Pilih Barang --</option>
                             @forelse($barangMaintenance as $b)
                                 <option value="{{ $b->id }}"
                                     data-nama="{{ $b->nama_perangkat }}"
-                                    data-kondisi="{{ $b->kondisi }}"
                                     data-stok="{{ $b->stok_tersedia }}"
                                     {{ old('gudang_barang_id') == $b->id ? 'selected' : '' }}>
-                                    {{ $b->nama_perangkat }} - {{ $b->merk }} [{{ $b->kondisi }}] (Stok: {{ $b->stok_tersedia }})
+                                    {{ $b->nama_perangkat }} - {{ $b->merk }} (Stok: {{ $b->stok_tersedia }}/{{ $b->stok_total }})
                                 </option>
                             @empty
-                                <option value="" disabled>Tidak ada barang yang perlu maintenance</option>
+                                <option value="" disabled>Tidak ada barang tersedia di gudang</option>
                             @endforelse
                         </select>
                     </div>

@@ -130,6 +130,14 @@
                 <div class="num" style="color:#6f42c1;">{{ $stats['total_pengajuan'] }}</div>
                 <div class="lbl">Total Pengajuan</div>
             </div>
+            <div class="stat-mini">
+                <div class="num" style="color:#17a2b8;">{{ $stats['total_bukutamu'] }}</div>
+                <div class="lbl">Total Buku Tamu</div>
+            </div>
+            <div class="stat-mini">
+                <div class="num" style="color:#e83e8c;">{{ $stats['total_radio'] }}</div>
+                <div class="lbl">Total Registrasi Radio</div>
+            </div>
         </div>
 
         <div class="laporan-card">
@@ -192,6 +200,36 @@
             </a>
         </div>
 
+        <div class="laporan-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="laporan-icon" style="background:linear-gradient(135deg, #17a2b8, #20c997);">
+                    <i class="fas fa-address-book"></i>
+                </div>
+                <div>
+                    <h5>5. Laporan Buku Tamu</h5>
+                    <p>Daftar kunjungan tamu dan riwayat registrasi</p>
+                </div>
+            </div>
+            <a href="{{ route('pimpinan.laporan.bukutamu') }}" class="btn-modern btn-view">
+                <i class="fas fa-eye me-1"></i> Lihat Detail
+            </a>
+        </div>
+
+        <div class="laporan-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="laporan-icon" style="background:linear-gradient(135deg, #6f42c1, #e83e8c);">
+                    <i class="fas fa-broadcast-tower"></i>
+                </div>
+                <div>
+                    <h5>6. Laporan Registrasi Radio</h5>
+                    <p>Daftar registrasi setting channel frekuensi radio</p>
+                </div>
+            </div>
+            <a href="{{ route('pimpinan.laporan.radio') }}" class="btn-modern btn-view">
+                <i class="fas fa-eye me-1"></i> Lihat Detail
+            </a>
+        </div>
+
         <hr class="section-divider">
         <div class="section-title"><i class="fas fa-search me-2"></i>Laporan Inspeksi</div>
 
@@ -201,7 +239,7 @@
                     <i class="fas fa-car-battery"></i>
                 </div>
                 <div>
-                    <h5>5. Laporan Inspeksi UPS</h5>
+                    <h5>7. Laporan Inspeksi UPS</h5>
                     <p>Daftar inspeksi perangkat UPS - Total: {{ $stats['total_ups'] }} data</p>
                 </div>
             </div>
@@ -216,7 +254,7 @@
                     <i class="fas fa-plug"></i>
                 </div>
                 <div>
-                    <h5>6. Laporan Inspeksi Stavolt</h5>
+                    <h5>8. Laporan Inspeksi Stavolt</h5>
                     <p>Daftar inspeksi perangkat Stavolt - Total: {{ $stats['total_stavolt'] }} data</p>
                 </div>
             </div>
@@ -231,7 +269,7 @@
                     <i class="fas fa-tv"></i>
                 </div>
                 <div>
-                    <h5>7. Laporan Inspeksi Monitor / TV</h5>
+                    <h5>9. Laporan Inspeksi Monitor / TV</h5>
                     <p>Daftar inspeksi monitor dan TV - Total: {{ $stats['total_monitor'] }} data</p>
                 </div>
             </div>
@@ -246,7 +284,7 @@
                     <i class="fas fa-video"></i>
                 </div>
                 <div>
-                    <h5>8. Laporan Inspeksi Proyektor</h5>
+                    <h5>10. Laporan Inspeksi Proyektor</h5>
                     <p>Daftar inspeksi proyektor - Total: {{ $stats['total_proyektor'] }} data</p>
                 </div>
             </div>

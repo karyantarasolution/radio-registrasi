@@ -7,12 +7,15 @@ use App\Models\Inventaris;
 use App\Models\Pengajuan;
 use App\Models\StokMutasi;
 use App\Models\User;
+use App\Models\BukuTamu;
+use App\Models\Registrasi;
 use App\Models\InspeksiUps;
 use App\Models\InspeksiStavolt;
 use App\Models\InspeksiMonitor;
 use App\Models\InspeksiProyektor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\InspeksiUpsExport;
@@ -36,11 +39,13 @@ class LaporanController extends Controller
         $stats = [
             'total_barang' => GudangBarang::count(),
             'stok_tersedia' => GudangBarang::sum('stok_tersedia'),
-            'maintenance' => GudangBarang::whereIn('kondisi', ['Perlu Maintenance', 'Rusak'])->count(),
+            'maintenance' => GudangBarang::where('stok_tersedia', '<', DB::raw('stok_total'))->count(),
             'total_peminjaman' => Inventaris::count(),
             'belum_kembali' => Inventaris::where('status_peminjaman', 'Belum Dikembalikan')->count(),
             'total_pengajuan' => Pengajuan::count(),
             'pengajuan_menunggu' => Pengajuan::where('status', 'Menunggu')->count(),
+            'total_bukutamu' => BukuTamu::count(),
+            'total_radio' => Registrasi::count(),
             'total_ups' => InspeksiUps::count(),
             'total_stavolt' => InspeksiStavolt::count(),
             'total_monitor' => InspeksiMonitor::count(),
@@ -100,12 +105,76 @@ class LaporanController extends Controller
     {
         $this->ensureAuthorized();
 
-        $items = GudangBarang::where('kondisi', 'Baik')
-            ->whereColumn('stok_tersedia', '<', 'stok_total')
+        $items = GudangBarang::where('stok_tersedia', '<', DB::raw('stok_total'))
             ->orderBy('nama_perangkat')
             ->get();
 
         return view('laporan.maintenance', compact('items'));
+    }
+
+    public function bukuTamu()
+    {
+        $this->ensureAuthorized();
+
+        $bukutamu = BukuTamu::with('pic')->orderBy('no', 'desc')->get();
+
+        return view('laporan.bukutamu', compact('bukutamu'));
+    }
+
+    public function radio()
+    {
+        $this->ensureAuthorized();
+
+        $registrasis = Registrasi::orderBy('created_at', 'desc')->get();
+
+        return view('laporan.radio', compact('registrasis'));
+    }
+
+    public function pdfGudang()
+    {
+        $this->ensureAuthorized();
+
+        $barang = GudangBarang::orderBy('nama_perangkat')->get();
+        $mutasi = StokMutasi::with('gudangBarang')->orderBy('created_at', 'desc')->limit(50)->get();
+
+        $pdf = Pdf::loadView('laporan.pdf-gudang', compact('barang', 'mutasi'))->setPaper('a4', 'portrait');
+        return $pdf->stream('Laporan-Gudang-IT.pdf');
+    }
+
+    public function pdfPeminjaman()
+    {
+        $this->ensureAuthorized();
+
+        $inventaris = Inventaris::with('gudangBarang', 'approver')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $pdf = Pdf::loadView('laporan.pdf-peminjaman', compact('inventaris'))->setPaper('a4', 'landscape');
+        return $pdf->stream('Laporan-Peminjaman.pdf');
+    }
+
+    public function pdfPengajuan()
+    {
+        $this->ensureAuthorized();
+
+        $pengajuans = Pengajuan::with('user', 'approver', 'gudangBarang')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $pdf = Pdf::loadView('laporan.pdf-pengajuan', compact('pengajuans'))->setPaper('a4', 'landscape');
+        return $pdf->stream('Laporan-Pengajuan.pdf');
+    }
+
+    public function pdfMaintenance()
+    {
+        $this->ensureAuthorized();
+
+        $items = GudangBarang::where('stok_tersedia', '<', DB::raw('stok_total'))
+            ->orderBy('nama_perangkat')
+            ->get();
+
+        $pdf = Pdf::loadView('laporan.pdf-maintenance', compact('items'))->setPaper('a4', 'portrait');
+        return $pdf->stream('Laporan-Barang-Maintenance.pdf');
     }
 
     public function inspeksiUps()

@@ -9,6 +9,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (!Schema::hasColumn('users', 'nrp')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('nrp')->nullable()->after('email');
+            });
+        }
+
         DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('ict', 'user', 'admin_ict', 'pimpinan', 'karyawan', 'tamu') DEFAULT 'user'");
 
         DB::table('users')->where('name', 'ICT')->update(['role' => 'admin_ict', 'nrp' => 'ICT']);

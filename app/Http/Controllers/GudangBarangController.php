@@ -6,6 +6,7 @@ use App\Models\GudangBarang;
 use App\Models\StokMutasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class GudangBarangController extends Controller
@@ -38,7 +39,9 @@ class GudangBarangController extends Controller
         $stats = [
             'total_jenis' => $barang->count(),
             'stok_tersedia' => $barang->sum('stok_tersedia'),
-            'maintenance' => $barang->where('kondisi', 'Perlu Maintenance')->count(),
+            'maintenance' => $barang->filter(function ($item) {
+                return $item->stok_tersedia < $item->stok_total;
+            })->count(),
         ];
 
         return view('gudang.index', compact('barang', 'stats'));
@@ -87,7 +90,7 @@ class GudangBarangController extends Controller
             'kategori' => $request->kategori,
             'stok_total' => $stokTotal,
             'stok_tersedia' => $stokTersedia,
-            'kondisi' => 'Baik',
+            'kondisi' => $request->kondisi,
             'tanggal_masuk' => $request->tanggal_masuk,
             'keterangan' => $request->keterangan,
         ]);
@@ -154,7 +157,7 @@ class GudangBarangController extends Controller
             'kategori' => $request->kategori,
             'stok_total' => $stokTotal,
             'stok_tersedia' => $stokTersedia,
-            'kondisi' => 'Baik',
+            'kondisi' => $request->kondisi,
             'tanggal_masuk' => $request->tanggal_masuk,
             'keterangan' => $request->keterangan,
         ]);
@@ -204,7 +207,7 @@ class GudangBarangController extends Controller
             abort(403);
         }
 
-        $items = GudangBarang::where('kondisi', 'Perlu Maintenance')
+        $items = GudangBarang::where('stok_tersedia', '<', DB::raw('stok_total'))
             ->orderBy('nama_perangkat')
             ->get();
 
@@ -243,7 +246,7 @@ class GudangBarangController extends Controller
             abort(403);
         }
 
-        $items = GudangBarang::where('kondisi', 'Perlu Maintenance')
+        $items = GudangBarang::where('stok_tersedia', '<', DB::raw('stok_total'))
             ->orderBy('nama_perangkat')
             ->get();
 

@@ -68,7 +68,7 @@
         font-size:14px;
     }
     .table-custom tbody tr:hover { background:#f8f9fa; }
-    .badge-kondisi { padding:5px 10px; border-radius:8px; font-size:0.8rem; font-weight:600; }
+    .badge-maintenance { padding:5px 10px; border-radius:8px; font-size:0.8rem; font-weight:600; background:#ffc107; color:#333; }
     .btn-modern {
         border:none;
         padding:7px 14px;
@@ -94,7 +94,7 @@
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <h2 class="fw-bold mb-1"><i class="fas fa-tools me-2"></i>Barang Maintenance</h2>
-                    <p class="mb-0">Daftar perangkat yang dalam kondisi perlu maintenance atau rusak</p>
+                    <p class="mb-0">Daftar perangkat yang sedang dalam proses maintenance (disetujui pimpinan)</p>
                     <small>PT. Putra Perkasa Abadi</small>
                 </div>
                 <div class="col-md-4 text-end">
@@ -140,7 +140,7 @@
             <div class="table-header">
                 <div>
                     <h4 class="table-title">Daftar Barang Maintenance</h4>
-                    <small>Total: {{ $items->count() }} barang</small>
+                    <small>Total: {{ $items->count() }} jenis barang</small>
                 </div>
             </div>
             <div class="table-responsive">
@@ -154,12 +154,12 @@
                             <th>Stok Total</th>
                             <th>Stok Tersedia</th>
                             <th>Unit di Maintenance</th>
-                            <th>Tgl Masuk</th>
                             <th>Keterangan</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($items as $b)
+                        @php $unitMaintenance = $b->stok_total - $b->stok_tersedia; @endphp
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td class="fw-semibold">{{ $b->nama_perangkat }}</td>
@@ -168,17 +168,13 @@
                             <td>{{ $b->stok_total }}</td>
                             <td>{{ $b->stok_tersedia }}</td>
                             <td>
-                                @php $unitMaintenance = $b->stok_total - $b->stok_tersedia; @endphp
-                                <span class="badge-kondisi" style="background:#ffc107; color:#333;">
-                                    {{ $unitMaintenance }} unit
-                                </span>
+                                <span class="badge-maintenance">{{ $unitMaintenance }} unit</span>
                             </td>
-                            <td>{{ $b->tanggal_masuk->format('d-m-Y') }}</td>
                             <td><small>{{ $b->keterangan ?? '-' }}</small></td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-muted py-4">
+                            <td colspan="8" class="text-muted py-4">
                                 <div style="font-size:2rem;">✅</div>
                                 Tidak ada barang yang sedang di-maintenance
                             </td>

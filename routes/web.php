@@ -190,6 +190,12 @@ Route::middleware('auth')->group(function () {
     Route::get('laporan/peminjaman', [LaporanController::class, 'peminjaman'])->name('pimpinan.laporan.peminjaman');
     Route::get('laporan/pengajuan', [LaporanController::class, 'pengajuan'])->name('pimpinan.laporan.pengajuan');
     Route::get('laporan/maintenance', [LaporanController::class, 'maintenance'])->name('pimpinan.laporan.maintenance');
+    Route::get('laporan/bukutamu', [LaporanController::class, 'bukuTamu'])->name('pimpinan.laporan.bukutamu');
+    Route::get('laporan/radio', [LaporanController::class, 'radio'])->name('pimpinan.laporan.radio');
+    Route::get('laporan/pdf/gudang', [LaporanController::class, 'pdfGudang'])->name('pimpinan.laporan.pdf.gudang');
+    Route::get('laporan/pdf/peminjaman', [LaporanController::class, 'pdfPeminjaman'])->name('pimpinan.laporan.pdf.peminjaman');
+    Route::get('laporan/pdf/pengajuan', [LaporanController::class, 'pdfPengajuan'])->name('pimpinan.laporan.pdf.pengajuan');
+    Route::get('laporan/pdf/maintenance', [LaporanController::class, 'pdfMaintenance'])->name('pimpinan.laporan.pdf.maintenance');
     Route::get('laporan/inspeksi-ups', [LaporanController::class, 'inspeksiUps'])->name('pimpinan.laporan.inspeksi.ups');
     Route::get('laporan/inspeksi-stavolt', [LaporanController::class, 'inspeksiStavolt'])->name('pimpinan.laporan.inspeksi.stavolt');
     Route::get('laporan/inspeksi-monitor', [LaporanController::class, 'inspeksiMonitor'])->name('pimpinan.laporan.inspeksi.monitor');

@@ -25,7 +25,12 @@
                 <h2 class="fw-bold mb-1"><i class="fas fa-warehouse me-2"></i>Laporan Gudang IT</h2>
                 <p class="mb-0">Detail stok dan mutasi barang gudang IT</p>
             </div>
-            <a href="{{ route('pimpinan.laporan') }}" class="btn btn-light btn-sm fw-bold"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('pimpinan.laporan.pdf.gudang') }}" class="btn btn-danger btn-sm fw-bold" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+                <a href="{{ route('pimpinan.laporan') }}" class="btn btn-light btn-sm fw-bold"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
+            </div>
         </div>
 
         <h5 class="section-title">Daftar Stok Gudang</h5>

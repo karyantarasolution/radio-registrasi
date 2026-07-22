@@ -43,8 +43,7 @@ class PengajuanController extends Controller
             abort(403, 'Pimpinan tidak dapat membuat pengajuan.');
         }
 
-        $barangMaintenance = GudangBarang::whereIn('kondisi', ['Perlu Maintenance', 'Rusak'])
-            ->orderBy('nama_perangkat')
+        $barangMaintenance = GudangBarang::orderBy('nama_perangkat')
             ->get();
 
         return view('pengajuan.form', compact('barangMaintenance'));
@@ -134,15 +133,14 @@ class PengajuanController extends Controller
                     $barang = $pengajuan->gudangBarang;
 
                     $barang->update([
-                        'kondisi' => 'Baik',
-                        'stok_tersedia' => $barang->stok_tersedia + $qty,
+                        'stok_tersedia' => max(0, $barang->stok_tersedia - $qty),
                     ]);
 
                     StokMutasi::create([
                         'gudang_barang_id' => $barang->id,
-                        'jenis' => 'Masuk',
+                        'jenis' => 'Keluar',
                         'jumlah' => $qty,
-                        'keterangan' => "Maintenance selesai - Pengajuan {$pengajuan->nomor_pengajuan}",
+                        'keterangan' => "Dikirim ke maintenance - Pengajuan {$pengajuan->nomor_pengajuan}",
                     ]);
                 }
             }
