@@ -89,7 +89,7 @@ class BukuTamuController extends Controller
 
     public function previewReport()
     {
-        if (Auth::user()->name != 'ICT') {
+        if (!Auth::user()->isAdmin() && !Auth::user()->isPimpinan()) {
             abort(403, 'Tidak punya akses');
         }
 
@@ -108,7 +108,7 @@ class BukuTamuController extends Controller
 
     public function exportPDF()
     {
-        if (Auth::user()->name != 'ICT') {
+        if (!Auth::user()->isAdmin() && !Auth::user()->isPimpinan()) {
             abort(403, 'Tidak punya akses');
         }
 
@@ -117,7 +117,7 @@ class BukuTamuController extends Controller
 
     public function downloadPDF()
     {
-        if (Auth::user()->name != 'ICT') {
+        if (!Auth::user()->isAdmin() && !Auth::user()->isPimpinan()) {
             abort(403, 'Tidak punya akses');
         }
 

@@ -99,6 +99,24 @@
         padding: 0;
     }
     .dropdown-action .btn-action:hover { opacity: 0.8; }
+    .action-btn {
+        border: none;
+        width: 30px; height: 30px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all .2s;
+        padding: 0;
+        color: #fff;
+        text-decoration: none;
+    }
+    .action-btn:hover { opacity: 0.8; transform: translateY(-1px); color: #fff; }
+    .action-btn.btn-success { background: linear-gradient(135deg, #28a745, #20c997); }
+    .action-btn.btn-danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
+    .action-btn.btn-info { background: linear-gradient(135deg, #17a2b8, #20c997); }
     .dropdown-action .dropdown-menu {
         border: 1px solid #e9ecef;
         border-radius: 12px;
@@ -153,7 +171,7 @@
                 <form method="GET" action="{{ route('pengajuan.index') }}" style="display:flex; gap:8px;">
                     <select name="status" onchange="this.form.submit()" style="border-radius:8px; border:none; padding:6px 10px; font-size:0.85rem; font-weight:600; background:rgba(255,255,255,0.9); color:#333;">
                         <option value="">Semua Status</option>
-                        @foreach(['Menunggu','Disetujui','Ditolak'] as $s)
+                        @foreach(['Menunggu','Disetujui','Ditolak','Selesai'] as $s)
                             <option value="{{ $s }}" {{ request('status') == $s ? 'selected' : '' }}>{{ $s }}</option>
                         @endforeach
                     </select>
@@ -180,7 +198,7 @@
                             <th>Diajukan Oleh</th>
                             <th>Tanggal</th>
                             <th>Status</th>
-                            @if(Auth::user()->isPimpinan())<th>Aksi</th>@endif
+                            @if(Auth::user()->isPimpinan() || Auth::user()->isAdmin())<th>Aksi</th>@endif
                         </tr>
                     </thead>
                     <tbody>
@@ -215,17 +233,18 @@
                                     $statusColor = match($p->status) {
                                         'Disetujui' => '#28a745',
                                         'Ditolak' => '#dc3545',
+                                        'Selesai' => '#17a2b8',
                                         default => '#ffc107',
                                     };
-                                    $statusTextColor = $p->status === 'Menunggu' ? '#333' : '#fff';
+                                    $statusTextColor = in_array($p->status, ['Menunggu']) ? '#333' : '#fff';
                                 @endphp
                                 <span class="badge-status" style="background:{{ $statusColor }}; color:{{ $statusTextColor }};">
                                     {{ $p->status }}
                                 </span>
                             </td>
-                            @if(Auth::user()->isPimpinan())
+                            @if(Auth::user()->isPimpinan() || Auth::user()->isAdmin())
                             <td>
-                                @if($p->status === 'Menunggu')
+                                @if(Auth::user()->isPimpinan() && $p->status === 'Menunggu')
                                     <div style="display:flex; gap:4px; justify-content:center;">
                                         <button type="button" class="action-btn btn-success" title="Setujui" onclick="approvePengajuan({{ $p->id }}, 'Disetujui')">
                                             <i class="fas fa-check"></i>
@@ -233,6 +252,15 @@
                                         <button type="button" class="action-btn btn-danger" title="Tolak" onclick="approvePengajuan({{ $p->id }}, 'Ditolak')">
                                             <i class="fas fa-times"></i>
                                         </button>
+                                    </div>
+                                @elseif(Auth::user()->isAdmin() && $p->status === 'Disetujui' && $p->kategori === 'Maintenance')
+                                    <div style="display:flex; gap:4px; justify-content:center;">
+                                        <form action="{{ route('pengajuan.selesai-maintenance', $p->id) }}" method="POST" style="display:inline;">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="action-btn btn-info" title="Selesai Maintenance" onclick="return confirm('Tandai maintenance selesai? Stok akan dikembalikan ke gudang.')">
+                                                <i class="fas fa-check-double"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 @else
                                     <small class="text-muted">-</small>
@@ -242,7 +270,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="{{ Auth::user()->isPimpinan() ? 11 : 10 }}" class="text-center text-muted py-5">
+                            <td colspan="{{ Auth::user()->isPimpinan() || Auth::user()->isAdmin() ? 12 : 10 }}" class="text-center text-muted py-5">
                                 <div style="font-size:2.5rem; margin-bottom:8px;">📭</div>
                                 Belum ada pengajuan
                             </td>

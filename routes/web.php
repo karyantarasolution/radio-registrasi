@@ -152,6 +152,7 @@ Route::middleware('auth')->group(function () {
     Route::get('pengajuan/create', [PengajuanController::class, 'create'])->name('pengajuan.create');
     Route::post('pengajuan', [PengajuanController::class, 'store'])->name('pengajuan.store');
     Route::post('pengajuan/{id}/approve', [PengajuanController::class, 'approve'])->name('pengajuan.approve');
+    Route::patch('pengajuan/{id}/selesai-maintenance', [PengajuanController::class, 'selesaiMaintenance'])->name('pengajuan.selesai-maintenance');
     Route::delete('pengajuan/{id}', [PengajuanController::class, 'destroy'])->name('pengajuan.destroy');
     Route::get('pengajuan-report', [PengajuanController::class, 'report'])->name('pengajuan.report');
 

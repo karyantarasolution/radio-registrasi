@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\GudangBarang;
 use App\Models\Pengajuan;
 use App\Models\StokMutasi;
+use App\Services\PimpinanNotificationService;
+use App\Notifications\PengajuanBaruNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -64,7 +66,7 @@ class PengajuanController extends Controller
 
         $nomor = 'PJ-' . date('Ymd') . '-' . strtoupper(Str::random(4));
 
-        Pengajuan::create([
+        $pengajuan = Pengajuan::create([
             'nomor_pengajuan' => $nomor,
             'judul' => $request->judul,
             'kategori' => $request->kategori,
@@ -78,6 +80,8 @@ class PengajuanController extends Controller
             'diajukan_oleh' => Auth::id(),
             'tanggal_pengajuan' => now()->toDateString(),
         ]);
+
+        PimpinanNotificationService::notify(new PengajuanBaruNotification($pengajuan));
 
         return redirect()->route('pengajuan.index')->with('success', 'Pengajuan berhasil dikirim. Menunggu persetujuan pimpinan.');
     }
@@ -148,6 +152,41 @@ class PengajuanController extends Controller
 
         $statusText = $request->status === 'Disetujui' ? 'disetujui' : 'ditolak';
         return redirect()->route('pengajuan.index')->with('success', "Pengajuan berhasil {$statusText}.");
+    }
+
+    public function selesaiMaintenance(Request $request, $id)
+    {
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
+            abort(403, 'Hanya admin yang dapat menyelesaikan maintenance.');
+        }
+
+        $pengajuan = Pengajuan::with('gudangBarang')->findOrFail($id);
+
+        if ($pengajuan->kategori !== 'Maintenance' || $pengajuan->status !== 'Disetujui') {
+            return back()->with('error', 'Hanya pengajuan maintenance yang disetujui yang dapat diselesaikan.');
+        }
+
+        DB::transaction(function () use ($pengajuan, $request) {
+            $qty = $pengajuan->jumlah_disetujui ?? $pengajuan->jumlah_diminta;
+
+            if ($pengajuan->gudangBarang) {
+                $pengajuan->gudangBarang->increment('stok_tersedia', $qty);
+
+                StokMutasi::create([
+                    'gudang_barang_id' => $pengajuan->gudangBarang->id,
+                    'jenis' => 'Masuk',
+                    'jumlah' => $qty,
+                    'keterangan' => "Maintenance selesai - Pengajuan {$pengajuan->nomor_pengajuan}",
+                ]);
+            }
+
+            $pengajuan->update([
+                'status' => 'Selesai',
+            ]);
+        });
+
+        return redirect()->route('pengajuan.index')->with('success', 'Maintenance selesai. Stok barang telah dikembalikan ke gudang IT.');
     }
 
     public function destroy($id)

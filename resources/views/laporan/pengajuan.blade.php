@@ -41,6 +41,7 @@
             <div class="stat-mini"><div class="num" style="color:#ffc107;">{{ $stats['menunggu'] }}</div><div class="lbl">Menunggu</div></div>
             <div class="stat-mini"><div class="num" style="color:#28a745;">{{ $stats['disetujui'] }}</div><div class="lbl">Disetujui</div></div>
             <div class="stat-mini"><div class="num" style="color:#dc3545;">{{ $stats['ditolak'] }}</div><div class="lbl">Ditolak</div></div>
+            <div class="stat-mini"><div class="num" style="color:#17a2b8;">{{ $stats['selesai'] ?? 0 }}</div><div class="lbl">Selesai</div></div>
         </div>
 
         <div class="table-card">
@@ -65,7 +66,7 @@
                             <td>{{ $p->user->name ?? '-' }}</td>
                             <td><small>{{ $p->tanggal_pengajuan?->format('d/m/Y') ?? '-' }}</small></td>
                             <td>
-                                @php $sColor = match($p->status) { 'Disetujui' => '#28a745', 'Ditolak' => '#dc3545', default => '#ffc107' }; @endphp
+                                @php $sColor = match($p->status) { 'Disetujui' => '#28a745', 'Ditolak' => '#dc3545', 'Selesai' => '#17a2b8', default => '#ffc107' }; @endphp
                                 <span class="badge-status" style="background:{{ $sColor }}; color:{{ $p->status === 'Menunggu' ? '#333' : '#fff' }};">{{ $p->status }}</span>
                             </td>
                             <td><small>{{ $p->catatan_pimpinan ?? '-' }}</small></td>

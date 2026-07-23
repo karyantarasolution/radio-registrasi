@@ -37,7 +37,7 @@ class Pengajuan extends Model
     ];
 
     public const KATEGORI = ['Pembelian', 'Maintenance'];
-    public const STATUS = ['Menunggu', 'Disetujui', 'Ditolak'];
+    public const STATUS = ['Menunggu', 'Disetujui', 'Ditolak', 'Selesai'];
 
     public function user()
     {

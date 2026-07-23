@@ -366,8 +366,8 @@
                                             data-doc-kondisi="{{ $item->dokumentasi->kondisi_barang }}"
                                             data-doc-oleh="{{ $item->dokumentasi->dikembalikan_oleh }}"
                                             data-doc-catatan="{{ $item->dokumentasi->catatan ?? '' }}"
-                                            data-doc-foto-sebelum="{{ $item->dokumentasi->foto_sebelum ?? '' }}"
-                                            data-doc-foto-sesudah="{{ $item->dokumentasi->foto_sesudah ?? '' }}"
+                                            data-doc-foto-sebelum="{{ $item->dokumentasi->foto_sebelum ? asset('storage/' . $item->dokumentasi->foto_sebelum) : '' }}"
+                                            data-doc-foto-sesudah="{{ $item->dokumentasi->foto_sesudah ? asset('storage/' . $item->dokumentasi->foto_sesudah) : '' }}"
                                             data-doc-nama="{{ addslashes($item->nama_perangkat) }}"
                                             onclick="openViewDocModal(this)">
                                             <i class="fas fa-eye"></i>
@@ -542,14 +542,14 @@ function openViewDocModal(btn) {
 
     var fotoSebelum = document.getElementById('viewDocFotoSebelum');
     if (doc.foto_sebelum) {
-        fotoSebelum.innerHTML = '<img src="/storage/' + doc.foto_sebelum + '" alt="Foto Sebelum" style="max-width:100%; max-height:250px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">';
+        fotoSebelum.innerHTML = '<img src="' + doc.foto_sebelum + '" alt="Foto Sebelum" style="max-width:100%; max-height:250px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">';
     } else {
         fotoSebelum.innerHTML = '<div class="text-muted py-4" style="background:#f8f9fa; border-radius:10px;"><i class="fas fa-image fa-2x mb-2 d-block"></i>Tidak ada foto</div>';
     }
 
     var fotoSesudah = document.getElementById('viewDocFotoSesudah');
     if (doc.foto_sesudah) {
-        fotoSesudah.innerHTML = '<img src="/storage/' + doc.foto_sesudah + '" alt="Foto Sesudah" style="max-width:100%; max-height:250px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">';
+        fotoSesudah.innerHTML = '<img src="' + doc.foto_sesudah + '" alt="Foto Sesudah" style="max-width:100%; max-height:250px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">';
     } else {
         fotoSesudah.innerHTML = '<div class="text-muted py-4" style="background:#f8f9fa; border-radius:10px;"><i class="fas fa-image fa-2x mb-2 d-block"></i>Tidak ada foto</div>';
     }

@@ -96,6 +96,7 @@ class LaporanController extends Controller
             'menunggu' => $pengajuans->where('status', 'Menunggu')->count(),
             'disetujui' => $pengajuans->where('status', 'Disetujui')->count(),
             'ditolak' => $pengajuans->where('status', 'Ditolak')->count(),
+            'selesai' => $pengajuans->where('status', 'Selesai')->count(),
         ];
 
         return view('laporan.pengajuan', compact('pengajuans', 'stats'));
