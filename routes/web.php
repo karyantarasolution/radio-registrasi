@@ -47,6 +47,7 @@ Route::post('/register/inventaris', function (\Illuminate\Http\Request $request)
     \App\Models\User::create([
         'name' => $request->name,
         'nrp' => $request->nrp,
+        'jabatan' => $request->jabatan,
         'role' => 'karyawan',
         'is_approved' => false,
         'password' => \Illuminate\Support\Facades\Hash::make($request->password),
@@ -170,6 +171,7 @@ Route::middleware('auth')->group(function () {
     // Daftar Akun Inventaris - Admin only
     Route::get('admin/daftar-akun', [InventarisController::class, 'daftarAkun'])->name('admin.daftar-akun');
     Route::post('admin/daftar-akun/{id}/approve', [InventarisController::class, 'approveAkun'])->name('admin.approve-akun');
+    Route::patch('admin/daftar-akun/{id}', [InventarisController::class, 'updateAkun'])->name('admin.update-akun');
     Route::delete('admin/daftar-akun/{id}', [InventarisController::class, 'destroyAkun'])->name('admin.destroy-akun');
 
     // Gudang IT
@@ -197,6 +199,12 @@ Route::middleware('auth')->group(function () {
     Route::get('laporan/pdf/peminjaman', [LaporanController::class, 'pdfPeminjaman'])->name('pimpinan.laporan.pdf.peminjaman');
     Route::get('laporan/pdf/pengajuan', [LaporanController::class, 'pdfPengajuan'])->name('pimpinan.laporan.pdf.pengajuan');
     Route::get('laporan/pdf/maintenance', [LaporanController::class, 'pdfMaintenance'])->name('pimpinan.laporan.pdf.maintenance');
+    Route::get('laporan/pdf/bukutamu', [LaporanController::class, 'pdfBukuTamu'])->name('pimpinan.laporan.pdf.bukutamu');
+    Route::get('laporan/pdf/radio', [LaporanController::class, 'pdfRadio'])->name('pimpinan.laporan.pdf.radio');
+    Route::get('laporan/pdf/inspeksi-ups', [LaporanController::class, 'pdfInspeksiUps'])->name('pimpinan.laporan.pdf.inspeksi.ups');
+    Route::get('laporan/pdf/inspeksi-stavolt', [LaporanController::class, 'pdfInspeksiStavolt'])->name('pimpinan.laporan.pdf.inspeksi.stavolt');
+    Route::get('laporan/pdf/inspeksi-monitor', [LaporanController::class, 'pdfInspeksiMonitor'])->name('pimpinan.laporan.pdf.inspeksi.monitor');
+    Route::get('laporan/pdf/inspeksi-proyektor', [LaporanController::class, 'pdfInspeksiProyektor'])->name('pimpinan.laporan.pdf.inspeksi.proyektor');
     Route::get('laporan/inspeksi-ups', [LaporanController::class, 'inspeksiUps'])->name('pimpinan.laporan.inspeksi.ups');
     Route::get('laporan/inspeksi-stavolt', [LaporanController::class, 'inspeksiStavolt'])->name('pimpinan.laporan.inspeksi.stavolt');
     Route::get('laporan/inspeksi-monitor', [LaporanController::class, 'inspeksiMonitor'])->name('pimpinan.laporan.inspeksi.monitor');

@@ -451,6 +451,35 @@ class InventarisController extends Controller
         return redirect()->route('admin.daftar-akun')->with('success', 'Akun ' . $akun->name . ' berhasil disetujui.');
     }
 
+    public function updateAkun(Request $request, $id)
+    {
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
+            abort(403);
+        }
+
+        $akun = \App\Models\User::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'nrp' => 'required|string|max:255|unique:users,nrp,' . $akun->id,
+            'jabatan' => 'required|string|max:255',
+        ], [
+            'name.required' => 'Nama wajib diisi.',
+            'nrp.required' => 'NRP wajib diisi.',
+            'nrp.unique' => 'NRP sudah dipakai akun lain.',
+            'jabatan.required' => 'Jabatan wajib diisi.',
+        ]);
+
+        $akun->update([
+            'name' => $request->name,
+            'nrp' => $request->nrp,
+            'jabatan' => $request->jabatan,
+        ]);
+
+        return redirect()->route('admin.daftar-akun')->with('success', 'Data akun ' . $akun->name . ' berhasil diperbarui.');
+    }
+
     public function destroyAkun($id)
     {
         $user = Auth::user();

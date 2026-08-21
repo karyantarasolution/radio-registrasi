@@ -178,6 +178,66 @@ class LaporanController extends Controller
         return $pdf->stream('Laporan-Barang-Maintenance.pdf');
     }
 
+    public function pdfBukuTamu()
+    {
+        $this->ensureAuthorized();
+
+        $bukutamu = BukuTamu::with('pic')->orderBy('no', 'desc')->get();
+
+        $pdf = Pdf::loadView('laporan.pdf-bukutamu', compact('bukutamu'))->setPaper('a4', 'landscape');
+        return $pdf->stream('Laporan-Buku-Tamu.pdf');
+    }
+
+    public function pdfRadio()
+    {
+        $this->ensureAuthorized();
+
+        $registrasis = Registrasi::orderBy('created_at', 'desc')->get();
+
+        $pdf = Pdf::loadView('laporan.pdf-radio', compact('registrasis'))->setPaper('a4', 'landscape');
+        return $pdf->stream('Laporan-Registrasi-Radio.pdf');
+    }
+
+    public function pdfInspeksiUps()
+    {
+        $this->ensureAuthorized();
+
+        $data = InspeksiUps::latest()->get();
+
+        $pdf = Pdf::loadView('laporan.pdf-inspeksi-ups', compact('data'))->setPaper('a4', 'landscape');
+        return $pdf->stream('Laporan-Inspeksi-UPS.pdf');
+    }
+
+    public function pdfInspeksiStavolt()
+    {
+        $this->ensureAuthorized();
+
+        $data = InspeksiStavolt::latest()->get();
+
+        $pdf = Pdf::loadView('laporan.pdf-inspeksi-stavolt', compact('data'))->setPaper('a4', 'landscape');
+        return $pdf->stream('Laporan-Inspeksi-Stavolt.pdf');
+    }
+
+    public function pdfInspeksiMonitor()
+    {
+        $this->ensureAuthorized();
+
+        $data = InspeksiMonitor::latest()->get();
+
+        $pdf = Pdf::loadView('laporan.pdf-inspeksi-monitor', compact('data'))->setPaper('a4', 'landscape');
+        return $pdf->stream('Laporan-Inspeksi-Monitor.pdf');
+    }
+
+    public function pdfInspeksiProyektor()
+    {
+        $this->ensureAuthorized();
+
+        $data = InspeksiProyektor::latest()->get();
+
+        $pdf = Pdf::loadView('laporan.pdf-inspeksi-proyektor', compact('data'))->setPaper('a4', 'landscape');
+        return $pdf->stream('Laporan-Inspeksi-Proyektor.pdf');
+    }
+
     public function inspeksiUps()
     {
         $this->ensureAuthorized();

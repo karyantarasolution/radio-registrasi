@@ -60,6 +60,15 @@
     .action-btn:hover { opacity: 0.8; transform: translateY(-1px); color: #fff; }
     .action-btn.btn-success { background: linear-gradient(135deg, #28a745, #20c997); }
     .action-btn.btn-danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
+    .action-btn.btn-primary { background: linear-gradient(135deg, #2563eb, #1e40af); }
+    .modal-custom .modal-content { border-radius: 16px; border: none; }
+    .modal-custom .modal-header {
+        background: linear-gradient(135deg, #ea6666 0%, #f71414 100%);
+        color: #fff; border-radius: 16px 16px 0 0;
+    }
+    .modal-custom .form-control:focus {
+        border-color: #ea6666; box-shadow: 0 0 0 3px rgba(234,102,102,.15);
+    }
 </style>
 
 <div class="page-container">
@@ -108,8 +117,7 @@
                             <td>{{ $loop->iteration }}</td>
                             <td class="fw-semibold">{{ $akun->name }}</td>
                             <td><code>{{ $akun->nrp ?? '-' }}</code></td>
-                            <td>{{ $akun->jabatan ?? '-' }}</td>
-                            <td>
+                            <td>{{ $akun->jabatan ?? '-' }}</td>                            <td>
                                 @if($akun->is_approved)
                                     <span class="badge-status" style="background:#28a745; color:#fff;">Disetujui</span>
                                 @else
@@ -119,6 +127,14 @@
                             <td><small>{{ $akun->created_at->format('d/m/Y') }}</small></td>
                             <td>
                                 <div style="display:flex; gap:4px; justify-content:center;">
+                                    <button type="button" class="action-btn btn-primary" title="Edit Data"
+                                        data-bs-toggle="modal" data-bs-target="#modalEditAkun"
+                                        data-id="{{ $akun->id }}"
+                                        data-name="{{ $akun->name }}"
+                                        data-nrp="{{ $akun->nrp }}"
+                                        data-jabatan="{{ $akun->jabatan }}">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
                                     @if(!$akun->is_approved)
                                         <form action="{{ route('admin.approve-akun', $akun->id) }}" method="POST" style="display:inline;">
                                             @csrf
@@ -146,4 +162,55 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Edit Akun -->
+<div class="modal fade modal-custom" id="modalEditAkun" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-pen me-2"></i>Edit Data Akun</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formEditAkun" method="POST">
+                @csrf
+                @method('PATCH')
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nama</label>
+                        <input type="text" name="name" id="edit-name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">NRP</label>
+                        <input type="text" name="nrp" id="edit-nrp" class="form-control" required>
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label fw-semibold">Jabatan</label>
+                        <input type="text" name="jabatan" id="edit-jabatan" class="form-control" placeholder="Contoh: Teknisi IT" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn text-white" style="background:linear-gradient(135deg, #ea6666, #f71414);">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var modalEdit = document.getElementById('modalEditAkun');
+    var formEdit = document.getElementById('formEditAkun');
+
+    modalEdit.addEventListener('show.bs.modal', function (event) {
+        var btn = event.relatedTarget;
+        if (!btn) return;
+        formEdit.action = '{{ url("admin/daftar-akun") }}/' + btn.getAttribute('data-id');
+        document.getElementById('edit-name').value = btn.getAttribute('data-name') || '';
+        document.getElementById('edit-nrp').value = btn.getAttribute('data-nrp') || '';
+        document.getElementById('edit-jabatan').value = btn.getAttribute('data-jabatan') || '';
+    });
+});
+</script>
+
 @endsection

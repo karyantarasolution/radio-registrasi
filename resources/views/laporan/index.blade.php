@@ -56,6 +56,7 @@
     }
     .btn-modern:hover { opacity: .9; }
     .btn-view { background: linear-gradient(135deg, #2980b9, #3498db); }
+    .btn-pdf { background: linear-gradient(135deg, #e74c3c, #c0392b); }
     .laporan-icon {
         width: 50px;
         height: 50px;
@@ -150,9 +151,14 @@
                     <p>Daftar seluruh stok barang, barang baru, dan mutasi stok gudang</p>
                 </div>
             </div>
-            <a href="{{ route('pimpinan.laporan.gudang') }}" class="btn-modern btn-view">
-                <i class="fas fa-eye me-1"></i> Lihat Detail
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('pimpinan.laporan.pdf.gudang') }}" class="btn-modern btn-pdf" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+                <a href="{{ route('pimpinan.laporan.gudang') }}" class="btn-modern btn-view">
+                    <i class="fas fa-eye me-1"></i> Lihat Detail
+                </a>
+            </div>
         </div>
 
         <div class="laporan-card">
@@ -165,9 +171,14 @@
                     <p>Riwayat dan status peminjaman perangkat IT oleh karyawan</p>
                 </div>
             </div>
-            <a href="{{ route('pimpinan.laporan.peminjaman') }}" class="btn-modern btn-view">
-                <i class="fas fa-eye me-1"></i> Lihat Detail
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('pimpinan.laporan.pdf.peminjaman') }}" class="btn-modern btn-pdf" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+                <a href="{{ route('pimpinan.laporan.peminjaman') }}" class="btn-modern btn-view">
+                    <i class="fas fa-eye me-1"></i> Lihat Detail
+                </a>
+            </div>
         </div>
 
         <div class="laporan-card">
@@ -180,9 +191,14 @@
                     <p>Riwayat pengajuan pembelian dan maintenance barang IT</p>
                 </div>
             </div>
-            <a href="{{ route('pimpinan.laporan.pengajuan') }}" class="btn-modern btn-view">
-                <i class="fas fa-eye me-1"></i> Lihat Detail
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('pimpinan.laporan.pdf.pengajuan') }}" class="btn-modern btn-pdf" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+                <a href="{{ route('pimpinan.laporan.pengajuan') }}" class="btn-modern btn-view">
+                    <i class="fas fa-eye me-1"></i> Lihat Detail
+                </a>
+            </div>
         </div>
 
         <div class="laporan-card">
@@ -195,9 +211,14 @@
                     <p>Daftar barang yang sedang dalam perbaikan/maintenance</p>
                 </div>
             </div>
-            <a href="{{ route('pimpinan.laporan.maintenance') }}" class="btn-modern btn-view">
-                <i class="fas fa-eye me-1"></i> Lihat Detail
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('pimpinan.laporan.pdf.maintenance') }}" class="btn-modern btn-pdf" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+                <a href="{{ route('pimpinan.laporan.maintenance') }}" class="btn-modern btn-view">
+                    <i class="fas fa-eye me-1"></i> Lihat Detail
+                </a>
+            </div>
         </div>
 
         <div class="laporan-card">
@@ -210,9 +231,14 @@
                     <p>Daftar kunjungan tamu dan riwayat registrasi</p>
                 </div>
             </div>
-            <a href="{{ route('pimpinan.laporan.bukutamu') }}" class="btn-modern btn-view">
-                <i class="fas fa-eye me-1"></i> Lihat Detail
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('pimpinan.laporan.pdf.bukutamu') }}" class="btn-modern btn-pdf" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+                <a href="{{ route('pimpinan.laporan.bukutamu') }}" class="btn-modern btn-view">
+                    <i class="fas fa-eye me-1"></i> Lihat Detail
+                </a>
+            </div>
         </div>
 
         <div class="laporan-card">
@@ -225,9 +251,14 @@
                     <p>Daftar registrasi setting channel frekuensi radio</p>
                 </div>
             </div>
-            <a href="{{ route('pimpinan.laporan.radio') }}" class="btn-modern btn-view">
-                <i class="fas fa-eye me-1"></i> Lihat Detail
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('pimpinan.laporan.pdf.radio') }}" class="btn-modern btn-pdf" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+                <a href="{{ route('pimpinan.laporan.radio') }}" class="btn-modern btn-view">
+                    <i class="fas fa-eye me-1"></i> Lihat Detail
+                </a>
+            </div>
         </div>
 
         <hr class="section-divider">
@@ -243,9 +274,14 @@
                     <p>Daftar inspeksi perangkat UPS - Total: {{ $stats['total_ups'] }} data</p>
                 </div>
             </div>
-            <a href="{{ route('pimpinan.laporan.inspeksi.ups') }}" class="btn-modern btn-view">
-                <i class="fas fa-eye me-1"></i> Lihat Detail
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('pimpinan.laporan.pdf.inspeksi.ups') }}" class="btn-modern btn-pdf" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+                <a href="{{ route('pimpinan.laporan.inspeksi.ups') }}" class="btn-modern btn-view">
+                    <i class="fas fa-eye me-1"></i> Lihat Detail
+                </a>
+            </div>
         </div>
 
         <div class="laporan-card">
@@ -258,9 +294,14 @@
                     <p>Daftar inspeksi perangkat Stavolt - Total: {{ $stats['total_stavolt'] }} data</p>
                 </div>
             </div>
-            <a href="{{ route('pimpinan.laporan.inspeksi.stavolt') }}" class="btn-modern btn-view">
-                <i class="fas fa-eye me-1"></i> Lihat Detail
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('pimpinan.laporan.pdf.inspeksi.stavolt') }}" class="btn-modern btn-pdf" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+                <a href="{{ route('pimpinan.laporan.inspeksi.stavolt') }}" class="btn-modern btn-view">
+                    <i class="fas fa-eye me-1"></i> Lihat Detail
+                </a>
+            </div>
         </div>
 
         <div class="laporan-card">
@@ -273,9 +314,14 @@
                     <p>Daftar inspeksi monitor dan TV - Total: {{ $stats['total_monitor'] }} data</p>
                 </div>
             </div>
-            <a href="{{ route('pimpinan.laporan.inspeksi.monitor') }}" class="btn-modern btn-view">
-                <i class="fas fa-eye me-1"></i> Lihat Detail
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('pimpinan.laporan.pdf.inspeksi.monitor') }}" class="btn-modern btn-pdf" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+                <a href="{{ route('pimpinan.laporan.inspeksi.monitor') }}" class="btn-modern btn-view">
+                    <i class="fas fa-eye me-1"></i> Lihat Detail
+                </a>
+            </div>
         </div>
 
         <div class="laporan-card">
@@ -288,9 +334,14 @@
                     <p>Daftar inspeksi proyektor - Total: {{ $stats['total_proyektor'] }} data</p>
                 </div>
             </div>
-            <a href="{{ route('pimpinan.laporan.inspeksi.proyektor') }}" class="btn-modern btn-view">
-                <i class="fas fa-eye me-1"></i> Lihat Detail
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('pimpinan.laporan.pdf.inspeksi.proyektor') }}" class="btn-modern btn-pdf" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+                <a href="{{ route('pimpinan.laporan.inspeksi.proyektor') }}" class="btn-modern btn-view">
+                    <i class="fas fa-eye me-1"></i> Lihat Detail
+                </a>
+            </div>
         </div>
     </div>
 </div>
