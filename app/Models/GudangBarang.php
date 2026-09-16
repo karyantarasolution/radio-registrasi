@@ -14,6 +14,8 @@ class GudangBarang extends Model
     protected $fillable = [
         'nama_perangkat',
         'merk',
+        'kode_qr',
+        'lokasi',
         'kategori',
         'stok_total',
         'stok_tersedia',
@@ -38,9 +40,24 @@ class GudangBarang extends Model
         return $this->hasMany(Inventaris::class);
     }
 
+    public function riwayat()
+    {
+        return $this->morphMany(AsetRiwayat::class, 'aset');
+    }
+
+    public function maintenances()
+    {
+        return $this->hasMany(Maintenance::class);
+    }
+
     public function scopeAvailable($query)
     {
         return $query->where('stok_tersedia', '>', 0)
             ->where('kondisi', '!=', 'Rusak');
+    }
+
+    public static function generateKodeQr(int $id): string
+    {
+        return 'GB-' . str_pad($id, 5, '0', STR_PAD_LEFT);
     }
 }

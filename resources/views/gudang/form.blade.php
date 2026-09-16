@@ -173,6 +173,16 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">Lokasi / Penempatan</label>
+                    <input type="text" name="lokasi" class="form-control"
+                        placeholder="Gudang IT, Ruang Server, Kantor..."
+                        value="{{ old('lokasi', $barang->lokasi ?? '') }}">
+                    @if(isset($barang) && $barang->kode_qr)
+                        <small class="text-muted d-block mt-1">Kode QR: <code>{{ $barang->kode_qr }}</code></small>
+                    @endif
+                </div>
+
+                <div class="form-group">
                     <label class="form-label">Kategori</label>
                     <input type="text" name="kategori" class="form-control" required
                         placeholder="Laptop, Monitor, Aksesoris"

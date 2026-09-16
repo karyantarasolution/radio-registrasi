@@ -25,6 +25,9 @@ class Pengajuan extends Model
         'jumlah_disetujui',
         'diajukan_oleh',
         'disetujui_oleh',
+        'verified_by',
+        'verified_at',
+        'catatan_admin',
         'tanggal_pengajuan',
         'tanggal_persetujuan',
     ];
@@ -32,6 +35,7 @@ class Pengajuan extends Model
     protected $casts = [
         'tanggal_pengajuan' => 'date',
         'tanggal_persetujuan' => 'datetime',
+        'verified_at' => 'datetime',
         'jumlah_diminta' => 'integer',
         'jumlah_disetujui' => 'integer',
     ];
@@ -49,8 +53,33 @@ class Pengajuan extends Model
         return $this->belongsTo(User::class, 'disetujui_oleh');
     }
 
+    public function verifier()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
+    }
+
     public function gudangBarang()
     {
         return $this->belongsTo(GudangBarang::class);
+    }
+
+    public function approvals()
+    {
+        return $this->morphMany(Approval::class, 'model');
+    }
+
+    public function riwayat()
+    {
+        return $this->hasMany(AsetRiwayat::class, 'pengajuan_id');
+    }
+
+    public function menungguVerifikasiAdmin(): bool
+    {
+        return $this->status === 'Menunggu' && is_null($this->verified_by);
+    }
+
+    public function menungguPersetujuanPimpinan(): bool
+    {
+        return $this->status === 'Menunggu' && !is_null($this->verified_by);
     }
 }

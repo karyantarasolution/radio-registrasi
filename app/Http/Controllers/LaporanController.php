@@ -55,23 +55,56 @@ class LaporanController extends Controller
         return view('laporan.index', compact('stats'));
     }
 
-    public function gudang()
+    public function gudang(Request $request)
     {
         $this->ensureAuthorized();
 
-        $barang = GudangBarang::orderBy('nama_perangkat')->get();
+        $query = GudangBarang::orderBy('nama_perangkat');
+        $filters = $request->only(['kondisi', 'tanggal_awal', 'tanggal_akhir']);
+
+        if ($request->filled('kondisi')) {
+            $query->where('kondisi', $request->kondisi);
+        }
+        if ($request->filled('tanggal_awal')) {
+            $query->whereDate('tanggal_masuk', '>=', $request->tanggal_awal);
+        }
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('tanggal_masuk', '<=', $request->tanggal_akhir);
+        }
+
+        $barang = $query->get();
         $mutasi = StokMutasi::with('gudangBarang')->orderBy('created_at', 'desc')->limit(50)->get();
 
-        return view('laporan.gudang', compact('barang', 'mutasi'));
+        return view('laporan.gudang', compact('barang', 'mutasi', 'filters'));
     }
 
-    public function peminjaman()
+    public function peminjaman(Request $request)
     {
         $this->ensureAuthorized();
 
-        $inventaris = Inventaris::with('gudangBarang', 'approver')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Inventaris::with('gudangBarang', 'approver');
+        $filters = $request->only(['status', 'tanggal_awal', 'tanggal_akhir', 'q']);
+
+        if ($request->filled('status')) {
+            $query->where('status_peminjaman', $request->status);
+        }
+        if ($request->filled('tanggal_awal')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_awal);
+        }
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_akhir);
+        }
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function ($sub) use ($q) {
+                $sub->where('nrp', 'LIKE', "%{$q}%")
+                    ->orWhere('nama', 'LIKE', "%{$q}%")
+                    ->orWhere('keperluan', 'LIKE', "%{$q}%")
+                    ->orWhere('barang', 'LIKE', "%{$q}%");
+            });
+        }
+
+        $inventaris = $query->orderBy('created_at', 'desc')->get();
 
         $stats = [
             'total' => $inventaris->count(),
@@ -80,16 +113,38 @@ class LaporanController extends Controller
             'pending' => $inventaris->where('status_peminjaman', 'Pending')->count(),
         ];
 
-        return view('laporan.peminjaman', compact('inventaris', 'stats'));
+        return view('laporan.peminjaman', compact('inventaris', 'stats', 'filters'));
     }
 
-    public function pengajuan()
+    public function pengajuan(Request $request)
     {
         $this->ensureAuthorized();
 
-        $pengajuans = Pengajuan::with('user', 'approver', 'gudangBarang')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Pengajuan::with('user', 'approver', 'gudangBarang');
+        $filters = $request->only(['status', 'kategori', 'tanggal_awal', 'tanggal_akhir', 'q']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+        if ($request->filled('tanggal_awal')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_awal);
+        }
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_akhir);
+        }
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function ($sub) use ($q) {
+                $sub->where('judul', 'LIKE', "%{$q}%")
+                    ->orWhere('kategori', 'LIKE', "%{$q}%")
+                    ->orWhere('keperluan', 'LIKE', "%{$q}%");
+            });
+        }
+
+        $pengajuans = $query->orderBy('created_at', 'desc')->get();
 
         $stats = [
             'total' => $pengajuans->count(),
@@ -99,18 +154,26 @@ class LaporanController extends Controller
             'selesai' => $pengajuans->where('status', 'Selesai')->count(),
         ];
 
-        return view('laporan.pengajuan', compact('pengajuans', 'stats'));
+        return view('laporan.pengajuan', compact('pengajuans', 'stats', 'filters'));
     }
 
-    public function maintenance()
+    public function maintenance(Request $request)
     {
         $this->ensureAuthorized();
 
-        $items = GudangBarang::where('stok_tersedia', '<', DB::raw('stok_total'))
-            ->orderBy('nama_perangkat')
-            ->get();
+        $query = GudangBarang::where('stok_tersedia', '<', DB::raw('stok_total'));
 
-        return view('laporan.maintenance', compact('items'));
+        if ($request->filled('tanggal_awal')) {
+            $query->whereDate('tanggal_masuk', '>=', $request->tanggal_awal);
+        }
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('tanggal_masuk', '<=', $request->tanggal_akhir);
+        }
+
+        $items = $query->orderBy('nama_perangkat')->get();
+        $filters = $request->only(['tanggal_awal', 'tanggal_akhir']);
+
+        return view('laporan.maintenance', compact('items', 'filters'));
     }
 
     public function bukuTamu()
@@ -142,25 +205,48 @@ class LaporanController extends Controller
         return $pdf->stream('Laporan-Gudang-IT.pdf');
     }
 
-    public function pdfPeminjaman()
+    public function pdfPeminjaman(Request $request)
     {
         $this->ensureAuthorized();
 
-        $inventaris = Inventaris::with('gudangBarang', 'approver')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Inventaris::with('gudangBarang', 'approver');
+
+        if ($request->filled('status')) {
+            $query->where('status_peminjaman', $request->status);
+        }
+        if ($request->filled('tanggal_awal')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_awal);
+        }
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_akhir);
+        }
+
+        $inventaris = $query->orderBy('created_at', 'desc')->get();
 
         $pdf = Pdf::loadView('laporan.pdf-peminjaman', compact('inventaris'))->setPaper('a4', 'landscape');
         return $pdf->stream('Laporan-Peminjaman.pdf');
     }
 
-    public function pdfPengajuan()
+    public function pdfPengajuan(Request $request)
     {
         $this->ensureAuthorized();
 
-        $pengajuans = Pengajuan::with('user', 'approver', 'gudangBarang')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Pengajuan::with('user', 'approver', 'gudangBarang');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+        if ($request->filled('tanggal_awal')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_awal);
+        }
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_akhir);
+        }
+
+        $pengajuans = $query->orderBy('created_at', 'desc')->get();
 
         $pdf = Pdf::loadView('laporan.pdf-pengajuan', compact('pengajuans'))->setPaper('a4', 'landscape');
         return $pdf->stream('Laporan-Pengajuan.pdf');

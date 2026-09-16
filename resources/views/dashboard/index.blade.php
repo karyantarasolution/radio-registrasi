@@ -303,6 +303,116 @@
             </div>
         </div>
 
+        {{-- ===== Inventaris Saya (Karyawan) ===== --}}
+        @if($user->isKaryawan() && $sayaDipinjam->count() > 0)
+        <div class="section-label" data-aos="fade-up">📱 Peminjaman Saya</div>
+        <div class="row g-3 mb-4">
+            <div class="col-12" data-aos="fade-up">
+                <div class="card enhanced-card">
+                    <div class="card-header-custom">
+                        <h6><i class="fas fa-hand-holding me-2 text-warning"></i>Sedang Dipinjam ({{ $sayaDipinjam->count() }})</h6>
+                    </div>
+                    <div class="table-scroll">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr><th>No</th><th>Perangkat</th><th>Dipinjam</th><th>Batas</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach($sayaDipinjam as $item)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $item->gudangBarang->nama_perangkat ?? '-' }}</td>
+                                    <td><small>{{ $item->created_at->format('d/m/Y') }}</small></td>
+                                    <td><small>{{ $item->batas_peminjaman?->format('d/m/Y') ?? '-' }}</small></td>
+                                    <td>
+                                        @if($item->batas_peminjaman && $item->batas_peminjaman->isPast())
+                                            <span class="badge bg-danger rounded-pill">Terlambat {{ $item->batas_peminjaman->diffForHumans() }}</span>
+                                        @elseif($item->daysUntilReturn <= 3)
+                                            <span class="badge bg-warning text-dark rounded-pill">Sisa {{ $item->daysUntilReturn }} hari</span>
+                                        @else
+                                            <span class="badge bg-success rounded-pill">Aktif</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- ===== Perlu Tindak Lanjut (Admin) ===== --}}
+        @if($user->isAdmin())
+        <div class="section-label" data-aos="fade-up">⚠️ Perlu Tindak Lanjut</div>
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3" data-aos="fade-up">
+                <a href="{{ route('inventaris.index', ['status' => 'Pending']) }}" class="module-card" style="background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;">
+                    <div class="mc-icon"><i class="fas fa-clipboard-check"></i></div>
+                    <div class="mc-count">{{ $perluVerifikasiAdmin->count() }}</div>
+                    <div class="mc-label">Verifikasi Peminjaman</div>
+                </a>
+            </div>
+            <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="50">
+                <a href="{{ route('inventaris.index', ['status' => 'Pending']) }}" class="module-card" style="background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;">
+                    <div class="mc-icon"><i class="fas fa-user-tie"></i></div>
+                    <div class="mc-count">{{ $perluMenungguPersetujuan }}</div>
+                    <div class="mc-label">Menunggu Persetujuan</div>
+                </a>
+            </div>
+            <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+                <a href="{{ route('maintenance.index', ['status' => 'Menunggu']) }}" class="module-card" style="background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;">
+                    <div class="mc-icon"><i class="fas fa-tools"></i></div>
+                    <div class="mc-count">{{ $maintenanceStats['menunggu'] }}</div>
+                    <div class="mc-label">Maintenance Aktif</div>
+                </a>
+            </div>
+            <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="150">
+                <a href="{{ route('gudang-barang.index') }}" class="module-card" style="background:linear-gradient(135deg,#27ae60,#229954);color:#fff;">
+                    <div class="mc-icon"><i class="fas fa-warehouse"></i></div>
+                    <div class="mc-count">{{ $stokGudang }}</div>
+                    <div class="mc-label">Stok Gudang Tersedia</div>
+                </a>
+            </div>
+        </div>
+        @endif
+
+        {{-- ===== Stok & Maintenance (all) ===== --}}
+        @if($user->isPimpinan())
+        <div class="section-label" data-aos="fade-up">📊 Ringkasan Gudang & Maintenance</div>
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3" data-aos="fade-up">
+                <div class="module-card" style="background:linear-gradient(135deg,#27ae60,#229954);color:#fff;cursor:default;">
+                    <div class="mc-icon"><i class="fas fa-warehouse"></i></div>
+                    <div class="mc-count">{{ $stokGudang }}</div>
+                    <div class="mc-label">Stok Gudang Tersedia</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="50">
+                <div class="module-card" style="background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;cursor:default;">
+                    <div class="mc-icon"><i class="fas fa-tools"></i></div>
+                    <div class="mc-count">{{ $maintenanceStats['menunggu'] }}</div>
+                    <div class="mc-label">Maintenance Menunggu</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+                <div class="module-card" style="background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;cursor:default;">
+                    <div class="mc-icon"><i class="fas fa-cog"></i></div>
+                    <div class="mc-count">{{ $maintenanceStats['diproses'] }}</div>
+                    <div class="mc-label">Sedang Diperbaiki</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="150">
+                <div class="module-card" style="background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;cursor:default;">
+                    <div class="mc-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="mc-count">{{ $maintenanceStats['selesai_bulan_ini'] }}</div>
+                    <div class="mc-label">Selesai Bulan Ini</div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         {{-- ===== Chart + Summary ===== --}}
         <div class="section-label" data-aos="fade-up">📊 Statistik Inventaris</div>
         <div class="row g-3 mb-4">

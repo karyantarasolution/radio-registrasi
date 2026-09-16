@@ -67,4 +67,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(Pengajuan::class);
     }
+
+    public function approvals()
+    {
+        return $this->hasMany(Approval::class, 'user_id');
+    }
+
+    public function riwayat()
+    {
+        return $this->hasMany(AsetRiwayat::class, 'user_id');
+    }
+
+    public function isPimpinanDivisi(): bool
+    {
+        return $this->role === 'pimpinan';
+    }
 }

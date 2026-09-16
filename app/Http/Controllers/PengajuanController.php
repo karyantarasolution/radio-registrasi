@@ -5,8 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\GudangBarang;
 use App\Models\Pengajuan;
 use App\Models\StokMutasi;
+use App\Services\AdminNotificationService;
+use App\Services\ApprovalPolicy;
 use App\Services\PimpinanNotificationService;
 use App\Notifications\PengajuanBaruNotification;
+use App\Notifications\PengajuanDiketahuiNotification;
+use App\Notifications\PengajuanInventarisNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -86,9 +90,54 @@ class PengajuanController extends Controller
         return redirect()->route('pengajuan.index')->with('success', 'Pengajuan berhasil dikirim. Menunggu persetujuan pimpinan.');
     }
 
+    public function verifikasiAdmin(Request $request, $id)
+    {
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
+            abort(403, 'Hanya admin yang dapat melakukan verifikasi pengajuan.');
+        }
+
+        $request->validate([
+            'status_verifikasi' => 'required|in:Diketahui,Bermasalah',
+            'catatan_admin' => 'nullable|string',
+        ]);
+
+        DB::transaction(function () use ($request, $id, $user) {
+            $pengajuan = Pengajuan::with('gudangBarang', 'user')->findOrFail($id);
+
+            if ($request->status_verifikasi === 'Diketahui') {
+                $pengajuan->update([
+                    'verified_by' => $user->id,
+                    'verified_at' => now(),
+                    'catatan_admin' => $request->catatan_admin ?: null,
+                ]);
+
+                ApprovalPolicy::logApproval($pengajuan, 'verifikasi_admin_pengajuan', 'Disetujui', $request->catatan_admin, $user);
+
+                PimpinanNotificationService::notify(new PengajuanDiketahuiNotification($pengajuan));
+            } else {
+                $pengajuan->update([
+                    'status' => 'Ditolak',
+                    'catatan_admin' => $request->catatan_admin ?: null,
+                ]);
+
+                ApprovalPolicy::logApproval($pengajuan, 'verifikasi_admin_pengajuan', 'Ditolak', $request->catatan_admin, $user);
+            }
+        });
+
+        $pesan = $request->status_verifikasi === 'Diketahui'
+            ? 'Pengajuan diverifikasi (diketahui) admin. Menunggu persetujuan pimpinan.'
+            : 'Pengajuan ditandai bermasalah oleh admin dan ditolak.';
+
+        return redirect()->route('pengajuan.index')->with('success', $pesan);
+    }
+
     public function approve(Request $request, $id)
     {
         $user = Auth::user();
+        if ($user->isAdmin()) {
+            abort(403, 'Keputusan akhir pengajuan hanya dapat dilakukan pimpinan (admin tidak bisa approve pengajuan).');
+        }
         if (!$user->isPimpinan()) {
             abort(403, 'Hanya pimpinan yang dapat menyetujui pengajuan.');
         }
@@ -110,6 +159,8 @@ class PengajuanController extends Controller
                 'jumlah_disetujui' => $request->jumlah_disetujui,
             ]);
 
+            ApprovalPolicy::logApproval($pengajuan, 'persetujuan_pengajuan', $request->status, $request->catatan_pimpinan, $user);
+
             if ($request->status === 'Disetujui') {
                 $qty = $request->jumlah_disetujui ?? $pengajuan->jumlah_diminta;
 
@@ -124,12 +175,22 @@ class PengajuanController extends Controller
                         'keterangan' => "Hasil pengajuan pembelian {$pengajuan->nomor_pengajuan}",
                     ]);
 
+                    $barang->update(['kode_qr' => GudangBarang::generateKodeQr($barang->id)]);
+
                     StokMutasi::create([
                         'gudang_barang_id' => $barang->id,
                         'jenis' => 'Masuk',
                         'jumlah' => $qty,
                         'keterangan' => "Barang baru dari pengajuan {$pengajuan->nomor_pengajuan}",
                     ]);
+
+                    ApprovalPolicy::logRiwayat(
+                        $barang,
+                        'Pembelian',
+                        "Barang baru hasil pengajuan {$pengajuan->nomor_pengajuan} sejumlah {$qty} {$pengajuan->satuan}.",
+                        Auth::user(),
+                        ['pengajuan_id' => $pengajuan->id]
+                    );
 
                     $pengajuan->update(['gudang_barang_id' => $barang->id]);
 
@@ -146,12 +207,20 @@ class PengajuanController extends Controller
                         'jumlah' => $qty,
                         'keterangan' => "Dikirim ke maintenance - Pengajuan {$pengajuan->nomor_pengajuan}",
                     ]);
+
+                    ApprovalPolicy::logRiwayat(
+                        $barang,
+                        'Maintenance',
+                        "Pengajuan maintenance {$pengajuan->nomor_pengajuan} disetujui, {$qty} {$pengajuan->satuan} dikirim ke maintenance.",
+                        Auth::user(),
+                        ['pengajuan_id' => $pengajuan->id]
+                    );
                 }
             }
         });
 
         $statusText = $request->status === 'Disetujui' ? 'disetujui' : 'ditolak';
-        return redirect()->route('pengajuan.index')->with('success', "Pengajuan berhasil {$statusText}.");
+        return redirect()->route('pengajuan.index')->with('success', "Pengajuan berhasil {$statusText} oleh pimpinan.");
     }
 
     public function selesaiMaintenance(Request $request, $id)

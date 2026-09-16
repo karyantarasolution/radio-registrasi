@@ -117,7 +117,7 @@
                     <small>PT. Putra Perkasa Abadi</small>
                 </div>
                 <div class="col-md-4 text-end">
-                    @if(Auth::user()->name == 'ICT')
+                    @if(Auth::user()->isAdmin())
                         <a href="{{ route('gudang-barang.create') }}" class="btn btn-add btn-modern">
                             <i class="fas fa-plus me-1"></i> Tambah Barang
                         </a>
@@ -167,23 +167,27 @@
                     <thead>
                         <tr>
                             <th>No</th>
+                            <th>Kode QR</th>
                             <th>Nama Perangkat</th>
                             <th>Merek</th>
                             <th>Kategori</th>
+                            <th>Lokasi</th>
                             <th>Stok Total</th>
                             <th>Stok Tersedia</th>
                             <th>Kondisi</th>
                             <th>Tgl Masuk</th>
-                            @if(Auth::user()->name == 'ICT')<th>Aksi</th>@endif
+                            @if(Auth::user()->isAdmin())<th>Aksi</th>@endif
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($barang as $b)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
+                            <td><code>{{ $b->kode_qr ?? '-' }}</code></td>
                             <td>{{ $b->nama_perangkat }}</td>
                             <td>{{ $b->merk ?? '-' }}</td>
                             <td>{{ $b->kategori }}</td>
+                            <td>{{ $b->lokasi ?? '-' }}</td>
                             <td>{{ $b->stok_total }}</td>
                             <td>
                                 {{ $b->stok_tersedia }}
@@ -204,8 +208,9 @@
                                 <span class="badge-kondisi" style="background:{{ $kColor }}; color:{{ $kText }};">{{ $b->kondisi }}</span>
                             </td>
                             <td>{{ $b->tanggal_masuk->format('d-m-Y') }}</td>
-                            @if(Auth::user()->name == 'ICT')
+                            @if(Auth::user()->isAdmin())
                             <td>
+                                <a href="{{ route('gudang-barang.history', $b->id) }}" class="btn btn-edit btn-modern">Riwayat</a>
                                 <a href="{{ route('gudang-barang.edit', $b->id) }}" class="btn btn-edit btn-modern">Edit</a>
                                 <form action="{{ route('gudang-barang.destroy', $b->id) }}" method="POST" style="display:inline;">
                                     @csrf @method('DELETE')
@@ -215,7 +220,7 @@
                             @endif
                         </tr>
                         @empty
-                        <tr><td colspan="{{ Auth::user()->name == 'ICT' ? 9 : 8 }}" class="text-muted py-4">Belum ada data gudang</td></tr>
+                        <tr><td colspan="{{ Auth::user()->isAdmin() ? 11 : 10 }}" class="text-muted py-4">Belum ada data gudang</td></tr>
                         @endforelse
                     </tbody>
                 </table>

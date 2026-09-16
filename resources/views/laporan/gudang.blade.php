@@ -26,12 +26,38 @@
                 <p class="mb-0">Detail stok dan mutasi barang gudang IT</p>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('pimpinan.laporan.pdf.gudang') }}" class="btn btn-danger btn-sm fw-bold" target="_blank">
+                <a href="{{ route('pimpinan.laporan.pdf.gudang', request()->only(['kondisi','tanggal_awal','tanggal_akhir'])) }}" class="btn btn-danger btn-sm fw-bold" target="_blank">
                     <i class="fas fa-file-pdf me-1"></i> Export PDF
                 </a>
                 <a href="{{ route('pimpinan.laporan') }}" class="btn btn-light btn-sm fw-bold"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
             </div>
         </div>
+
+        <form method="GET" action="{{ route('pimpinan.laporan.gudang') }}" class="bg-white rounded-3 p-3 shadow-sm mb-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label small mb-1 fw-semibold">Kondisi</label>
+                    <select name="kondisi" class="form-select form-select-sm">
+                        <option value="">Semua</option>
+                        @foreach(['Baik', 'Perlu Maintenance', 'Rusak'] as $k)
+                            <option value="{{ $k }}" {{ ($filters['kondisi'] ?? '') == $k ? 'selected' : '' }}>{{ $k }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small mb-1 fw-semibold">Tgl Masuk Awal</label>
+                    <input type="date" name="tanggal_awal" class="form-control form-control-sm" value="{{ $filters['tanggal_awal'] ?? '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small mb-1 fw-semibold">Tgl Masuk Akhir</label>
+                    <input type="date" name="tanggal_akhir" class="form-control form-control-sm" value="{{ $filters['tanggal_akhir'] ?? '' }}">
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-dark btn-sm"><i class="fas fa-filter"></i> Filter</button>
+                    <a href="{{ route('pimpinan.laporan.gudang') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+                </div>
+            </div>
+        </form>
 
         <h5 class="section-title">Daftar Stok Gudang</h5>
         <div class="table-card">

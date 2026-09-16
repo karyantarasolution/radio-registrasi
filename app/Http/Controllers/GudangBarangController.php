@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GudangBarang;
 use App\Models\StokMutasi;
+use App\Services\ApprovalPolicy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -65,6 +66,7 @@ class GudangBarangController extends Controller
         $request->validate([
             'nama_perangkat' => 'required|string|max:255',
             'merk' => 'nullable|string|max:100',
+            'lokasi' => 'nullable|string|max:255',
             'kategori' => 'required|string|max:100',
             'stok_total' => 'required|integer|min:1',
             'kondisi' => 'required|in:Baik,Perlu Maintenance,Rusak',
@@ -87,6 +89,7 @@ class GudangBarangController extends Controller
         $barang = GudangBarang::create([
             'nama_perangkat' => $request->nama_perangkat,
             'merk' => $request->merk,
+            'lokasi' => $request->lokasi,
             'kategori' => $request->kategori,
             'stok_total' => $stokTotal,
             'stok_tersedia' => $stokTersedia,
@@ -94,6 +97,8 @@ class GudangBarangController extends Controller
             'tanggal_masuk' => $request->tanggal_masuk,
             'keterangan' => $request->keterangan,
         ]);
+
+        $barang->update(['kode_qr' => GudangBarang::generateKodeQr($barang->id)]);
 
         StokMutasi::create([
             'gudang_barang_id' => $barang->id,
@@ -110,6 +115,18 @@ class GudangBarangController extends Controller
                 'keterangan' => 'Dikirim ke maintenance',
             ]);
         }
+
+        ApprovalPolicy::logRiwayat(
+            $barang,
+            'Pembelian',
+            sprintf(
+                'Barang %s (stok %d unit) ditambahkan ke gudang.%s',
+                $barang->nama_perangkat,
+                $stokTotal,
+                $request->lokasi ? ' Lokasi: ' . $request->lokasi : ''
+            ),
+            Auth::user()
+        );
 
         return redirect()->route('gudang-barang.index')->with('success', 'Barang gudang berhasil ditambahkan.');
     }
@@ -132,6 +149,7 @@ class GudangBarangController extends Controller
         $request->validate([
             'nama_perangkat' => 'required|string|max:255',
             'merk' => 'nullable|string|max:100',
+            'lokasi' => 'nullable|string|max:255',
             'kategori' => 'required|string|max:100',
             'stok_total' => 'required|integer|min:0',
             'kondisi' => 'required|in:Baik,Perlu Maintenance,Rusak',
@@ -151,9 +169,14 @@ class GudangBarangController extends Controller
             $stokTersedia = $stokTotal - $jumlah;
         }
 
+        if (empty($gudang_barang->kode_qr)) {
+            $gudang_barang->update(['kode_qr' => GudangBarang::generateKodeQr($gudang_barang->id)]);
+        }
+
         $gudang_barang->update([
             'nama_perangkat' => $request->nama_perangkat,
             'merk' => $request->merk,
+            'lokasi' => $request->lokasi,
             'kategori' => $request->kategori,
             'stok_total' => $stokTotal,
             'stok_tersedia' => $stokTersedia,
@@ -161,6 +184,13 @@ class GudangBarangController extends Controller
             'tanggal_masuk' => $request->tanggal_masuk,
             'keterangan' => $request->keterangan,
         ]);
+
+        ApprovalPolicy::logRiwayat(
+            $gudang_barang,
+            'Perbarui',
+            sprintf('Data barang %s diperbarui (stok %d, kondisi %s).', $gudang_barang->nama_perangkat, $stokTotal, $request->kondisi),
+            Auth::user()
+        );
 
         if ($stokTersedia < $stokTotal) {
             $existingMutasi = StokMutasi::where('gudang_barang_id', $gudang_barang->id)
@@ -179,6 +209,50 @@ class GudangBarangController extends Controller
         }
 
         return redirect()->route('gudang-barang.index')->with('success', 'Data gudang berhasil diperbarui.');
+    }
+
+    public function pindahLokasi(Request $request, GudangBarang $gudang_barang)
+    {
+        if (!$this->isAdmin()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'lokasi' => 'required|string|max:255',
+            'keterangan' => 'nullable|string',
+        ]);
+
+        $lokasiLama = $gudang_barang->lokasi;
+        $gudang_barang->update(['lokasi' => $request->lokasi]);
+
+        ApprovalPolicy::logRiwayat(
+            $gudang_barang,
+            'Perpindahan',
+            sprintf(
+                'Perpindahan lokasi: %s -> %s.%s',
+                $lokasiLama ?: '-',
+                $request->lokasi,
+                $request->keterangan ? ' (' . $request->keterangan . ')' : ''
+            ),
+            Auth::user()
+        );
+
+        return redirect()->route('gudang-barang.index')->with('success', 'Lokasi barang berhasil diperbarui.');
+    }
+
+    public function history(GudangBarang $gudang_barang)
+    {
+        $riwayat = $gudang_barang->riwayat()
+            ->with('user', 'maintenance', 'inventaris')
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        $maintenances = $gudang_barang->maintenances()
+            ->with('histories.user')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('gudang.history', compact('gudang_barang', 'riwayat', 'maintenances'));
     }
 
     public function destroy(GudangBarang $gudang_barang)

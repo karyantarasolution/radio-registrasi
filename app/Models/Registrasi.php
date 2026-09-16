@@ -19,6 +19,8 @@ class Registrasi extends Model
         'jenis_kendaraan',
         'nomor_polisi',
         'id_ptt',
+        'kode_qr',
+        'lokasi',
         'merek_radio',
         'serial_number',
         'tanggal_permintaan',
@@ -33,5 +35,16 @@ class Registrasi extends Model
         'channels' => 'array',
         'range_frekuensi' => 'array',
     ];
+
+    public function riwayat()
+    {
+        return $this->morphMany(AsetRiwayat::class, 'aset');
+    }
+
+    public static function generateKodeQr(int $id, ?string $idPtt): string
+    {
+        return 'RD-' . ($idPtt ?? str_pad($id, 4, '0', STR_PAD_LEFT));
+    }
+}
 
 }

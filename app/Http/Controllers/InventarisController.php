@@ -6,11 +6,13 @@ use App\Models\GudangBarang;
 use App\Models\Inventaris;
 use App\Models\StokMutasi;
 use App\Services\AdminNotificationService;
+use App\Services\ApprovalPolicy;
 use App\Services\PimpinanNotificationService;
 use App\Notifications\PengajuanInventarisNotification;
 use App\Notifications\PengajuanPimpinanNotification;
 use App\Notifications\PengembalianInventarisNotification;
 use App\Notifications\PengembalianDisetujuiNotification;
+use App\Notifications\PersetujuanPeminjamanNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -120,15 +122,32 @@ class InventarisController extends Controller
             'nrp' => $request->nrp,
             'gudang_barang_id' => $barang->id,
             'nama_perangkat' => $barang->nama_perangkat,
-            'no_asset' => $barang->kategori . '-' . str_pad($barang->id, 4, '0', STR_PAD_LEFT),
+            'no_asset' => $barang->kode_qr ?? $barang->kategori . '-' . str_pad($barang->id, 4, '0', STR_PAD_LEFT),
             'tanggal_peminjaman' => $request->tanggal_peminjaman,
             'lama_pinjam' => $request->lama_pinjam,
             'tanggal_pengembalian' => $tanggalPengembalian->toDateString(),
             'status_verifikasi' => 'Pending',
+            'status_persetujuan' => 'Pending',
             'status_peminjaman' => 'Pending',
+            'butuh_persetujuan_pimpinan' => ApprovalPolicy::requiresPimpinan($barang, (int) $request->lama_pinjam),
+            'user_id' => $user->id,
         ];
 
         $inventaris = Inventaris::create($data);
+
+        ApprovalPolicy::logRiwayat(
+            $barang,
+            'Peminjaman',
+            sprintf(
+                'Pengajuan peminjaman %s oleh %s (%s), estimasi kembali %s.',
+                $barang->nama_perangkat,
+                $request->nama,
+                $request->nrp,
+                $tanggalPengembalian->toDateString()
+            ),
+            Auth::user(),
+            ['inventaris_id' => $inventaris->id]
+        );
 
         if (!$user->isAdmin()) {
             AdminNotificationService::notify(new PengajuanInventarisNotification($inventaris));
@@ -186,7 +205,7 @@ class InventarisController extends Controller
         $data = [
             'gudang_barang_id' => $barang->id,
             'nama_perangkat' => $barang->nama_perangkat,
-            'no_asset' => $barang->kategori . '-' . str_pad($barang->id, 4, '0', STR_PAD_LEFT),
+            'no_asset' => $barang->kode_qr ?? $barang->kategori . '-' . str_pad($barang->id, 4, '0', STR_PAD_LEFT),
             'tanggal_peminjaman' => $request->tanggal_peminjaman,
             'lama_pinjam' => $request->lama_pinjam,
             'tanggal_pengembalian' => $tanggalPengembalian->toDateString(),
@@ -211,39 +230,51 @@ class InventarisController extends Controller
 
         $request->validate([
             'status_verifikasi' => 'required|in:Disetujui,Ditolak',
+            'catatan_verifikasi' => 'nullable|string',
+            'langsung' => 'nullable|boolean',
         ]);
 
         $inventaris = Inventaris::with('gudangBarang')->findOrFail($id);
         $newVerifikasi = $request->status_verifikasi;
+        $langsung = (bool) $request->boolean('langsung');
+
+        if ($langsung && $newVerifikasi !== 'Disetujui') {
+            return back()->with('error', 'Persetujuan langsung hanya berlaku untuk verifikasi disetujui.');
+        }
 
         try {
-            DB::transaction(function () use ($inventaris, $newVerifikasi, $user) {
+            DB::transaction(function () use ($inventaris, $newVerifikasi, $user, $request, $langsung) {
                 if ($newVerifikasi === 'Disetujui') {
-                    if ($inventaris->gudangBarang) {
-                        if ($inventaris->gudangBarang->stok_tersedia <= 0) {
-                            throw new \RuntimeException('Stok barang tidak tersedia.');
-                        }
-                        $inventaris->gudangBarang->decrement('stok_tersedia');
-                        StokMutasi::create([
-                            'gudang_barang_id' => $inventaris->gudangBarang->id,
-                            'inventaris_id' => $inventaris->id,
-                            'jenis' => 'Keluar',
-                            'jumlah' => 1,
-                            'keterangan' => 'Peminjaman disetujui admin ICT',
-                        ]);
-                    }
                     $inventaris->update([
                         'status_verifikasi' => 'Disetujui',
-                        'status_peminjaman' => 'Belum Dikembalikan',
+                        'status_persetujuan' => $langsung ? 'Disetujui' : 'Pending',
                         'approved_by' => $user->id,
                         'approved_at' => now(),
+                        'catatan_verifikasi' => $request->catatan_verifikasi ?: null,
                     ]);
-                    PimpinanNotificationService::notify(new PengajuanPimpinanNotification($inventaris, 'disetujui'));
+
+                    ApprovalPolicy::logApproval($inventaris, 'verifikasi_admin', 'Disetujui', $request->catatan_verifikasi, $user, $langsung);
+
+                    if ($langsung) {
+                        $this->finalisasiPeminjaman($inventaris, true, $request->catatan_verifikasi);
+                    }
+
+                    PimpinanNotificationService::notify(
+                        $langsung
+                            ? new PersetujuanPeminjamanNotification($inventaris, 'urgent')
+                            : new PersetujuanPeminjamanNotification($inventaris, 'baru')
+                    );
                 } else {
                     $inventaris->update([
                         'status_verifikasi' => 'Ditolak',
+                        'status_persetujuan' => 'Ditolak',
                         'status_peminjaman' => 'Pending',
+                        'approved_by' => $user->id,
+                        'approved_at' => now(),
+                        'catatan_verifikasi' => $request->catatan_verifikasi ?: null,
                     ]);
+
+                    ApprovalPolicy::logApproval($inventaris, 'verifikasi_admin', 'Ditolak', $request->catatan_verifikasi, $user);
                     PimpinanNotificationService::notify(new PengajuanPimpinanNotification($inventaris, 'ditolak'));
                 }
             });
@@ -251,7 +282,110 @@ class InventarisController extends Controller
             return redirect()->route('inventaris.index')->with('error', $e->getMessage());
         }
 
-        return redirect()->route('inventaris.index')->with('success', 'Verifikasi berhasil diperbarui.');
+        $pesan = $langsung ? 'Verifikasi berhasil. Peminjaman disetujui langsung (urgent) dan stok telah diproses.' : 'Verifikasi berhasil. Peminjaman menunggu persetujuan pimpinan.';
+        return redirect()->route('inventaris.index')->with('success', $pesan);
+    }
+
+    public function persetujuan(Request $request, $id)
+    {
+        $user = Auth::user();
+        $inventaris = Inventaris::with('gudangBarang')->findOrFail($id);
+
+        $isPimpinan = $user->isPimpinan();
+        $isAdmin = $user->isAdmin();
+
+        if (!$isPimpinan && !($isAdmin && ApprovalPolicy::canAdminApproveFinal($inventaris))) {
+            abort(403, 'Hanya pimpinan (atau admin untuk kasus yang diizinkan) yang dapat memberikan persetujuan.');
+        }
+
+        if ($inventaris->status_persetujuan !== 'Pending') {
+            return back()->with('error', 'Persetujuan sudah diputuskan.');
+        }
+
+        $request->validate([
+            'status_persetujuan' => 'required|in:Disetujui,Ditolak',
+            'catatan_persetujuan' => 'nullable|string',
+        ]);
+
+        try {
+            DB::transaction(function () use ($inventaris, $request, $user) {
+                $statusBaru = $request->status_persetujuan;
+
+                if ($statusBaru === 'Disetujui') {
+                    if ($inventaris->gudangBarang && $inventaris->gudangBarang->stok_tersedia <= 0) {
+                        throw new \RuntimeException('Stok barang tidak tersedia.');
+                    }
+                }
+
+                $inventaris->update([
+                    'status_persetujuan' => $statusBaru,
+                    'pimpinan_id' => $user->id,
+                    'pimpinan_at' => now(),
+                    'catatan_persetujuan' => $request->catatan_persetujuan ?: null,
+                ]);
+
+                ApprovalPolicy::logApproval($inventaris, 'persetujuan_pimpinan', $statusBaru, $request->catatan_persetujuan, $user);
+
+                if ($statusBaru === 'Disetujui') {
+                    $this->finalisasiPeminjaman($inventaris, false, $request->catatan_persetujuan);
+                    PimpinanNotificationService::notify(new PersetujuanPeminjamanNotification($inventaris, 'disetujui'));
+                } else {
+                    $inventaris->update(['status_peminjaman' => 'Pending']);
+                    PimpinanNotificationService::notify(new PersetujuanPeminjamanNotification($inventaris, 'ditolak'));
+                }
+            });
+        } catch (\RuntimeException $e) {
+            return redirect()->route('inventaris.index')->with('error', $e->getMessage());
+        }
+
+        return redirect()->route('inventaris.index')->with('success', 'Keputusan persetujuan berhasil disimpan.');
+    }
+
+    private function finalisasiPeminjaman(Inventaris $inventaris, bool $urgent = false, ?string $catatan = null): void
+    {
+        $user = Auth::user();
+
+        if ($inventaris->gudangBarang) {
+            if ($inventaris->gudangBarang->stok_tersedia <= 0) {
+                throw new \RuntimeException('Stok barang tidak tersedia.');
+            }
+            $inventaris->gudangBarang->decrement('stok_tersedia');
+            StokMutasi::create([
+                'gudang_barang_id' => $inventaris->gudangBarang->id,
+                'inventaris_id' => $inventaris->id,
+                'jenis' => 'Keluar',
+                'jumlah' => 1,
+                'keterangan' => $urgent
+                    ? 'Peminjaman disetujui admin ICT (urgent)'
+                    : 'Peminjaman disetujui pimpinan',
+            ]);
+        }
+
+        $inventaris->update([
+            'status_peminjaman' => 'Belum Dikembalikan',
+            'urgent' => $urgent,
+        ]);
+
+        ApprovalPolicy::logRiwayat(
+            $inventaris->gudangBarang,
+            'Peminjaman',
+            sprintf(
+                '%s dipinjam oleh %s (%s) hingga %s%s%s.',
+                $inventaris->nama_perangkat,
+                $inventaris->nama,
+                $inventaris->nrp,
+                $inventaris->tanggal_pengembalian?->format('d/m/Y'),
+                $urgent ? ' [urgent]' : '',
+                $catatan ? ' Catatan: ' . $catatan : ''
+            ),
+            $user,
+            ['inventaris_id' => $inventaris->id]
+        );
+
+        $karyawan = \App\Models\User::where('nrp', $inventaris->nrp)->first();
+        if ($karyawan) {
+            $karyawan->notify(new PersetujuanPeminjamanNotification($inventaris, $urgent ? 'urgent' : 'disetujui'));
+        }
     }
 
     public function pengembalian(Request $request, $id)
@@ -327,16 +461,33 @@ class InventarisController extends Controller
                     'inventaris_id' => $inventaris->id,
                     'jenis' => 'Masuk',
                     'jumlah' => 1,
-                    'keterangan' => 'Pengembalian disetujui admin - kondisi baik',
+                    'keterangan' => 'Pengembalian disetujui - kondisi baik',
                 ]);
             }
 
             $inventaris->update([
                 'status_peminjaman' => 'Dikembalikan',
                 'tanggal_actual_kembali' => now()->toDateString(),
-                'approved_by' => $user->id,
-                'approved_at' => now(),
+                'pengembalian_acc_by' => $user->id,
+                'pengembalian_acc_at' => now(),
             ]);
+
+            ApprovalPolicy::logApproval($inventaris, 'acc_pengembalian', 'Disetujui', $inventaris->catatan_pengembalian, $user);
+
+            ApprovalPolicy::logRiwayat(
+                $inventaris->gudangBarang,
+                'Pengembalian',
+                sprintf(
+                    '%s dikembalikan oleh %s (%s) dengan kondisi %s%s.',
+                    $inventaris->nama_perangkat,
+                    $inventaris->nama,
+                    $inventaris->nrp,
+                    $inventaris->kondisi_pengembalian ?? '-',
+                    $inventaris->catatan_pengembalian ? ' Catatan: ' . $inventaris->catatan_pengembalian : ''
+                ),
+                $user,
+                ['inventaris_id' => $inventaris->id]
+            );
 
             $karyawan = \App\Models\User::where('nrp', $inventaris->nrp)->first();
             if ($karyawan) {

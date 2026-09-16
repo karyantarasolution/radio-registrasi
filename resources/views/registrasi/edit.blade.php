@@ -396,6 +396,16 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">Lokasi / Penempatan</label>
+                    <input type="text" name="lokasi" class="form-control"
+                           placeholder="Contoh: Site Kendari, Workshop, Pool"
+                           value="{{ old('lokasi', $registrasi->lokasi) }}">
+                    @if($registrasi->kode_qr)
+                        <small class="text-muted d-block mt-1">Kode QR: <code>{{ $registrasi->kode_qr }}</code></small>
+                    @endif
+                </div>
+
+                <div class="form-group">
                     <label class="form-label">Merek Radio</label>
                     <input type="text" name="merek_radio" class="form-control"
                            value="{{ old('merek_radio', $registrasi->merek_radio) }}">

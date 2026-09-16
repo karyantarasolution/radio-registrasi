@@ -253,6 +253,19 @@
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
+                                @elseif(Auth::user()->isAdmin() && $p->status === 'Menunggu' && $p->verified_by === null)
+                                    <div style="display:flex; gap:4px; justify-content:center;" title="Verifikasi admin: Diketahui / Bermasalah">
+                                        <form action="{{ route('pengajuan.verifikasi-admin', $p->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            <input type="hidden" name="status_verifikasi" value="Diketahui">
+                                            <button type="submit" class="action-btn btn-success" title="Diketahui (Lanjut ke pimpinan)"><i class="fas fa-eye"></i></button>
+                                        </form>
+                                        <form action="{{ route('pengajuan.verifikasi-admin', $p->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            <input type="hidden" name="status_verifikasi" value="Bermasalah">
+                                            <button type="submit" class="action-btn btn-danger" title="Bermasalah (Tolak)" onclick="return confirm('Tandai pengajuan bermasalah? Pengajuan akan ditolak.')"><i class="fas fa-times"></i></button>
+                                        </form>
+                                    </div>
                                 @elseif(Auth::user()->isAdmin() && $p->status === 'Disetujui' && $p->kategori === 'Maintenance')
                                     <div style="display:flex; gap:4px; justify-content:center;">
                                         <form action="{{ route('pengajuan.selesai-maintenance', $p->id) }}" method="POST" style="display:inline;">
@@ -270,7 +283,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="{{ Auth::user()->isPimpinan() || Auth::user()->isAdmin() ? 12 : 10 }}" class="text-center text-muted py-5">
+                            <td colspan="{{ Auth::user()->isPimpinan() || Auth::user()->isAdmin() ? 11 : 10 }}" class="text-center text-muted py-5">
                                 <div style="font-size:2.5rem; margin-bottom:8px;">📭</div>
                                 Belum ada pengajuan
                             </td>

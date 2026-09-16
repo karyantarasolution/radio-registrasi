@@ -597,8 +597,18 @@
                     <span class="link-text">Gudang IT</span>
                 </a>
 
-                <a href="{{ route('barang-maintenance.index') }}" class="{{ request()->routeIs('barang-maintenance.*') ? 'active' : '' }}">
+                <a href="{{ route('maintenance.index') }}" class="{{ request()->routeIs('maintenance.*') ? 'active' : '' }}">
                     <i class="fas fa-tools"></i>
+                    <span class="link-text">Maintenance</span>
+                </a>
+
+                <a href="{{ route('scan.index') }}" class="{{ request()->routeIs('scan.*') ? 'active' : '' }}">
+                    <i class="fas fa-qrcode"></i>
+                    <span class="link-text">Scan / QR Aset</span>
+                </a>
+
+                <a href="{{ route('barang-maintenance.index') }}" class="{{ request()->routeIs('barang-maintenance.*') ? 'active' : '' }}">
+                    <i class="fas fa-wrench"></i>
                     <span class="link-text">Barang Maintenance</span>
                 </a>
 
@@ -667,10 +677,30 @@
                     <span class="link-text">Laporan</span>
                 </a>
 
+                <a href="{{ route('maintenance.index') }}" class="{{ request()->routeIs('maintenance.*') ? 'active' : '' }}">
+                    <i class="fas fa-tools"></i>
+                    <span class="link-text">Maintenance</span>
+                </a>
+
+                <a href="{{ route('scan.index') }}" class="{{ request()->routeIs('scan.*') ? 'active' : '' }}">
+                    <i class="fas fa-qrcode"></i>
+                    <span class="link-text">Scan / QR Aset</span>
+                </a>
+
             @elseif($isKaryawan)
                 <a href="{{ route('inventaris.index') }}" class="{{ request()->routeIs('inventaris.*') ? 'active' : '' }}">
                     <i class="fas fa-box"></i>
                     <span class="link-text">Peminjaman Saya</span>
+                </a>
+
+                <a href="{{ route('maintenance.create') }}" class="{{ request()->routeIs('maintenance.*') ? 'active' : '' }}">
+                    <i class="fas fa-tools"></i>
+                    <span class="link-text">Ajukan Maintenance</span>
+                </a>
+
+                <a href="{{ route('scan.index') }}" class="{{ request()->routeIs('scan.*') ? 'active' : '' }}">
+                    <i class="fas fa-qrcode"></i>
+                    <span class="link-text">Scan / QR Aset</span>
                 </a>
 
             @else

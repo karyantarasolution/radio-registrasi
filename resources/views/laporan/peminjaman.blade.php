@@ -30,12 +30,42 @@
                 <p class="mb-0">Detail seluruh data peminjaman perangkat IT</p>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('pimpinan.laporan.pdf.peminjaman') }}" class="btn btn-danger btn-sm fw-bold" target="_blank">
+                <a href="{{ route('pimpinan.laporan.pdf.peminjaman', request()->only(['status','tanggal_awal','tanggal_akhir','q'])) }}" class="btn btn-danger btn-sm fw-bold" target="_blank">
                     <i class="fas fa-file-pdf me-1"></i> Export PDF
                 </a>
                 <a href="{{ route('pimpinan.laporan') }}" class="btn btn-light btn-sm fw-bold"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
             </div>
         </div>
+
+        <form method="GET" action="{{ route('pimpinan.laporan.peminjaman') }}" class="bg-white rounded-3 p-3 shadow-sm mb-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label small mb-1 fw-semibold">Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">Semua</option>
+                        @foreach(['Pending', 'Menunggu Persetujuan', 'Belum Dikembalikan', 'Pending Pengembalian', 'Dikembalikan'] as $st)
+                            <option value="{{ $st }}" {{ ($filters['status'] ?? '') == $st ? 'selected' : '' }}>{{ $st }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1 fw-semibold">Tgl Awal</label>
+                    <input type="date" name="tanggal_awal" class="form-control form-control-sm" value="{{ $filters['tanggal_awal'] ?? '' }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1 fw-semibold">Tgl Akhir</label>
+                    <input type="date" name="tanggal_akhir" class="form-control form-control-sm" value="{{ $filters['tanggal_akhir'] ?? '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small mb-1 fw-semibold">Cari (Nama / NRP / Perangkat)</label>
+                    <input type="text" name="q" class="form-control form-control-sm" value="{{ $filters['q'] ?? '' }}">
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-dark btn-sm"><i class="fas fa-filter"></i> Filter</button>
+                    <a href="{{ route('pimpinan.laporan.peminjaman') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+                </div>
+            </div>
+        </form>
 
         <div class="stat-row">
             <div class="stat-mini"><div class="num" style="color:#2c3e50;">{{ $stats['total'] }}</div><div class="lbl">Total</div></div>

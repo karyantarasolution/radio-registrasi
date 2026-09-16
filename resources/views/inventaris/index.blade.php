@@ -287,9 +287,10 @@
                             <th>Status Peminjaman</th>
                             <th>Lama</th>
                             <th>Verifikasi</th>
+                            <th>Persetujuan</th>
                             <th>Tgl Pinjam</th>
                             <th>Est. Kembali</th>
-                            <th style="width:80px;">Aksi</th>
+                            <th style="width:110px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -331,6 +332,22 @@
                                     {{ $item->status_verifikasi ?? 'Pending' }}
                                 </span>
                             </td>
+                            <td>
+                                @php
+                                    $persetujuanColor = match($item->status_persetujuan ?? 'Pending') {
+                                        'Disetujui' => '#28a745',
+                                        'Ditolak' => '#dc3545',
+                                        default => '#FF8C00',
+                                    };
+                                    $persetujuanText = ($item->status_persetujuan ?? 'Pending') === 'Pending' ? '#fff' : '#fff';
+                                @endphp
+                                <span class="badge-status" style="background:{{ $persetujuanColor }}; color:{{ $persetujuanText }};">
+                                    {{ $item->status_persetujuan ?? 'Pending' }}
+                                </span>
+                                @if(($item->butuh_persetujuan_pimpinan ?? false))
+                                    <br><small class="text-muted" title="Wajib persetujuan pimpinan (kategori / > {{ config('approval.wajib_persetujuan_pimpinan_lama_pinjam_hari') }} hari)">👔 pimpinan</small>
+                                @endif
+                            </td>
                             <td>{{ $item->tanggal_peminjaman }}</td>
                             <td><small>{{ $item->tanggal_pengembalian ? \Carbon\Carbon::parse($item->tanggal_pengembalian)->format('d/m/Y') : '-' }}</small></td>
                             <td>
@@ -341,10 +358,30 @@
                                             <input type="hidden" name="status_verifikasi" value="Disetujui">
                                             <button type="submit" class="action-btn btn-success" title="Setujui Verifikasi"><i class="fas fa-check"></i></button>
                                         </form>
+                                        <form action="{{ route('inventaris.verifikasi', $item->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Setujui LANGSUNG oleh admin (urgent)? Peminjaman langsung aktif tanpa menunggu pimpinan.')">
+                                            @csrf @method('PATCH')
+                                            <input type="hidden" name="status_verifikasi" value="Disetujui">
+                                            <input type="hidden" name="langsung" value="1">
+                                            <button type="submit" class="action-btn btn-purple" title="Setujui Langsung (Urgent)"><i class="fas fa-bolt"></i></button>
+                                        </form>
                                         <form action="{{ route('inventaris.verifikasi', $item->id) }}" method="POST" style="display:inline;">
                                             @csrf @method('PATCH')
                                             <input type="hidden" name="status_verifikasi" value="Ditolak">
                                             <button type="submit" class="action-btn btn-danger" title="Tolak Verifikasi" onclick="return confirm('Tolak verifikasi ini?')"><i class="fas fa-times"></i></button>
+                                        </form>
+                                    @endif
+
+                                    @if(($item->status_verifikasi ?? '') === 'Disetujui' && ($item->status_persetujuan ?? 'Pending') === 'Pending' &&
+                                        (Auth::user()->isPimpinan() || (Auth::user()->isAdmin() && \App\Services\ApprovalPolicy::canAdminApproveFinal($item))))
+                                        <form action="{{ route('inventaris.persetujuan', $item->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            <input type="hidden" name="status_persetujuan" value="Disetujui">
+                                            <button type="submit" class="action-btn btn-success" title="Setujui Peminjaman" onclick="return confirm('Setujui peminjaman ini? Stok akan dikurangi.')"><i class="fas fa-user-check"></i></button>
+                                        </form>
+                                        <form action="{{ route('inventaris.persetujuan', $item->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            <input type="hidden" name="status_persetujuan" value="Ditolak">
+                                            <button type="submit" class="action-btn btn-danger" title="Tolak Persetujuan" onclick="return confirm('Tolak persetujuan ini?')"><i class="fas fa-user-times"></i></button>
                                         </form>
                                     @endif
 
@@ -393,7 +430,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="11" class="text-center text-muted py-5">
+                            <td colspan="12" class="text-center text-muted py-5">
                                 <div style="font-size:2.5rem; margin-bottom:8px;">📭</div>
                                 Belum ada data peminjaman
                             </td>

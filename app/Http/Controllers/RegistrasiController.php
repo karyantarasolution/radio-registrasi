@@ -34,6 +34,7 @@ class RegistrasiController extends Controller
             'merek_radio' => 'required|string|max:100',
             'serial_number' => 'required|string|max:100|unique:registrasis,serial_number',
             'channels' => 'nullable|array',
+            'lokasi' => 'nullable|string|max:255',
 
             // ➕ validasi tambahan
             'range_power' => 'required|string',
@@ -57,6 +58,11 @@ class RegistrasiController extends Controller
 
         $registrasi->save();
 
+        $registrasi->update([
+            'kode_qr' => Registrasi::generateKodeQr($registrasi->id, $registrasi->id_ptt),
+            'lokasi' => $request->lokasi,
+        ]);
+
         return redirect()->route('registrasi.index')->with('success', 'Data berhasil disimpan.');
     }
 
@@ -70,6 +76,7 @@ class RegistrasiController extends Controller
             'merek_radio'     => 'nullable|string|max:255',
             'serial_number'   => 'nullable|string|max:255',
             'channels'        => 'nullable|array',
+            'lokasi'          => 'nullable|string|max:255',
 
             // ➕ validasi tambahan
             'range_power' => 'required|string',
@@ -92,9 +99,14 @@ class RegistrasiController extends Controller
         $registrasi->range_power = $request->range_power;
         $registrasi->range_frekuensi = $request->range_frekuensi;
         $registrasi->jenis_radio = $request->jenis_radio;
+        $registrasi->lokasi = $request->lokasi;
 
         // 🔥 update otomatis tanggal
         $registrasi->tanggal_permintaan = now();
+
+        if (empty($registrasi->kode_qr)) {
+            $registrasi->kode_qr = Registrasi::generateKodeQr($registrasi->id, $registrasi->id_ptt);
+        }
 
         $registrasi->save();
 

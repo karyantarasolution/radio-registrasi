@@ -423,6 +423,19 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="lokasi" class="form-label">Lokasi / Penempatan</label>
+                    <div class="input-group">
+                        <input type="text" name="lokasi" id="lokasi"
+                               value="{{ old('lokasi') }}"
+                               class="form-control @error('lokasi') is-invalid @enderror"
+                               placeholder="Contoh: Site Kendari, Workshop, Pool">
+                    </div>
+                    @error('lokasi')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
                     <label for="merek_radio" class="form-label">Merek Radio</label>
                     <div class="input-group">
                         <input type="text" name="merek_radio" id="merek_radio"

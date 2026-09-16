@@ -17,6 +17,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\BarangMaintenanceController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\ScanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -156,6 +158,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('pengajuan/{id}/selesai-maintenance', [PengajuanController::class, 'selesaiMaintenance'])->name('pengajuan.selesai-maintenance');
     Route::delete('pengajuan/{id}', [PengajuanController::class, 'destroy'])->name('pengajuan.destroy');
     Route::get('pengajuan-report', [PengajuanController::class, 'report'])->name('pengajuan.report');
+    Route::post('pengajuan/{id}/verifikasi-admin', [PengajuanController::class, 'verifikasiAdmin'])->name('pengajuan.verifikasi-admin');
 
     // Inventaris - All authenticated users
     Route::resource('inventaris', InventarisController::class)->except(['show']);
@@ -163,6 +166,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('inventaris/{inventaris}/verifikasi', [InventarisController::class, 'verifikasi'])->name('inventaris.verifikasi');
     Route::patch('inventaris/{inventaris}/pengembalian', [InventarisController::class, 'pengembalian'])->name('inventaris.pengembalian');
     Route::patch('inventaris/{inventaris}/acc-pengembalian', [InventarisController::class, 'accPengembalian'])->name('inventaris.acc-pengembalian');
+    Route::post('inventaris/{inventaris}/persetujuan', [InventarisController::class, 'persetujuan'])->name('inventaris.persetujuan');
     Route::get('inventaris-report', [InventarisController::class, 'report'])->name('inventaris.report');
     Route::get('inventaris-riwayat', [InventarisController::class, 'riwayat'])->name('inventaris.riwayat');
     Route::get('inventaris-riwayat-pdf', [InventarisController::class, 'riwayatPdf'])->name('inventaris.riwayat-pdf');
@@ -176,6 +180,8 @@ Route::middleware('auth')->group(function () {
 
     // Gudang IT
     Route::resource('gudang-barang', GudangBarangController::class)->except(['show']);
+    Route::post('gudang-barang/{gudang_barang}/pindah-lokasi', [GudangBarangController::class, 'pindahLokasi'])->name('gudang-barang.pindah-lokasi');
+    Route::get('gudang-barang/{gudang_barang}/riwayat', [GudangBarangController::class, 'history'])->name('gudang-barang.history');
     Route::get('gudang-laporan', [GudangBarangController::class, 'laporan'])->name('gudang.laporan');
     Route::get('gudang-laporan/maintenance', [GudangBarangController::class, 'previewMaintenance'])->name('gudang.preview.maintenance');
     Route::get('gudang-laporan/barang-baru', [GudangBarangController::class, 'previewBaru'])->name('gudang.preview.baru');
@@ -186,6 +192,22 @@ Route::middleware('auth')->group(function () {
 
     // Barang Maintenance - Admin only
     Route::get('barang-maintenance', [BarangMaintenanceController::class, 'index'])->name('barang-maintenance.index');
+
+    // Maintenance Modul
+    Route::get('maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
+    Route::get('maintenance/create', [MaintenanceController::class, 'create'])->name('maintenance.create');
+    Route::post('maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');
+    Route::get('maintenance-report', [MaintenanceController::class, 'report'])->name('maintenance.report');
+    Route::get('maintenance/{id}', [MaintenanceController::class, 'show'])->name('maintenance.show');
+    Route::get('maintenance/{id}/edit', [MaintenanceController::class, 'edit'])->name('maintenance.edit');
+    Route::put('maintenance/{id}', [MaintenanceController::class, 'update'])->name('maintenance.update');
+    Route::post('maintenance/{id}/proses', [MaintenanceController::class, 'proses'])->name('maintenance.proses');
+    Route::post('maintenance/{id}/selesai', [MaintenanceController::class, 'selesai'])->name('maintenance.selesai');
+    Route::post('maintenance/{id}/batalkan', [MaintenanceController::class, 'batalkan'])->name('maintenance.batalkan');
+Route::delete('maintenance/{id}', [MaintenanceController::class, 'destroy'])->name('maintenance.destroy');
+    // Scan / QR Search
+    Route::get('scan', [ScanController::class, 'index'])->name('scan.index');
+    Route::get('scan/search', [ScanController::class, 'search'])->name('scan.search');
 
     // Laporan Pimpinan - Pimpinan & Admin
     Route::get('laporan', [LaporanController::class, 'index'])->name('pimpinan.laporan');
