@@ -323,12 +323,12 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $item->gudangBarang->nama_perangkat ?? '-' }}</td>
                                     <td><small>{{ $item->created_at->format('d/m/Y') }}</small></td>
-                                    <td><small>{{ $item->batas_peminjaman?->format('d/m/Y') ?? '-' }}</small></td>
+                                    <td><small>{{ $item->tanggal_pengembalian?->format('d/m/Y') ?? '-' }}</small></td>
                                     <td>
-                                        @if($item->batas_peminjaman && $item->batas_peminjaman->isPast())
-                                            <span class="badge bg-danger rounded-pill">Terlambat {{ $item->batas_peminjaman->diffForHumans() }}</span>
-                                        @elseif($item->daysUntilReturn <= 3)
-                                            <span class="badge bg-warning text-dark rounded-pill">Sisa {{ $item->daysUntilReturn }} hari</span>
+                                        @if($item->isOverdue())
+                                            <span class="badge bg-danger rounded-pill">Terlambat {{ $item->tanggal_pengembalian->diffForHumans() }}</span>
+                                        @elseif(($item->daysUntilReturn() ?? 0) <= 3)
+                                            <span class="badge bg-warning text-dark rounded-pill">Sisa {{ $item->daysUntilReturn() }} hari</span>
                                         @else
                                             <span class="badge bg-success rounded-pill">Aktif</span>
                                         @endif

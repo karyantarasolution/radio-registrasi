@@ -46,5 +46,3 @@ class Registrasi extends Model
         return 'RD-' . ($idPtt ?? str_pad($id, 4, '0', STR_PAD_LEFT));
     }
 }
-
-}

@@ -74,12 +74,11 @@ class DashboardController extends Controller
         $perluVerifikasiAdmin = collect();
         if ($user->isAdmin()) {
             $perluMenungguPersetujuan = Inventaris::where('status_peminjaman', 'Pending')
-                ->where('verifikasi_admin', true)
-                ->where('pimpinan_acc', null)
+                ->where('status_verifikasi', 'Disetujui')
+                ->where('status_persetujuan', 'Pending')
                 ->count();
             $perluVerifikasiAdmin = Inventaris::where('status_peminjaman', 'Pending')
-                ->where('verifikasi_admin', false)
-                ->with('karyawan')
+                ->where('status_verifikasi', 'Pending')
                 ->get();
         }
 
